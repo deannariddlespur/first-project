@@ -22,6 +22,10 @@ from django import forms
 from .models import FacilityAvailability
 from django.core.exceptions import ValidationError
 
+def home(request):
+    """Homepage view - landing page for the dog boarding system"""
+    return render(request, 'core/home.html')
+
 class KennelForm(forms.ModelForm):
     class Meta:
         model = Kennel

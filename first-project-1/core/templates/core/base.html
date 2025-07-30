@@ -2,14 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dog Boarding</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dog Boarding Management System{% endblock %}</title>
     <style>
-        body {
-            background: #f9f6f2 url('https://www.transparenttextures.com/patterns/paw-print.png');
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* Only apply doggy theme to specific pages, not homepage */
         .doggy-container {
             background: #fffbe7;
             max-width: 400px;
@@ -19,10 +27,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             border: 2px solid #f7d08a;
         }
-        h2 {
-            color: #d2691e;
-            text-align: center;
-        }
+        
         .doggy-btn {
             background: #f7d08a;
             color: #fff;
@@ -35,16 +40,28 @@
             display: block;
             width: 100%;
         }
+        
         .doggy-btn:hover {
             background: #d2691e;
         }
+        
         a {
             color: #d2691e;
             text-decoration: underline;
         }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .doggy-container {
+                margin: 20px auto;
+                padding: 1.5em 2em;
+            }
+        }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% block content %}{% endblock %}
+    {% block extra_js %}{% endblock %}
 </body>
 </html> 
