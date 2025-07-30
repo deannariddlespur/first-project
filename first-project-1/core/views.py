@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Owner
@@ -26,6 +26,12 @@ from django.contrib import messages
 def home(request):
     """Homepage view - landing page for the dog boarding system"""
     return render(request, 'core/home.html')
+
+def logout_view(request):
+    """Logout view"""
+    logout(request)
+    messages.success(request, "✅ You have been successfully logged out!")
+    return redirect('home')
 
 class AdminUserForm(forms.Form):
     username = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'placeholder': 'Enter username'}))
