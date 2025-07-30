@@ -1,12 +1,374 @@
 {% extends 'core/base.html' %}
+
+{% block title %}🐕 Register - Dog Boarding Management{% endblock %}
+
 {% block content %}
-<div class="doggy-container">
-    <h2>🐾 Owner Registration 🐾</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="doggy-btn">Register</button>
-    </form>
-    <p>Already have an account? <a href="/login/">Login here</a>.</p>
+<style>
+    .registration-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .registration-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="paw" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M10 5c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5 5 2.24 5 5zm0 10c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5 5 2.24 5 5z" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23paw)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .registration-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        max-width: 500px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .registration-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .registration-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .registration-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input.error {
+        border-color: #e74c3c;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 2rem;
+        color: #666;
+    }
+
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .login-link a:hover {
+        color: #764ba2;
+    }
+
+    .floating-dogs {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .floating-dog {
+        position: absolute;
+        font-size: 1.5rem;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.1;
+    }
+
+    .floating-dog:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .floating-dog:nth-child(2) { top: 20%; right: 15%; animation-delay: 2s; }
+    .floating-dog:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+
+    .field-required {
+        color: #e74c3c;
+        margin-left: 0.25rem;
+    }
+
+    .form-help {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .registration-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+        
+        .registration-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="registration-container">
+    <div class="floating-dogs">
+        <div class="floating-dog">🐕</div>
+        <div class="floating-dog">🐩</div>
+        <div class="floating-dog">🦮</div>
+    </div>
+    
+    <div class="registration-card">
+        <div class="registration-header">
+            <h1 class="registration-title">
+                <span>🐕</span>
+                Owner Registration
+                <span>🐕</span>
+            </h1>
+            <p class="registration-subtitle">Join our dog boarding community and start booking stays for your beloved pets!</p>
+        </div>
+
+        <form method="post" id="registration-form">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="error-message" style="margin-bottom: 1rem; padding: 1rem; background: #fdf2f2; border-radius: 8px; border: 1px solid #fecaca;">
+                    <span>⚠️</span> Please correct the errors below:
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">
+                    Username <span class="field-required">*</span>
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.username.errors.0 }}
+                    </div>
+                {% endif %}
+                <div class="form-help">Choose a unique username for your account</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Email <span class="field-required">*</span>
+                </label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.email.errors.0 }}
+                    </div>
+                {% endif %}
+                <div class="form-help">We'll use this for important updates about your bookings</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    First Name <span class="field-required">*</span>
+                </label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.first_name.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Last Name <span class="field-required">*</span>
+                </label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.last_name.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Password <span class="field-required">*</span>
+                </label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.password.errors.0 }}
+                    </div>
+                {% endif %}
+                <div class="form-help">Choose a strong password (at least 8 characters)</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Phone Number <span class="field-required">*</span>
+                </label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.phone.errors.0 }}
+                    </div>
+                {% endif %}
+                <div class="form-help">We'll contact you about your bookings</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Address <span class="field-required">*</span>
+                </label>
+                {{ form.address }}
+                {% if form.address.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.address.errors.0 }}
+                    </div>
+                {% endif %}
+                <div class="form-help">Your full address for billing and pickup</div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                🐾 Create Account 🐾
+            </button>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account? <a href="{% url 'login_owner' %}">Login here</a></p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #888;">
+                By registering, you agree to our terms of service and privacy policy.
+            </p>
+        </div>
+    </div>
 </div>
+
+<script>
+    // Add form validation and styling
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('registration-form');
+        const inputs = form.querySelectorAll('input');
+        
+        // Add CSS classes to form inputs
+        inputs.forEach(input => {
+            input.classList.add('form-input');
+            
+            // Add error styling on blur if field is invalid
+            input.addEventListener('blur', function() {
+                if (this.value === '' && this.hasAttribute('required')) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+            
+            // Remove error styling on input
+            input.addEventListener('input', function() {
+                this.classList.remove('error');
+            });
+        });
+        
+        // Form submission animation
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.style.opacity = '0.7';
+        });
+    });
+</script>
 {% endblock %} 
