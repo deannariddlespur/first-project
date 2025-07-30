@@ -21,10 +21,55 @@ from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote
 from django import forms
 from .models import FacilityAvailability
 from django.core.exceptions import ValidationError
+from django.contrib import messages
 
 def home(request):
     """Homepage view - landing page for the dog boarding system"""
     return render(request, 'core/home.html')
+
+class AdminUserForm(forms.Form):
+    username = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'placeholder': 'Enter username'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Enter email'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter password'}))
+    first_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'placeholder': 'Enter first name'}))
+    last_name = forms.CharField(max_length=30, widget=forms.TextInput(attrs={'placeholder': 'Enter last name'}))
+    is_staff = forms.BooleanField(required=False, initial=True)
+    is_superuser = forms.BooleanField(required=False, initial=True)
+
+def create_admin_user(request):
+    """Simple view to create admin users"""
+    if request.method == 'POST':
+        form = AdminUserForm(request.POST)
+        if form.is_valid():
+            try:
+                # Check if user already exists
+                if User.objects.filter(username=form.cleaned_data['username']).exists():
+                    messages.error(request, f"User '{form.cleaned_data['username']}' already exists!")
+                else:
+                    # Create the user
+                    user = User.objects.create_user(
+                        username=form.cleaned_data['username'],
+                        email=form.cleaned_data['email'],
+                        password=form.cleaned_data['password'],
+                        first_name=form.cleaned_data['first_name'],
+                        last_name=form.cleaned_data['last_name'],
+                        is_staff=form.cleaned_data['is_staff'],
+                        is_superuser=form.cleaned_data['is_superuser']
+                    )
+                    messages.success(request, f"✅ Admin user '{user.username}' created successfully!")
+                    return redirect('create_admin_user')
+            except Exception as e:
+                messages.error(request, f"Error creating user: {str(e)}")
+    else:
+        form = AdminUserForm()
+    
+    # Get list of existing users
+    existing_users = User.objects.all().order_by('username')
+    
+    return render(request, 'core/create_admin_user.html', {
+        'form': form,
+        'existing_users': existing_users
+    })
 
 class KennelForm(forms.ModelForm):
     class Meta:
