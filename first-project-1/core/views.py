@@ -7,7 +7,7 @@ from django import forms
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Dog
 from django.forms import ModelForm
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from datetime import datetime, timedelta
 from django.utils import timezone
 from .models import Booking
@@ -21,6 +21,11 @@ from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote
 from django import forms
 from .models import FacilityAvailability
 from django.core.exceptions import ValidationError
+
+from django.http import HttpResponse
+
+def home(request):
+    return render(request, 'core/home.html')  # make sure this file exists
 
 class KennelForm(forms.ModelForm):
     class Meta:
