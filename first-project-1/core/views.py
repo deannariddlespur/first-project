@@ -205,7 +205,7 @@ def setup_database(request):
                                 username, password, email, first_name, last_name,
                                 is_staff, is_superuser, is_active, date_joined
                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, [
+                        """, (
                             'admin',
                             make_password('admin123456'),
                             'admin@dogboarding.com',
@@ -214,8 +214,8 @@ def setup_database(request):
                             1,  # is_staff
                             1,  # is_superuser
                             1,  # is_active
-                            timezone.now()
-                        ])
+                            timezone.now().isoformat()
+                        ))
                         messages.success(request, "✅ Admin user created: admin/admin123456")
                     else:
                         messages.info(request, "ℹ️ Admin user already exists")
