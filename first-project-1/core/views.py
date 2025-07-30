@@ -143,6 +143,25 @@ def setup_database(request):
                         )
                     """)
                     
+                    # Create django_session table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS django_session (
+                            session_key VARCHAR(40) PRIMARY KEY,
+                            session_data TEXT NOT NULL,
+                            expire_date DATETIME(6) NOT NULL
+                        )
+                    """)
+                    
+                    # Create django_content_type table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS django_content_type (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            app_label VARCHAR(100) NOT NULL,
+                            model VARCHAR(100) NOT NULL,
+                            UNIQUE(app_label, model)
+                        )
+                    """)
+                    
                     # Create auth_user table if it doesn't exist
                     cursor.execute("""
                         CREATE TABLE IF NOT EXISTS auth_user (
