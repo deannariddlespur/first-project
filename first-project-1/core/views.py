@@ -89,7 +89,7 @@ def setup_database(request):
     
     if request.method == 'POST':
         try:
-            # First, check if we can connect to the database
+            # Step 1: Test database connection
             try:
                 with connection.cursor() as cursor:
                     cursor.execute("SELECT 1")
@@ -98,17 +98,21 @@ def setup_database(request):
                 messages.error(request, f"❌ Database connection failed: {str(db_error)}")
                 return render(request, 'core/setup_database.html')
             
-            # Try to run migrations using our management command
+            # Step 2: Run migrations first (this creates the tables)
             try:
-                execute_from_command_line(['manage.py', 'setup_production'])
-                messages.success(request, "✅ Database setup completed successfully!")
-                messages.success(request, "📝 You can now login as admin (admin/admin123456)")
-                return redirect('setup_database')
-            except Exception as cmd_error:
-                # Fallback to manual setup if management command fails
-                messages.warning(request, f"Management command failed, trying manual setup: {str(cmd_error)}")
+                messages.info(request, "📦 Running database migrations...")
+                execute_from_command_line(['manage.py', 'migrate'])
+                messages.success(request, "✅ Database migrations completed!")
+            except Exception as migrate_error:
+                messages.error(request, f"❌ Migration failed: {str(migrate_error)}")
+                return render(request, 'core/setup_database.html')
+            
+            # Step 3: Now that tables exist, we can safely import and use models
+            try:
+                from django.contrib.auth.models import User
+                from .models import Kennel
                 
-                # Create a default admin user
+                # Create admin user
                 if not User.objects.filter(username='admin').exists():
                     admin_user = User.objects.create_user(
                         username='admin',
@@ -119,10 +123,11 @@ def setup_database(request):
                         is_staff=True,
                         is_superuser=True
                     )
-                    messages.success(request, f"✅ Default admin user created: username='admin', password='admin123456'")
+                    messages.success(request, "✅ Admin user created: admin/admin123456")
+                else:
+                    messages.info(request, "ℹ️ Admin user already exists")
                 
-                # Create some sample kennels
-                from .models import Kennel
+                # Create sample kennels
                 if not Kennel.objects.exists():
                     kennel_data = [
                         {'name': 'Small Kennel A', 'description': 'Cozy kennel for small dogs', 'size': 'small'},
@@ -137,12 +142,19 @@ def setup_database(request):
                         Kennel.objects.create(**kennel_info)
                     
                     messages.success(request, "✅ Sample kennels created!")
+                else:
+                    messages.info(request, "ℹ️ Kennels already exist")
                 
-                messages.success(request, "✅ Manual database setup completed!")
+                messages.success(request, "🎉 Database setup completed successfully!")
+                messages.success(request, "📝 You can now login as admin (admin/admin123456)")
                 return redirect('setup_database')
+                
+            except Exception as model_error:
+                messages.error(request, f"❌ Model setup failed: {str(model_error)}")
+                return render(request, 'core/setup_database.html')
             
         except Exception as e:
-            messages.error(request, f"❌ Error setting up database: {str(e)}")
+            messages.error(request, f"❌ Unexpected error: {str(e)}")
             messages.error(request, "💡 Please check Railway logs for more details")
     
     return render(request, 'core/setup_database.html')
