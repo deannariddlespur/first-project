@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>❌ Cancel Booking</h2>
+    
+    <div class="cancel-confirmation">
+        <h3>Are you sure you want to cancel this booking?</h3>
+        <p><strong>Dog:</strong> {{ booking.dog.name }}</p>
+        <p><strong>Dates:</strong> {{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</p>
+        {% if booking.kennel %}
+            <p><strong>Kennel:</strong> {{ booking.kennel.name }}</p>
+        {% endif %}
+        {% if booking.total_amount %}
+            <p><strong>Total Amount:</strong> ${{ booking.total_amount }}</p>
+        {% endif %}
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="cancel-actions">
+            <button type="submit" class="doggy-btn danger">Yes, Cancel Booking</button>
+            <a href="{% url 'booking_list' %}" class="doggy-btn">No, Keep Booking</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.cancel-confirmation {
+    background: #fff;
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+.cancel-confirmation h3 {
+    color: #d2691e;
+    margin-top: 0;
+}
+.cancel-confirmation p {
+    margin: 10px 0;
+    word-wrap: break-word;
+}
+.cancel-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+.cancel-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.doggy-btn.danger {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock %} 

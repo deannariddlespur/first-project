@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>Add a New Dog 🐕</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>
+            <label for="{{ form.name.id_for_label }}">Dog's Name:</label>
+            {{ form.name }}
+        </p>
+        <p>
+            <label for="{{ form.breed.id_for_label }}">Breed:</label>
+            {{ form.breed }}
+        </p>
+        <p>
+            <label for="{{ form.age.id_for_label }}">Age:</label>
+            {{ form.age }}
+        </p>
+        <p>
+            <label for="{{ form.size.id_for_label }}">Size:</label>
+            {{ form.size }}
+            <!-- Debug: Size field HTML: {{ form.size|safe }} -->
+        </p>
+        <p>
+            <label for="{{ form.notes.id_for_label }}">Notes:</label>
+            {{ form.notes }}
+        </p>
+        <p>
+            <label for="{{ form.photo.id_for_label }}">Photo:</label>
+            {{ form.photo }}
+        </p>
+        <button type="submit" class="doggy-btn">Add Dog</button>
+    </form>
+    <p><a href="{% url 'owner_dashboard' %}">Back to Dashboard</a></p>
+</div>
+{% endblock %} 

@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>Delete Dog 🐶</h2>
+    <p>Are you sure you want to delete <strong>{{ dog.name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="doggy-btn">Yes, Delete</button>
+        <a href="{% url 'owner_dashboard' %}" class="doggy-btn" style="background:#ccc;color:#333;">Cancel</a>
+    </form>
+</div>
+{% endblock %} 

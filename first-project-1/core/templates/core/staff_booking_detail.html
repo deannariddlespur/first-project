@@ -1,0 +1,242 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>🐕 Manage Booking</h2>
+    
+    <div class="booking-info">
+        <div class="dog-header">
+            {% if booking.dog.photo %}
+                <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}" class="dog-photo">
+            {% endif %}
+            <h3>{{ booking.dog.name }}</h3>
+        </div>
+        <p><strong>Owner:</strong> {{ booking.dog.owner }}</p>
+        <p><strong>Dog:</strong> {{ booking.dog.name }} ({{ booking.dog.breed }})</p>
+        <p><strong>Dates:</strong> {{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</p>
+        <p><strong>Nights:</strong> {{ booking.get_nights }} nights</p>
+        <p><strong>Status:</strong> <span class="status {{ booking.status }}">{{ booking.get_status_display }}</span></p>
+        {% if booking.kennel %}
+            <p><strong>Kennel:</strong> {{ booking.kennel.name }}</p>
+        {% else %}
+            <p><strong>Kennel:</strong> <em>Not assigned</em></p>
+        {% endif %}
+        {% if booking.notes %}
+            <p><strong>Owner Notes:</strong> {{ booking.notes }}</p>
+        {% endif %}
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="management-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h4>Update Status</h4>
+            <select name="status" class="form-control">
+                {% for value, label in booking.STATUS_CHOICES %}
+                    <option value="{{ value }}" {% if booking.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-section">
+            <h4>Assign Kennel</h4>
+            <select name="kennel" class="form-control">
+                <option value="">-- Select Kennel --</option>
+                {% for kennel in available_kennels %}
+                    <option value="{{ kennel.id }}" {% if booking.kennel == kennel %}selected{% endif %}>
+                        {{ kennel.name }} - {{ kennel.description }}
+                    </option>
+                {% endfor %}
+            </select>
+            <small class="kennel-info">Only available kennels for these dates are shown.</small>
+        </div>
+        
+        <div class="form-section">
+            <h4>Add Staff Note</h4>
+            <textarea name="staff_note" placeholder="Add notes about this booking..." class="form-control" rows="4"></textarea>
+        </div>
+        
+        <div class="form-section">
+            <h4>Upload Picture</h4>
+            <input type="file" name="staff_picture" accept="image/*" class="form-control">
+            <small class="upload-info">Upload a picture related to this booking (optional)</small>
+        </div>
+        
+        <button type="submit" class="doggy-btn">Update Booking</button>
+    </form>
+    
+    {% if staff_notes %}
+    <div class="staff-notes-section">
+        <h3>📝 Staff Notes</h3>
+        {% for note in staff_notes %}
+            <div class="staff-note">
+                <div class="note-header">
+                    <strong>{{ note.staff_member.get_full_name|default:note.staff_member.username }}</strong>
+                    <small>{{ note.created_at|date:"m/d/Y g:i A" }}</small>
+                </div>
+                {% if note.note %}
+                    <p class="note-text">{{ note.note }}</p>
+                {% endif %}
+                {% if note.picture %}
+                    <div class="note-picture">
+                        <img src="{{ note.picture.url }}" alt="Staff picture" class="staff-picture">
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="staff-actions">
+        <a href="{% url 'staff_booking_list' %}" class="doggy-btn">Back to All Bookings</a>
+        <a href="{% url 'staff_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+.booking-info {
+    background: #fff;
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.dog-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.dog-photo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #f7d08a;
+}
+.booking-info h3 {
+    margin: 0;
+    color: #d2691e;
+}
+.booking-info p {
+    margin: 5px 0;
+    word-wrap: break-word;
+}
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+.status.confirmed {
+    background: #d4edda;
+    color: #155724;
+}
+.status.completed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+.status.cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+.management-form {
+    background: #fff;
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.form-section {
+    margin-bottom: 15px;
+}
+.form-section h4 {
+    margin: 0 0 5px 0;
+    color: #d2691e;
+}
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #f7d08a;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+.kennel-info, .upload-info {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: block;
+}
+.management-form .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.staff-notes-section {
+    background: #fff;
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.staff-notes-section h3 {
+    margin: 0 0 15px 0;
+    color: #d2691e;
+}
+.staff-note {
+    border: 1px solid #f7d08a;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #fefefe;
+}
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #d2691e;
+    font-size: 0.9em;
+}
+.note-text {
+    margin: 8px 0;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+.note-picture {
+    margin-top: 10px;
+}
+.staff-picture {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 6px;
+    border: 1px solid #f7d08a;
+}
+.staff-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+.staff-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+</style>
+{% endblock %} 

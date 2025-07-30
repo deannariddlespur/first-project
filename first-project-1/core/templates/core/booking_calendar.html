@@ -1,0 +1,267 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>📅 Booking Calendar</h2>
+    
+    <div class="calendar-nav">
+        <a href="?year={{ prev_year }}&month={{ prev_month }}" class="nav-btn">← Previous</a>
+        <span class="month-year">{{ month }}/{{ year }}</span>
+        <a href="?year={{ next_year }}&month={{ next_month }}" class="nav-btn">Next →</a>
+    </div>
+    
+    <div class="calendar">
+        <div class="calendar-header">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+        
+        <div class="calendar-body">
+            {% for week in calendar_weeks %}
+                <div class="calendar-week">
+                    {% for day in week %}
+                        <div class="calendar-day 
+                                 {% if day.is_today %}today{% endif %} 
+                                 {% if day.is_other_month %}other-month{% endif %}
+                                 availability-{{ day.availability_status }}
+                                 {% if not day.is_other_month %}clickable{% endif %}"
+                             {% if not day.is_other_month %}
+                             onclick="selectDate('{{ day.date|date:'m/d/Y' }}')"
+                             title="{% if day.availability_percentage > 0 %}{{ day.available_kennels }}/{{ day.total_kennels }} kennels available{% else %}No kennels available{% endif %}"
+                             {% endif %}>
+                            {% if day.date %}
+                                <span class="day-number">{{ day.date.day }}</span>
+                                {% if day.has_booking %}
+                                    <div class="booking-indicator">🐕</div>
+                                {% endif %}
+                                {% if not day.is_other_month %}
+                                    <div class="availability-info">
+                                        {% if day.availability_percentage > 0 %}
+                                            <small>{{ day.available_kennels }}/{{ day.total_kennels }}</small>
+                                        {% else %}
+                                            <small>Full</small>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="calendar-legend">
+        <div class="legend-item">
+            <span class="legend-color availability-high"></span>
+            <span>High Availability (70%+)</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color availability-medium"></span>
+            <span>Medium Availability (30-69%)</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color availability-low"></span>
+            <span>Low Availability (1-29%)</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color availability-none"></span>
+            <span>No Availability</span>
+        </div>
+        <div class="legend-item">
+            <span class="booking-indicator">🐕</span>
+            <span>Existing Booking</span>
+        </div>
+    </div>
+    
+    <div class="calendar-actions">
+        <a href="{% url 'create_booking' %}" class="doggy-btn">Book New Stay</a>
+        <a href="{% url 'booking_list' %}" class="doggy-btn">View My Bookings</a>
+        <a href="{% url 'owner_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+    width: 100%;
+}
+.nav-btn {
+    background: #f7d08a;
+    color: #d2691e;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    text-decoration: none;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+.nav-btn:hover {
+    background: #d2691e;
+    color: #fff;
+}
+.month-year {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #d2691e;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+.calendar {
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    width: 100%;
+}
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f7d08a;
+    font-weight: bold;
+    text-align: center;
+}
+.calendar-header > div {
+    padding: 10px;
+    border-right: 1px solid #d2691e;
+}
+.calendar-header > div:last-child {
+    border-right: none;
+}
+.calendar-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+.calendar-day {
+    min-height: 60px;
+    border-right: 1px solid #f7d08a;
+    border-bottom: 1px solid #f7d08a;
+    padding: 5px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+.calendar-day:last-child {
+    border-right: none;
+}
+.calendar-day.other-month {
+    background: #f9f9f9;
+    color: #ccc;
+}
+.calendar-day.today {
+    background: #fff3cd;
+    border: 2px solid #d2691e;
+}
+.calendar-day.clickable {
+    cursor: pointer;
+}
+.calendar-day.clickable:hover {
+    background: #fff3cd;
+    transform: scale(1.02);
+}
+.day-number {
+    font-weight: bold;
+    color: #d2691e;
+    display: block;
+    margin-bottom: 2px;
+}
+.booking-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.8em;
+}
+.availability-info {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    font-size: 0.7em;
+    color: #666;
+}
+.availability-info small {
+    font-size: 0.8em;
+}
+/* Availability color coding */
+.availability-high {
+    background: #d4edda;
+}
+.availability-medium {
+    background: #fff3cd;
+}
+.availability-low {
+    background: #f8d7da;
+}
+.availability-none {
+    background: #e2e3e5;
+}
+.calendar-legend {
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+}
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+.legend-color.availability-high {
+    background: #d4edda;
+}
+.legend-color.availability-medium {
+    background: #fff3cd;
+}
+.legend-color.availability-low {
+    background: #f8d7da;
+}
+.legend-color.availability-none {
+    background: #e2e3e5;
+}
+.calendar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+.calendar-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+</style>
+
+<script>
+function selectDate(dateStr) {
+    // Convert m/d/Y format to Y-m-d format for URL
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+        const month = parts[0];
+        const day = parts[1];
+        const year = parts[2];
+        const ymdFormat = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        
+        // Redirect to create booking with pre-filled dates
+        const url = "{% url 'create_booking' %}?start_date=" + ymdFormat + "&end_date=" + ymdFormat;
+        window.location.href = url;
+    }
+}
+</script>
+{% endblock %} 

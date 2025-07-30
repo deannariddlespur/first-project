@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>👨‍💼 Staff Login</h2>
+    <p><strong>This login is for staff members only.</strong></p>
+    <p>Dog owners should use the <a href="{% url 'login_owner' %}">main login page</a>.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="doggy-btn">Staff Login</button>
+    </form>
+    
+    <div class="login-links">
+        <p><a href="{% url 'login_owner' %}">← Back to Dog Owner Login</a></p>
+        <p><a href="{% url 'register_owner' %}">Register as Dog Owner</a></p>
+    </div>
+</div>
+
+<style>
+.login-links {
+    margin-top: 20px;
+    text-align: center;
+}
+</style>
+{% endblock %} 

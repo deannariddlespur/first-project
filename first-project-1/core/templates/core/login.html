@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>🐶 Owner Login 🐶</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="doggy-btn">Login</button>
+    </form>
+    <p>New here? <a href="/register/">Register your account</a>.</p>
+</div>
+{% endblock %} 

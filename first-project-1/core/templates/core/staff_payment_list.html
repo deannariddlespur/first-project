@@ -1,0 +1,157 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>💰 Payment Management</h2>
+    
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <label for="status-filter">Filter by Status:</label>
+            <select name="status" id="status-filter" class="filter-control" onchange="this.form.submit()">
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    
+    {% if payments %}
+        <div class="payments-list">
+            {% for payment in payments %}
+                <div class="payment-card">
+                    <div class="payment-header">
+                        <h3>{{ payment.booking.dog.name }}</h3>
+                        <span class="payment-status {{ payment.status }}">{{ payment.get_status_display }}</span>
+                    </div>
+                    <div class="payment-details">
+                        <p><strong>Owner:</strong> {{ payment.booking.dog.owner }}</p>
+                        <p><strong>Amount:</strong> ${{ payment.amount }}</p>
+                        <p><strong>Booking Dates:</strong> {{ payment.booking.start_date|date:"m/d/Y" }} to {{ payment.booking.end_date|date:"m/d/Y" }}</p>
+                        <p><strong>Created:</strong> {{ payment.created_at|date:"m/d/Y" }}</p>
+                        {% if payment.payment_method %}
+                            <p><strong>Payment Method:</strong> {{ payment.get_payment_method_display }}</p>
+                        {% endif %}
+                                        {% if payment.paid_date %}
+                    <p><strong>Paid Date:</strong> {{ payment.paid_date|date:"m/d/Y" }}</p>
+                {% endif %}
+                        {% if payment.notes %}
+                            <p><strong>Notes:</strong> {{ payment.notes }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="payment-actions">
+                        <a href="{% url 'staff_payment_detail' payment.id %}" class="doggy-btn">Manage Payment</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No payments found for the selected filter.</p>
+    {% endif %}
+    
+    <div class="staff-actions">
+        <a href="{% url 'staff_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
+        <a href="{% url 'staff_booking_list' %}" class="doggy-btn">View All Bookings</a>
+    </div>
+</div>
+
+<style>
+.filter-section {
+    background: #fff;
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.filter-form label {
+    color: #d2691e;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.filter-control {
+    padding: 8px;
+    border: 1px solid #f7d08a;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #fff;
+    color: #333;
+    min-width: 150px;
+}
+.payments-list {
+    margin: 20px 0;
+}
+.payment-card {
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    overflow: hidden;
+}
+.payment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.payment-header h3 {
+    margin: 0;
+    color: #d2691e;
+}
+.payment-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.payment-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+.payment-status.paid {
+    background: #d4edda;
+    color: #155724;
+}
+.payment-status.overdue {
+    background: #f8d7da;
+    color: #721c24;
+}
+.payment-status.cancelled {
+    background: #e2e3e5;
+    color: #383d41;
+}
+.payment-details p {
+    margin: 5px 0;
+    word-wrap: break-word;
+}
+.payment-actions {
+    margin-top: 10px;
+}
+.payment-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.staff-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+.staff-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,139 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>Welcome to the Doggy Dashboard! 🦴</h2>
+    <p>Here you can manage your dogs, bookings, and more.</p>
+    
+    <h3>Quick Actions</h3>
+    <div class="quick-actions">
+        <a href="{% url 'booking_calendar' %}" class="doggy-btn">📅 View Calendar</a>
+        <a href="{% url 'create_booking' %}" class="doggy-btn">🐕 Book Boarding</a>
+        <a href="{% url 'booking_list' %}" class="doggy-btn">📋 My Bookings</a>
+    </div>
+    
+    <h3>Your Dogs</h3>
+    {% if dogs %}
+        <ul class="dogs-list">
+        {% for dog in dogs %}
+            <li class="dog-item">
+                {% if dog.photo %}<img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo"> {% endif %}
+                <span class="dog-info">
+                    <strong>{{ dog.name }}</strong> ({{ dog.breed }}) - {{ dog.get_size_display }}
+                </span>
+                <span class="dog-actions">
+                    <a href="{% url 'edit_dog' dog.id %}">Edit</a> |
+                    <a href="{% url 'delete_dog' dog.id %}">Delete</a>
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not added any dogs yet.</p>
+    {% endif %}
+    <div class="add-dog-section">
+        <a href="{% url 'add_dog' %}" class="doggy-btn">Add a Dog</a>
+    </div>
+</div>
+
+<style>
+.doggy-container {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+.quick-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px 15px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    word-wrap: break-word;
+    white-space: normal;
+}
+.dogs-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+.dog-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    border: 1px solid #f7d08a;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-wrap: wrap;
+}
+.dog-photo {
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.dog-info {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+}
+.dog-actions {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.dog-actions a {
+    color: #d2691e;
+    text-decoration: none;
+    margin: 0 5px;
+}
+.dog-actions a:hover {
+    text-decoration: underline;
+}
+.add-dog-section {
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.add-dog-section .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px 15px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    word-wrap: break-word;
+    white-space: normal;
+}
+h2, h3 {
+    margin: 20px 0 10px 0;
+    color: #d2691e;
+    word-wrap: break-word;
+}
+p {
+    margin: 10px 0;
+    word-wrap: break-word;
+}
+</style>
+{% endblock %} 

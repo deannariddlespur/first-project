@@ -1,0 +1,154 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="doggy-container">
+    <h2>📋 My Bookings</h2>
+    
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <label for="status-filter">Filter by Status:</label>
+            <select name="status" id="status-filter" class="filter-control" onchange="this.form.submit()">
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    
+    {% if bookings %}
+        <div class="bookings-list">
+            {% for booking in bookings %}
+                <div class="booking-card">
+                    <div class="booking-header">
+                        <h3>{{ booking.dog.name }}</h3>
+                        <span class="booking-status {{ booking.status }}">{{ booking.get_status_display }}</span>
+                    </div>
+                    <div class="booking-details">
+                        <p><strong>Dates:</strong> {{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</p>
+                        <p><strong>Nights:</strong> {{ booking.get_nights }} nights</p>
+                        {% if booking.kennel %}
+                            <p><strong>Kennel:</strong> {{ booking.kennel.name }}</p>
+                        {% else %}
+                            <p><strong>Kennel:</strong> <em>Not assigned</em></p>
+                        {% endif %}
+                        {% if booking.total_amount %}
+                            <p><strong>Total Amount:</strong> ${{ booking.total_amount }}</p>
+                            <p><strong>Price per Night:</strong> ${{ booking.price_per_night }}</p>
+                        {% endif %}
+                        {% if booking.notes %}
+                            <p><strong>Notes:</strong> {{ booking.notes }}</p>
+                        {% endif %}
+                        <p><strong>Created:</strong> {{ booking.created_at|date:"m/d/Y" }}</p>
+                    </div>
+                    {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                        <div class="booking-actions">
+                            <a href="{% url 'cancel_booking' booking.id %}" class="doggy-btn danger">Cancel Booking</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No bookings found for the selected filter.</p>
+    {% endif %}
+    
+    <div class="booking-actions">
+        <a href="{% url 'booking_calendar' %}" class="doggy-btn">View Calendar</a>
+        <a href="{% url 'create_booking' %}" class="doggy-btn">Book New Stay</a>
+        <a href="{% url 'owner_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+.filter-section {
+    background: #fff;
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.filter-form label {
+    color: #d2691e;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.filter-control {
+    padding: 8px;
+    border: 1px solid #f7d08a;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #fff;
+    color: #333;
+    min-width: 150px;
+}
+.bookings-list {
+    margin: 20px 0;
+}
+.booking-card {
+    border: 2px solid #f7d08a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    overflow: hidden;
+}
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.booking-header h3 {
+    margin: 0;
+    color: #d2691e;
+}
+.booking-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.booking-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+.booking-status.confirmed {
+    background: #d4edda;
+    color: #155724;
+}
+.booking-status.completed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+.booking-status.cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+.booking-details p {
+    margin: 5px 0;
+    word-wrap: break-word;
+}
+.booking-actions {
+    margin-top: 10px;
+}
+.booking-actions .doggy-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.doggy-btn.danger {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock %} 
