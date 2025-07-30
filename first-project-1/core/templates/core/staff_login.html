@@ -1,26 +1,318 @@
 {% extends 'core/base.html' %}
+
+{% block title %}👨‍💼 Staff Login - Dog Boarding Management{% endblock %}
+
 {% block content %}
-<div class="doggy-container">
-    <h2>👨‍💼 Staff Login</h2>
-    <p><strong>This login is for staff members only.</strong></p>
-    <p>Dog owners should use the <a href="{% url 'login_owner' %}">main login page</a>.</p>
+<style>
+    .staff-login-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .staff-login-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="paw" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M10 5c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5 5 2.24 5 5zm0 10c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5 5 2.24 5 5z" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23paw)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .staff-login-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        max-width: 450px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .staff-login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .staff-login-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .staff-login-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .staff-notice {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input.error {
+        border-color: #e74c3c;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .login-links {
+        text-align: center;
+        margin-top: 2rem;
+        color: #666;
+    }
+
+    .login-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+        display: block;
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .login-links a:hover {
+        color: #764ba2;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .floating-dogs {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .floating-dog {
+        position: absolute;
+        font-size: 1.5rem;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.1;
+    }
+
+    .floating-dog:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .floating-dog:nth-child(2) { top: 20%; right: 15%; animation-delay: 2s; }
+    .floating-dog:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .staff-login-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+        
+        .staff-login-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="staff-login-container">
+    <div class="floating-dogs">
+        <div class="floating-dog">🐕</div>
+        <div class="floating-dog">🐩</div>
+        <div class="floating-dog">🦮</div>
+    </div>
     
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="doggy-btn">Staff Login</button>
-    </form>
-    
-    <div class="login-links">
-        <p><a href="{% url 'login_owner' %}">← Back to Dog Owner Login</a></p>
-        <p><a href="{% url 'register_owner' %}">Register as Dog Owner</a></p>
+    <div class="staff-login-card">
+        <div class="staff-login-header">
+            <h1 class="staff-login-title">
+                <span>👨‍💼</span>
+                Staff Login
+                <span>👨‍💼</span>
+            </h1>
+            <p class="staff-login-subtitle">Access the staff dashboard to manage bookings and operations</p>
+        </div>
+
+        <div class="staff-notice">
+            ⚠️ This login is for staff members only
+        </div>
+
+        <form method="post" id="staff-login-form">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="error-message" style="margin-bottom: 1rem; padding: 1rem; background: #fdf2f2; border-radius: 8px; border: 1px solid #fecaca;">
+                    <span>⚠️</span> Invalid username or password. Please try again.
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">
+                    Username <span style="color: #e74c3c;">*</span>
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.username.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Password <span style="color: #e74c3c;">*</span>
+                </label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        <span>⚠️</span> {{ form.password.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="submit-btn">
+                👨‍💼 Staff Sign In 👨‍💼
+            </button>
+        </form>
+
+        <div class="login-links">
+            <a href="{% url 'login_owner' %}">← Back to Dog Owner Login</a>
+            <a href="{% url 'register_owner' %}">Register as Dog Owner</a>
+            <a href="{% url 'home' %}">← Back to Homepage</a>
+        </div>
     </div>
 </div>
 
-<style>
-.login-links {
-    margin-top: 20px;
-    text-align: center;
-}
-</style>
+<script>
+    // Add form styling and validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('staff-login-form');
+        const inputs = form.querySelectorAll('input');
+        
+        // Add CSS classes to form inputs
+        inputs.forEach(input => {
+            input.classList.add('form-input');
+            
+            // Add error styling on blur if field is invalid
+            input.addEventListener('blur', function() {
+                if (this.value === '' && this.hasAttribute('required')) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+            
+            // Remove error styling on input
+            input.addEventListener('input', function() {
+                this.classList.remove('error');
+            });
+        });
+        
+        // Form submission animation
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.textContent = 'Signing In...';
+            submitBtn.style.opacity = '0.7';
+        });
+    });
+</script>
 {% endblock %} 

@@ -758,7 +758,6 @@ def edit_kennel(request, kennel_id):
     
     return redirect('staff_kennel_management')
 
-@user_passes_test(is_staff)
 def staff_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
