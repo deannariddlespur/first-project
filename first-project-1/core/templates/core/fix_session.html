@@ -1,0 +1,231 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Fix Session Table - Dog Boarding{% endblock %}
+
+{% block content %}
+<div class="doggy-container">
+    <div class="fix-session-card">
+        <div class="fix-header">
+            <h1>🔧 Fix Session Table</h1>
+            <p>This will create the missing Django session table and other essential tables.</p>
+        </div>
+        
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="fix-content">
+            <div class="problem-info">
+                <h3>🐛 Problem Detected</h3>
+                <p>The <code>django_session</code> table is missing from your database. This table is required for:</p>
+                <ul>
+                    <li>✅ User login sessions</li>
+                    <li>✅ Admin interface access</li>
+                    <li>✅ Staff dashboard access</li>
+                    <li>✅ Booking management</li>
+                </ul>
+            </div>
+            
+            <div class="solution-info">
+                <h3>🛠️ Solution</h3>
+                <p>Click the button below to create the missing tables:</p>
+                <ul>
+                    <li><code>django_session</code> - For user sessions</li>
+                    <li><code>django_content_type</code> - For Django admin</li>
+                    <li><code>django_admin_log</code> - For admin logging</li>
+                    <li><code>auth_user</code> - For user authentication</li>
+                </ul>
+            </div>
+            
+            <form method="post" class="fix-form">
+                {% csrf_token %}
+                <button type="submit" class="fix-btn">
+                    <span class="btn-icon">🔧</span>
+                    Fix Session Table
+                </button>
+            </form>
+            
+            <div class="back-links">
+                <a href="{% url 'home' %}" class="back-link">← Back to Home</a>
+                <a href="{% url 'setup_database' %}" class="back-link">📦 Full Database Setup</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.fix-session-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin: 40px auto;
+    border: 2px solid #f0f0f0;
+}
+
+.fix-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.fix-header h1 {
+    color: #333;
+    font-size: 2.5em;
+    margin: 0 0 15px 0;
+    font-weight: 800;
+}
+
+.fix-header p {
+    color: #666;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.messages {
+    margin-bottom: 30px;
+}
+
+.message {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.fix-content {
+    display: grid;
+    gap: 30px;
+}
+
+.problem-info, .solution-info {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    border-left: 4px solid #ff9800;
+}
+
+.problem-info h3, .solution-info h3 {
+    color: #333;
+    margin: 0 0 15px 0;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.problem-info p, .solution-info p {
+    color: #666;
+    margin: 0 0 15px 0;
+    line-height: 1.6;
+}
+
+.problem-info ul, .solution-info ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.problem-info li, .solution-info li {
+    color: #555;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #e83e8c;
+}
+
+.fix-form {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.fix-btn {
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+}
+
+.fix-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 152, 0, 0.6);
+}
+
+.btn-icon {
+    font-size: 1.2em;
+}
+
+.back-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.back-link {
+    color: #666;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    background: #e9ecef;
+    color: #333;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .fix-session-card {
+        margin: 20px;
+        padding: 25px;
+    }
+    
+    .fix-header h1 {
+        font-size: 2em;
+    }
+    
+    .back-links {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+{% endblock %} 
