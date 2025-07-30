@@ -84,8 +84,8 @@ def create_admin_user(request):
 def setup_database(request):
     """Simple view to run database setup"""
     from django.db import connection
-    from django.db.migrations.executor import MigrationExecutor
-    from django.db import connections
+    from django.contrib.auth.hashers import make_password
+    from django.utils import timezone
     
     if request.method == 'POST':
         try:
@@ -98,76 +98,167 @@ def setup_database(request):
                 messages.error(request, f"❌ Database connection failed: {str(db_error)}")
                 return render(request, 'core/setup_database.html')
             
-            # Step 2: Try to run migrations using Django's migration system
+            # Step 2: Create basic tables using raw SQL
             try:
-                messages.info(request, "📦 Running database migrations...")
+                messages.info(request, "📦 Creating database tables...")
                 
-                # Get the default database connection
-                connection = connections['default']
-                
-                # Create a migration executor
-                executor = MigrationExecutor(connection)
-                
-                # Get all pending migrations
-                plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-                
-                if plan:
-                    # Apply migrations
-                    executor.migrate(plan)
-                    messages.success(request, f"✅ Applied {len(plan)} migrations!")
-                else:
-                    messages.success(request, "✅ Database is already up to date!")
+                with connection.cursor() as cursor:
+                    # Create django_migrations table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS django_migrations (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            app VARCHAR(255) NOT NULL,
+                            name VARCHAR(255) NOT NULL,
+                            applied DATETIME(6) NOT NULL
+                        )
+                    """)
                     
-            except Exception as migrate_error:
-                messages.error(request, f"❌ Migration failed: {str(migrate_error)}")
-                messages.error(request, "💡 This might be normal if tables already exist")
-            
-            # Step 3: Try to create admin user and kennels
-            try:
-                from django.contrib.auth.models import User
-                from .models import Kennel
-                
-                # Create admin user
-                if not User.objects.filter(username='admin').exists():
-                    admin_user = User.objects.create_user(
-                        username='admin',
-                        email='admin@dogboarding.com',
-                        password='admin123456',
-                        first_name='Admin',
-                        last_name='User',
-                        is_staff=True,
-                        is_superuser=True
-                    )
-                    messages.success(request, "✅ Admin user created: admin/admin123456")
-                else:
-                    messages.info(request, "ℹ️ Admin user already exists")
-                
-                # Create sample kennels
-                if not Kennel.objects.exists():
-                    kennel_data = [
-                        {'name': 'Small Kennel A', 'description': 'Cozy kennel for small dogs', 'size': 'small'},
-                        {'name': 'Small Kennel B', 'description': 'Cozy kennel for small dogs', 'size': 'small'},
-                        {'name': 'Medium Kennel A', 'description': 'Comfortable kennel for medium dogs', 'size': 'medium'},
-                        {'name': 'Medium Kennel B', 'description': 'Comfortable kennel for medium dogs', 'size': 'medium'},
-                        {'name': 'Large Kennel A', 'description': 'Spacious kennel for large dogs', 'size': 'large'},
-                        {'name': 'Large Kennel B', 'description': 'Spacious kennel for large dogs', 'size': 'large'},
-                    ]
+                    # Create auth_user table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS auth_user (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            password VARCHAR(128) NOT NULL,
+                            last_login DATETIME(6),
+                            is_superuser BOOLEAN NOT NULL,
+                            username VARCHAR(150) UNIQUE NOT NULL,
+                            first_name VARCHAR(150) NOT NULL,
+                            last_name VARCHAR(150) NOT NULL,
+                            email VARCHAR(254) NOT NULL,
+                            is_staff BOOLEAN NOT NULL,
+                            is_active BOOLEAN NOT NULL,
+                            date_joined DATETIME(6) NOT NULL
+                        )
+                    """)
                     
-                    for kennel_info in kennel_data:
-                        Kennel.objects.create(**kennel_info)
+                    # Create core_owner table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_owner (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            user_id INTEGER NOT NULL UNIQUE,
+                            phone VARCHAR(20) NOT NULL,
+                            address TEXT NOT NULL,
+                            FOREIGN KEY (user_id) REFERENCES auth_user (id)
+                        )
+                    """)
                     
-                    messages.success(request, "✅ Sample kennels created!")
-                else:
-                    messages.info(request, "ℹ️ Kennels already exist")
+                    # Create core_kennel table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_kennel (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            name VARCHAR(100) NOT NULL,
+                            description TEXT NOT NULL,
+                            size VARCHAR(20) NOT NULL,
+                            is_available BOOLEAN NOT NULL DEFAULT 1
+                        )
+                    """)
+                    
+                    # Create core_dog table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_dog (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            name VARCHAR(100) NOT NULL,
+                            breed VARCHAR(100) NOT NULL,
+                            age INTEGER NOT NULL,
+                            size VARCHAR(20) NOT NULL,
+                            notes TEXT,
+                            photo VARCHAR(100),
+                            owner_id INTEGER NOT NULL,
+                            FOREIGN KEY (owner_id) REFERENCES core_owner (id)
+                        )
+                    """)
+                    
+                    # Create core_booking table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_booking (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            dog_id INTEGER NOT NULL,
+                            start_date DATE NOT NULL,
+                            end_date DATE NOT NULL,
+                            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+                            notes TEXT,
+                            total_amount DECIMAL(10,2),
+                            price_per_night DECIMAL(10,2),
+                            kennel_id INTEGER,
+                            created_at DATETIME(6) NOT NULL,
+                            FOREIGN KEY (dog_id) REFERENCES core_dog (id),
+                            FOREIGN KEY (kennel_id) REFERENCES core_kennel (id)
+                        )
+                    """)
                 
-                messages.success(request, "🎉 Database setup completed successfully!")
-                messages.success(request, "📝 You can now login as admin (admin/admin123456)")
-                return redirect('setup_database')
-                
-            except Exception as model_error:
-                messages.error(request, f"❌ Model setup failed: {str(model_error)}")
-                messages.error(request, "💡 This might mean the database tables don't exist yet")
+                messages.success(request, "✅ Database tables created!")
+                    
+            except Exception as table_error:
+                messages.error(request, f"❌ Table creation failed: {str(table_error)}")
                 return render(request, 'core/setup_database.html')
+            
+            # Step 3: Create admin user using raw SQL
+            try:
+                messages.info(request, "👤 Creating admin user...")
+                
+                with connection.cursor() as cursor:
+                    # Check if admin user exists
+                    cursor.execute("SELECT id FROM auth_user WHERE username = 'admin'")
+                    if not cursor.fetchone():
+                        # Create admin user
+                        cursor.execute("""
+                            INSERT INTO auth_user (
+                                username, password, email, first_name, last_name,
+                                is_staff, is_superuser, is_active, date_joined
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, [
+                            'admin',
+                            make_password('admin123456'),
+                            'admin@dogboarding.com',
+                            'Admin',
+                            'User',
+                            1,  # is_staff
+                            1,  # is_superuser
+                            1,  # is_active
+                            timezone.now()
+                        ])
+                        messages.success(request, "✅ Admin user created: admin/admin123456")
+                    else:
+                        messages.info(request, "ℹ️ Admin user already exists")
+                
+            except Exception as user_error:
+                messages.error(request, f"❌ User creation failed: {str(user_error)}")
+                return render(request, 'core/setup_database.html')
+            
+            # Step 4: Create sample kennels using raw SQL
+            try:
+                messages.info(request, "🏠 Creating sample kennels...")
+                
+                with connection.cursor() as cursor:
+                    # Check if kennels exist
+                    cursor.execute("SELECT id FROM core_kennel LIMIT 1")
+                    if not cursor.fetchone():
+                        # Create sample kennels
+                        kennel_data = [
+                            ('Small Kennel A', 'Cozy kennel for small dogs', 'small'),
+                            ('Small Kennel B', 'Cozy kennel for small dogs', 'small'),
+                            ('Medium Kennel A', 'Comfortable kennel for medium dogs', 'medium'),
+                            ('Medium Kennel B', 'Comfortable kennel for medium dogs', 'medium'),
+                            ('Large Kennel A', 'Spacious kennel for large dogs', 'large'),
+                            ('Large Kennel B', 'Spacious kennel for large dogs', 'large'),
+                        ]
+                        
+                        for name, description, size in kennel_data:
+                            cursor.execute("""
+                                INSERT INTO core_kennel (name, description, size, is_available)
+                                VALUES (?, ?, ?, ?)
+                            """, [name, description, size, 1])
+                        
+                        messages.success(request, "✅ Sample kennels created!")
+                    else:
+                        messages.info(request, "ℹ️ Kennels already exist")
+                
+            except Exception as kennel_error:
+                messages.error(request, f"❌ Kennel creation failed: {str(kennel_error)}")
+                return render(request, 'core/setup_database.html')
+            
+            messages.success(request, "🎉 Database setup completed successfully!")
+            messages.success(request, "📝 You can now login as admin (admin/admin123456)")
+            return redirect('setup_database')
             
         except Exception as e:
             messages.error(request, f"❌ Unexpected error: {str(e)}")
