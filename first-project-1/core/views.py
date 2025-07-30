@@ -162,6 +162,22 @@ def setup_database(request):
                         )
                     """)
                     
+                    # Create django_admin_log table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS django_admin_log (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            action_time DATETIME(6) NOT NULL,
+                            object_id TEXT,
+                            object_repr VARCHAR(200) NOT NULL,
+                            action_flag SMALLINT UNSIGNED NOT NULL,
+                            change_message TEXT NOT NULL,
+                            content_type_id INTEGER,
+                            user_id INTEGER NOT NULL,
+                            FOREIGN KEY (content_type_id) REFERENCES django_content_type (id),
+                            FOREIGN KEY (user_id) REFERENCES auth_user (id)
+                        )
+                    """)
+                    
                     # Create auth_user table if it doesn't exist
                     cursor.execute("""
                         CREATE TABLE IF NOT EXISTS auth_user (
