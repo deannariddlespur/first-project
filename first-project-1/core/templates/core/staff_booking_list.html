@@ -1,161 +1,674 @@
 {% extends 'core/base.html' %}
 {% block content %}
 <div class="doggy-container">
-    <h2>📋 All Bookings</h2>
-    
-    <div class="filter-section">
-        <form method="get" class="filter-form">
-            <label for="status-filter">Filter by Status:</label>
-            <select name="status" id="status-filter" class="filter-control" onchange="this.form.submit()">
-                {% for value, label in status_choices %}
-                    <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
+    <!-- Hero Section with Dog Animation -->
+    <div class="booking-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">🐕‍🦺 Booking Management</h1>
+            <p class="hero-subtitle">Keep track of all your furry guests and their stays</p>
+        </div>
+        <div class="hero-dog-animation">
+            <div class="floating-dog">🐕</div>
+            <div class="floating-dog delayed">🐩</div>
+            <div class="floating-dog delayed-2">🦮</div>
+        </div>
+    </div>
+
+    <!-- Smart Filter Section -->
+    <div class="smart-filter-section">
+        <div class="filter-header">
+            <h3>🔍 Filter & Search</h3>
+            <div class="filter-stats">
+                <span class="stat-badge">{{ bookings.count }} bookings</span>
+                {% if current_filter != 'all' %}
+                    <span class="stat-badge active">{{ current_filter|title }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <form method="get" class="modern-filter-form">
+            <div class="filter-group">
+                <label for="status-filter" class="filter-label">
+                    <span class="label-icon">📊</span>
+                    Booking Status
+                </label>
+                <select name="status" id="status-filter" class="modern-select" onchange="this.form.submit()">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
         </form>
     </div>
-    
+
+    <!-- Bookings Display -->
     {% if bookings %}
-        <div class="bookings-list">
+        <div class="bookings-grid">
             {% for booking in bookings %}
-                <div class="booking-card">
-                    <div class="booking-header">
-                        <h3>{{ booking.dog.name }}</h3>
-                        <span class="booking-status {{ booking.status }}">{{ booking.get_status_display }}</span>
+                <div class="booking-card-modern" data-status="{{ booking.status }}">
+                    <div class="card-header">
+                        <div class="dog-info">
+                            <div class="dog-avatar">
+                                {% if booking.dog.photo %}
+                                    <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}">
+                                {% else %}
+                                    <span class="dog-emoji">🐕</span>
+                                {% endif %}
+                            </div>
+                            <div class="dog-details">
+                                <h3 class="dog-name">{{ booking.dog.name }}</h3>
+                                <p class="dog-breed">{{ booking.dog.breed }} • {{ booking.dog.age }} years</p>
+                            </div>
+                        </div>
+                        <div class="status-badge status-{{ booking.status }}">
+                            <span class="status-icon">
+                                {% if booking.status == 'pending' %}⏳
+                                {% elif booking.status == 'confirmed' %}✅
+                                {% elif booking.status == 'completed' %}🎉
+                                {% elif booking.status == 'cancelled' %}❌
+                                {% endif %}
+                            </span>
+                            {{ booking.get_status_display }}
+                        </div>
                     </div>
-                    <div class="booking-details">
-                        <p><strong>Owner:</strong> {{ booking.dog.owner }}</p>
-                        <p><strong>Dates:</strong> {{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</p>
-                        <p><strong>Nights:</strong> {{ booking.get_nights }} nights</p>
-                        <p><strong>Created:</strong> {{ booking.created_at|date:"m/d/Y" }}</p>
-                        {% if booking.kennel %}
-                            <p><strong>Kennel:</strong> {{ booking.kennel.name }}</p>
-                        {% else %}
-                            <p><strong>Kennel:</strong> <em>Not assigned</em></p>
-                        {% endif %}
-                        {% if booking.total_amount %}
-                            <p><strong>Total Amount:</strong> ${{ booking.total_amount }}</p>
-                            <p><strong>Price per Night:</strong> ${{ booking.price_per_night }}</p>
-                        {% endif %}
+
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-icon">👤</span>
+                                <div class="info-text">
+                                    <label>Owner</label>
+                                    <span>{{ booking.dog.owner.user.first_name }} {{ booking.dog.owner.user.last_name }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-icon">📅</span>
+                                <div class="info-text">
+                                    <label>Stay Dates</label>
+                                    <span>{{ booking.start_date|date:"m/d/Y" }} - {{ booking.end_date|date:"m/d/Y" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-icon">🌙</span>
+                                <div class="info-text">
+                                    <label>Nights</label>
+                                    <span>{{ booking.get_nights }} nights</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-icon">🏠</span>
+                                <div class="info-text">
+                                    <label>Kennel</label>
+                                    <span>{% if booking.kennel %}{{ booking.kennel.name }}{% else %}<em>Not assigned</em>{% endif %}</span>
+                                </div>
+                            </div>
+                            
+                            {% if booking.total_amount %}
+                            <div class="info-item">
+                                <span class="info-icon">💰</span>
+                                <div class="info-text">
+                                    <label>Total</label>
+                                    <span class="price">${{ booking.total_amount }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
                         {% if booking.notes %}
-                            <p><strong>Notes:</strong> {{ booking.notes }}</p>
+                        <div class="notes-section">
+                            <span class="notes-icon">📝</span>
+                            <p class="notes-text">{{ booking.notes }}</p>
+                        </div>
                         {% endif %}
                     </div>
-                    <div class="booking-actions">
-                        <a href="{% url 'staff_booking_detail' booking.id %}" class="doggy-btn">Manage Booking</a>
+
+                    <div class="card-actions">
+                        <a href="{% url 'staff_booking_detail' booking.id %}" class="action-btn primary">
+                            <span class="btn-icon">⚙️</span>
+                            Manage Booking
+                        </a>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>No bookings found for the selected filter.</p>
+        <div class="empty-state">
+            <div class="empty-icon">🐾</div>
+            <h3>No Bookings Found</h3>
+            <p>There are no bookings matching your current filter.</p>
+            <div class="empty-actions">
+                <a href="?status=all" class="action-btn secondary">Show All Bookings</a>
+            </div>
+        </div>
     {% endif %}
-    
-    <div class="staff-actions">
-        <a href="{% url 'staff_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
-        <a href="{% url 'staff_kennel_management' %}" class="doggy-btn">Manage Kennels</a>
-        <a href="{% url 'staff_payment_list' %}" class="doggy-btn">Manage Payments</a>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h3>🚀 Quick Actions</h3>
+        <div class="action-grid">
+            <a href="{% url 'staff_dashboard' %}" class="quick-action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-text">Dashboard</span>
+            </a>
+            <a href="{% url 'staff_kennel_management' %}" class="quick-action-card">
+                <span class="action-icon">🏠</span>
+                <span class="action-text">Manage Kennels</span>
+            </a>
+            <a href="{% url 'staff_payment_list' %}" class="quick-action-card">
+                <span class="action-icon">💰</span>
+                <span class="action-text">Payments</span>
+            </a>
+            <a href="{% url 'staff_calendar' %}" class="quick-action-card">
+                <span class="action-icon">📅</span>
+                <span class="action-text">Calendar</span>
+            </a>
+        </div>
     </div>
 </div>
 
 <style>
-.filter-section {
-    background: #fff;
-    border: 2px solid #f7d08a;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
+/* Hero Section */
+.booking-hero {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    position: relative;
     overflow: hidden;
+    box-shadow: 0 10px 30px rgba(255, 154, 158, 0.3);
 }
-.filter-form {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+
+.hero-content {
+    position: relative;
+    z-index: 2;
 }
-.filter-form label {
-    color: #d2691e;
-    font-weight: bold;
-    white-space: nowrap;
+
+.hero-title {
+    font-size: 2.5em;
+    color: #fff;
+    margin: 0 0 10px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    font-weight: 800;
 }
-.filter-control {
-    padding: 8px;
-    border: 1px solid #f7d08a;
-    border-radius: 4px;
-    font-size: 1em;
+
+.hero-subtitle {
+    color: #fff;
+    font-size: 1.2em;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.hero-dog-animation {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1;
+}
+
+.floating-dog {
+    font-size: 3em;
+    animation: float 3s ease-in-out infinite;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.floating-dog.delayed {
+    animation-delay: 1s;
+}
+
+.floating-dog.delayed-2 {
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Smart Filter Section */
+.smart-filter-section {
     background: #fff;
-    color: #333;
-    min-width: 150px;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
 }
-.bookings-list {
-    margin: 20px 0;
-}
-.booking-card {
-    border: 2px solid #f7d08a;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    background: #fff;
-    overflow: hidden;
-}
-.booking-header {
+
+.filter-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
-.booking-header h3 {
+
+.filter-header h3 {
     margin: 0;
-    color: #d2691e;
+    color: #333;
+    font-size: 1.3em;
 }
-.booking-status {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    white-space: nowrap;
+
+.filter-stats {
+    display: flex;
+    gap: 10px;
 }
-.booking-status.pending {
+
+.stat-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.stat-badge.active {
+    background: #ff9800;
+    color: #fff;
+}
+
+.modern-filter-form {
+    display: flex;
+    gap: 20px;
+    align-items: end;
+}
+
+.filter-group {
+    flex: 1;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.label-icon {
+    font-size: 1.1em;
+}
+
+.modern-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1em;
+    background: #fff;
+    color: #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+/* Bookings Grid */
+.bookings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.booking-card-modern {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.booking-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-color: #ff9800;
+}
+
+.booking-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff9800, #ff5722);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.dog-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dog-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    overflow: hidden;
+}
+
+.dog-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dog-name {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+.dog-breed {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.status-badge {
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-pending {
     background: #fff3cd;
     color: #856404;
 }
-.booking-status.confirmed {
+
+.status-confirmed {
     background: #d4edda;
     color: #155724;
 }
-.booking-status.completed {
+
+.status-completed {
     background: #d1ecf1;
     color: #0c5460;
 }
-.booking-status.cancelled {
+
+.status-cancelled {
     background: #f8d7da;
     color: #721c24;
 }
-.booking-details p {
-    margin: 5px 0;
-    word-wrap: break-word;
+
+.status-icon {
+    font-size: 1.1em;
 }
-.booking-actions {
-    margin-top: 10px;
+
+/* Card Content */
+.card-content {
+    margin-bottom: 20px;
 }
-.booking-actions .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
 }
-.staff-actions {
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-icon {
+    font-size: 1.2em;
+    width: 20px;
+    text-align: center;
+}
+
+.info-text {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    width: 100%;
 }
-.staff-actions .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
+
+.info-text label {
+    font-size: 0.8em;
+    color: #999;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-text span {
+    color: #333;
+    font-weight: 500;
+}
+
+.price {
+    color: #ff9800;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+.notes-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.notes-icon {
+    font-size: 1.2em;
+    margin-top: 2px;
+}
+
+.notes-text {
     margin: 0;
+    color: #666;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Card Actions */
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    color: #fff;
+    flex: 1;
+    justify-content: center;
+}
+
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+}
+
+.action-btn.secondary {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.action-btn.secondary:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-icon {
+    font-size: 1.1em;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.empty-state h3 {
+    color: #333;
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+}
+
+.empty-state p {
+    color: #666;
+    margin: 0 0 25px 0;
+    font-size: 1.1em;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+}
+
+.quick-actions h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.quick-action-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: #333;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #ff9800;
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+}
+
+.action-icon {
+    font-size: 2em;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.action-text {
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2em;
+    }
+    
+    .bookings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modern-filter-form {
+        flex-direction: column;
+    }
+    
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .hero-dog-animation {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-hero {
+        padding: 20px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 {% endblock %} 
