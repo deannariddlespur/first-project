@@ -1,37 +1,282 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>Welcome to the Doggy Dashboard! 🦴</h2>
-    <p>Here you can manage your dogs, bookings, and more.</p>
-    
-    <h3>Quick Actions</h3>
-    <div class="quick-actions">
-        <a href="{% url 'booking_calendar' %}" class="doggy-btn">📅 View Calendar</a>
-        <a href="{% url 'create_booking' %}" class="doggy-btn">🐕 Book Boarding</a>
-        <a href="{% url 'booking_list' %}" class="doggy-btn">📋 My Bookings</a>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .section-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .dogs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .dog-card {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .dog-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .dog-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .dog-photo {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #667eea;
+    }
+
+    .dog-info h4 {
+        margin: 0 0 5px 0;
+        color: #333;
+        font-size: 1.2em;
+    }
+
+    .dog-breed {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .dog-size {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .dog-size.small {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .dog-size.medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .dog-size.large {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .dog-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .dog-actions a {
+        padding: 8px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .dog-actions .edit-btn {
+        background: #667eea;
+        color: white;
+    }
+
+    .dog-actions .delete-btn {
+        background: #dc3545;
+        color: white;
+    }
+
+    .dog-actions a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+
+    .empty-state p {
+        margin-bottom: 20px;
+        font-size: 1.1em;
+    }
+
+    .add-dog-section {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .dogs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">🐕 Welcome to the Doggy Dashboard!</h1>
+        <p class="dashboard-subtitle">Here you can manage your dogs, bookings, and more.</p>
     </div>
     
-    <h3>Your Dogs</h3>
-    {% if dogs %}
-        <ul class="dogs-list">
-        {% for dog in dogs %}
-            <li class="dog-item">
-                {% if dog.photo %}<img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo"> {% endif %}
-                <span class="dog-info">
-                    <strong>{{ dog.name }}</strong> ({{ dog.breed }}) - {{ dog.get_size_display }}
-                </span>
-                <span class="dog-actions">
-                    <a href="{% url 'edit_dog' dog.id %}">Edit</a> |
-                    <a href="{% url 'delete_dog' dog.id %}">Delete</a>
-                </span>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>You have not added any dogs yet.</p>
-    {% endif %}
-    <div class="add-dog-section">
-        <a href="{% url 'add_dog' %}" class="doggy-btn">Add a Dog</a>
+    <!-- Quick Actions Section -->
+    <div class="section-card">
+        <div class="section-title">
+            <span>⚡</span>
+            Quick Actions
+        </div>
+        <div class="quick-actions">
+            <a href="{% url 'booking_calendar' %}" class="action-btn">📅 View Calendar</a>
+            <a href="{% url 'create_booking' %}" class="action-btn">🐕 Book Boarding</a>
+            <a href="{% url 'booking_list' %}" class="action-btn">📋 My Bookings</a>
+        </div>
+    </div>
+    
+    <!-- Your Dogs Section -->
+    <div class="section-card">
+        <div class="section-title">
+            <span>🐕</span>
+            Your Dogs
+        </div>
+        {% if dogs %}
+            <div class="dogs-grid">
+            {% for dog in dogs %}
+                <div class="dog-card">
+                    <div class="dog-header">
+                        {% if dog.photo %}
+                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo">
+                        {% else %}
+                            <div class="dog-photo" style="background: #667eea; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5em;">🐕</div>
+                        {% endif %}
+                        <div class="dog-info">
+                            <h4>{{ dog.name }}</h4>
+                            <div class="dog-breed">{{ dog.breed }}</div>
+                            <span class="dog-size {{ dog.size }}">{{ dog.get_size_display }}</span>
+                        </div>
+                    </div>
+                    <div class="dog-actions">
+                        <a href="{% url 'edit_dog' dog.id %}" class="edit-btn">Edit</a>
+                        <a href="{% url 'delete_dog' dog.id %}" class="delete-btn">Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>You have not added any dogs yet.</p>
+            </div>
+        {% endif %}
+        <div class="add-dog-section">
+            <a href="{% url 'add_dog' %}" class="action-btn">Add a Dog</a>
+        </div>
     </div>
 </div>
 

@@ -1,15 +1,313 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>📅 Booking Calendar</h2>
-    
-    <div class="calendar-nav">
-        <a href="?year={{ prev_year }}&month={{ prev_month }}" class="nav-btn">← Previous</a>
-        <span class="month-year">{{ month }}/{{ year }}</span>
-        <a href="?year={{ next_year }}&month={{ next_month }}" class="nav-btn">Next →</a>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .calendar-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .calendar-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+
+    .nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .month-year {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .calendar {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .calendar-header > div {
+        padding: 15px 10px;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .calendar-header > div:last-child {
+        border-right: none;
+    }
+
+    .calendar-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .calendar-week:last-child {
+        border-bottom: none;
+    }
+
+    .calendar-day {
+        min-height: 80px;
+        padding: 10px;
+        border-right: 1px solid #e0e0e0;
+        position: relative;
+        background: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .calendar-day:hover {
+        background: #f8f9fa;
+    }
+
+    .calendar-day:last-child {
+        border-right: none;
+    }
+
+    .calendar-day.other-month {
+        background: #f8f9fa;
+        color: #999;
+    }
+
+    .calendar-day.today {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .calendar-day.availability-high {
+        border-left: 4px solid #28a745;
+    }
+
+    .calendar-day.availability-medium {
+        border-left: 4px solid #ffc107;
+    }
+
+    .calendar-day.availability-low {
+        border-left: 4px solid #fd7e14;
+    }
+
+    .calendar-day.availability-none {
+        border-left: 4px solid #dc3545;
+    }
+
+    .day-number {
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+    }
+
+    .booking-indicator {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 0.8em;
+    }
+
+    .availability-info {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        font-size: 0.8em;
+        color: #666;
+    }
+
+    .legend-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .legend-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .legend-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+    }
+
+    .legend-color.availability-high {
+        background: #28a745;
+    }
+
+    .legend-color.availability-medium {
+        background: #ffc107;
+    }
+
+    .legend-color.availability-low {
+        background: #fd7e14;
+    }
+
+    .legend-color.availability-none {
+        background: #dc3545;
+    }
+
+    .calendar-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .calendar-nav {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .calendar-actions {
+            flex-direction: column;
+        }
+        
+        .legend-items {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">📅 Booking Calendar</h1>
+        <p class="dashboard-subtitle">Check availability and book your dog's stay</p>
     </div>
     
-    <div class="calendar">
+    <div class="calendar-section">
+        <div class="calendar-nav">
+            <a href="?year={{ prev_year }}&month={{ prev_month }}" class="nav-btn">← Previous</a>
+            <span class="month-year">{{ month }}/{{ year }}</span>
+            <a href="?year={{ next_year }}&month={{ next_month }}" class="nav-btn">Next →</a>
+        </div>
+        
+        <div class="calendar">
         <div class="calendar-header">
             <div>Sun</div>
             <div>Mon</div>
@@ -53,35 +351,42 @@
                 </div>
             {% endfor %}
         </div>
+        </div>
     </div>
     
-    <div class="calendar-legend">
-        <div class="legend-item">
-            <span class="legend-color availability-high"></span>
-            <span>High Availability (70%+)</span>
+    <div class="legend-section">
+        <div class="legend-title">
+            <span>📋</span>
+            Legend
         </div>
-        <div class="legend-item">
-            <span class="legend-color availability-medium"></span>
-            <span>Medium Availability (30-69%)</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-color availability-low"></span>
-            <span>Low Availability (1-29%)</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-color availability-none"></span>
-            <span>No Availability</span>
-        </div>
-        <div class="legend-item">
-            <span class="booking-indicator">🐕</span>
-            <span>Existing Booking</span>
+        <div class="legend-items">
+            <div class="legend-item">
+                <span class="legend-color availability-high"></span>
+                <span>High Availability (70%+)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color availability-medium"></span>
+                <span>Medium Availability (30-69%)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color availability-low"></span>
+                <span>Low Availability (1-29%)</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color availability-none"></span>
+                <span>No Availability</span>
+            </div>
+            <div class="legend-item">
+                <span class="booking-indicator">🐕</span>
+                <span>Existing Booking</span>
+            </div>
         </div>
     </div>
     
     <div class="calendar-actions">
-        <a href="{% url 'create_booking' %}" class="doggy-btn">Book New Stay</a>
-        <a href="{% url 'booking_list' %}" class="doggy-btn">View My Bookings</a>
-        <a href="{% url 'owner_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
+        <a href="{% url 'create_booking' %}" class="action-btn">Book New Stay</a>
+        <a href="{% url 'booking_list' %}" class="action-btn">View My Bookings</a>
+        <a href="{% url 'owner_dashboard' %}" class="action-btn">Back to Dashboard</a>
     </div>
 </div>
 
