@@ -83,9 +83,9 @@ def create_admin_user(request):
 
 def setup_database(request):
     """Simple view to run database setup"""
-    from django.core.management import execute_from_command_line
     from django.db import connection
-    import sys
+    from django.db.migrations.executor import MigrationExecutor
+    from django.db import connections
     
     if request.method == 'POST':
         try:
@@ -98,16 +98,31 @@ def setup_database(request):
                 messages.error(request, f"❌ Database connection failed: {str(db_error)}")
                 return render(request, 'core/setup_database.html')
             
-            # Step 2: Run migrations first (this creates the tables)
+            # Step 2: Try to run migrations using Django's migration system
             try:
                 messages.info(request, "📦 Running database migrations...")
-                execute_from_command_line(['manage.py', 'migrate'])
-                messages.success(request, "✅ Database migrations completed!")
+                
+                # Get the default database connection
+                connection = connections['default']
+                
+                # Create a migration executor
+                executor = MigrationExecutor(connection)
+                
+                # Get all pending migrations
+                plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+                
+                if plan:
+                    # Apply migrations
+                    executor.migrate(plan)
+                    messages.success(request, f"✅ Applied {len(plan)} migrations!")
+                else:
+                    messages.success(request, "✅ Database is already up to date!")
+                    
             except Exception as migrate_error:
                 messages.error(request, f"❌ Migration failed: {str(migrate_error)}")
-                return render(request, 'core/setup_database.html')
+                messages.error(request, "💡 This might be normal if tables already exist")
             
-            # Step 3: Now that tables exist, we can safely import and use models
+            # Step 3: Try to create admin user and kennels
             try:
                 from django.contrib.auth.models import User
                 from .models import Kennel
@@ -151,6 +166,7 @@ def setup_database(request):
                 
             except Exception as model_error:
                 messages.error(request, f"❌ Model setup failed: {str(model_error)}")
+                messages.error(request, "💡 This might mean the database tables don't exist yet")
                 return render(request, 'core/setup_database.html')
             
         except Exception as e:
