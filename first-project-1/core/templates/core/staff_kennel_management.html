@@ -1,37 +1,86 @@
 {% extends 'core/base.html' %}
 {% block content %}
 <div class="doggy-container">
-    <h2>🏠 Kennel Management</h2>
-    
+    <!-- Hero Section -->
+    <div class="kennel-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">🏠 Kennel Management</h1>
+            <p class="hero-subtitle">Manage your dog boarding facilities and track availability</p>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ kennels.count }}</span>
+                <span class="stat-label">Total Kennels</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ kennels|length }}</span>
+                <span class="stat-label">Available</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Kennel Section -->
     <div class="add-kennel-section">
-        <h3>➕ Add New Kennel</h3>
-        <form method="post" class="kennel-form">
+        <div class="section-header">
+            <h3>➕ Add New Kennel</h3>
+            <p>Create a new kennel for your furry guests</p>
+        </div>
+        
+        <form method="post" class="modern-kennel-form">
             {% csrf_token %}
-            <div class="form-row">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label for="{{ form.name.id_for_label }}">Kennel Name:</label>
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        <span class="label-icon">🏠</span>
+                        Kennel Name
+                    </label>
                     {{ form.name }}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.size.id_for_label }}">Kennel Size:</label>
+                    <label for="{{ form.size.id_for_label }}" class="form-label">
+                        <span class="label-icon">📏</span>
+                        Kennel Size
+                    </label>
                     {{ form.size }}
                 </div>
             </div>
             <div class="form-group">
-                <label for="{{ form.description.id_for_label }}">Description:</label>
+                <label for="{{ form.description.id_for_label }}" class="form-label">
+                    <span class="label-icon">📝</span>
+                    Description
+                </label>
                 {{ form.description }}
             </div>
-            <button type="submit" class="doggy-btn">Add Kennel</button>
+            <button type="submit" class="action-btn primary">
+                <span class="btn-icon">➕</span>
+                Add Kennel
+            </button>
         </form>
     </div>
-    
-    <div class="filter-section">
-        <h3>🔍 Filter Kennels</h3>
-        <form method="get" class="filter-form">
-            <div class="filter-row">
+
+    <!-- Smart Filter Section -->
+    <div class="smart-filter-section">
+        <div class="filter-header">
+            <h3>🔍 Filter & Search</h3>
+            <div class="filter-stats">
+                <span class="stat-badge">{{ kennels.count }} kennels</span>
+                {% if size_filter != 'all' %}
+                    <span class="stat-badge active">{{ size_filter|title }}</span>
+                {% endif %}
+                {% if availability_filter != 'all' %}
+                    <span class="stat-badge active">{{ availability_filter|title }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <form method="get" class="modern-filter-form">
+            <div class="filter-grid">
                 <div class="filter-group">
-                    <label for="size-filter">Size:</label>
-                    <select name="size" id="size-filter" class="filter-control">
+                    <label for="size-filter" class="filter-label">
+                        <span class="label-icon">📏</span>
+                        Size Filter
+                    </label>
+                    <select name="size" id="size-filter" class="modern-select" onchange="this.form.submit()">
                         <option value="all" {% if size_filter == 'all' %}selected{% endif %}>All Sizes</option>
                         {% for value, label in size_choices %}
                             <option value="{{ value }}" {% if size_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -39,75 +88,115 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="availability-filter">Availability:</label>
-                    <select name="availability" id="availability-filter" class="filter-control">
+                    <label for="availability-filter" class="filter-label">
+                        <span class="label-icon">📊</span>
+                        Availability
+                    </label>
+                    <select name="availability" id="availability-filter" class="modern-select" onchange="this.form.submit()">
                         <option value="all" {% if availability_filter == 'all' %}selected{% endif %}>All Kennels</option>
                         <option value="available" {% if availability_filter == 'available' %}selected{% endif %}>Available</option>
                         <option value="occupied" {% if availability_filter == 'occupied' %}selected{% endif %}>Occupied</option>
                     </select>
                 </div>
-                <div class="filter-actions">
-                    <button type="submit" class="doggy-btn">Apply Filters</button>
-                    <a href="{% url 'staff_kennel_management' %}" class="doggy-btn secondary">Clear Filters</a>
-                </div>
             </div>
         </form>
     </div>
-    
-    <h3>📋 Current Kennels</h3>
-    
+
+    <!-- Kennels Display -->
     {% if kennels %}
-        <div class="kennels-list">
+        <div class="kennels-grid">
             {% for kennel in kennels %}
-                <div class="kennel-card" id="kennel-{{ kennel.id }}">
-                    <div class="kennel-header">
-                        <h3>{{ kennel.name }}</h3>
-                        <div class="kennel-actions">
-                            <span class="kennel-status {% if kennel.current_bookings %}occupied{% else %}available{% endif %}">
-                                {% if kennel.current_bookings %}Occupied{% else %}Available{% endif %}
+                <div class="kennel-card-modern" data-size="{{ kennel.size }}" data-availability="{% if kennel.current_bookings %}occupied{% else %}available{% endif %}">
+                    <div class="card-header">
+                        <div class="kennel-info">
+                            <div class="kennel-avatar">
+                                <span class="kennel-emoji">
+                                    {% if kennel.size == 'small' %}🐕
+                                    {% elif kennel.size == 'medium' %}🐩
+                                    {% else %}🦮
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="kennel-details">
+                                <h3 class="kennel-name">{{ kennel.name }}</h3>
+                                <p class="kennel-size-text">{{ kennel.get_size_display }} Kennel</p>
+                            </div>
+                        </div>
+                        <div class="availability-badge {% if kennel.current_bookings %}occupied{% else %}available{% endif %}">
+                            <span class="status-icon">
+                                {% if kennel.current_bookings %}🔴{% else %}🟢{% endif %}
                             </span>
-                            <button class="edit-btn" onclick="toggleEdit({{ kennel.id }})">✏️ Edit</button>
+                            {% if kennel.current_bookings %}Occupied{% else %}Available{% endif %}
                         </div>
                     </div>
-                    
-                    <div class="kennel-content">
-                        <div class="kennel-info">
-                            <span class="kennel-size {{ kennel.size }}">{{ kennel.get_size_display }}</span>
-                            {% if kennel.description %}
-                                <p><em>{{ kennel.description }}</em></p>
-                            {% endif %}
+
+                    <div class="card-content">
+                        {% if kennel.description %}
+                        <div class="description-section">
+                            <span class="desc-icon">📝</span>
+                            <p class="description-text">{{ kennel.description }}</p>
                         </div>
-                        
+                        {% endif %}
+
                         {% if kennel.current_bookings %}
-                            <div class="current-bookings">
-                                <h4>Current Bookings:</h4>
+                        <div class="bookings-section">
+                            <h4 class="section-title">📅 Current Bookings</h4>
+                            <div class="bookings-list">
                                 {% for booking in kennel.current_bookings %}
-                                    <div class="booking-item">
-                                        <strong>{{ booking.dog.name }}</strong> ({{ booking.dog.owner }})
-                                        <br>
-                                        <small>{{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</small>
-                                        <span class="status {{ booking.status }}">{{ booking.get_status_display }}</span>
-                                        <br>
-                                        <a href="{% url 'staff_booking_detail' booking.id %}" class="doggy-btn">Manage</a>
+                                <div class="booking-item-modern">
+                                    <div class="booking-header">
+                                        <span class="dog-name">{{ booking.dog.name }}</span>
+                                        <span class="booking-status status-{{ booking.status }}">
+                                            {{ booking.get_status_display }}
+                                        </span>
                                     </div>
+                                    <div class="booking-details">
+                                        <span class="owner-name">👤 {{ booking.dog.owner.user.first_name }} {{ booking.dog.owner.user.last_name }}</span>
+                                        <span class="booking-dates">📅 {{ booking.start_date|date:"m/d/Y" }} - {{ booking.end_date|date:"m/d/Y" }}</span>
+                                    </div>
+                                    <a href="{% url 'staff_booking_detail' booking.id %}" class="manage-btn">
+                                        <span class="btn-icon">⚙️</span>
+                                        Manage
+                                    </a>
+                                </div>
                                 {% endfor %}
                             </div>
+                        </div>
                         {% else %}
-                            <p><em>No current bookings</em></p>
+                        <div class="empty-state">
+                            <span class="empty-icon">🐾</span>
+                            <p class="empty-text">No current bookings</p>
+                        </div>
                         {% endif %}
                     </div>
-                    
+
+                    <div class="card-actions">
+                        <button class="action-btn secondary" onclick="toggleEdit({{ kennel.id }})">
+                            <span class="btn-icon">✏️</span>
+                            Edit Kennel
+                        </button>
+                    </div>
+
                     <!-- Edit Form (Hidden by default) -->
-                    <div class="edit-form" id="edit-form-{{ kennel.id }}" style="display: none;">
-                        <form method="post" action="{% url 'edit_kennel' kennel.id %}" class="kennel-edit-form">
+                    <div class="edit-form-modern" id="edit-form-{{ kennel.id }}" style="display: none;">
+                        <div class="edit-header">
+                            <h4>✏️ Edit Kennel</h4>
+                        </div>
+                        <form method="post" action="{% url 'edit_kennel' kennel.id %}" class="modern-edit-form">
                             {% csrf_token %}
-                            <div class="form-row">
+                            <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="edit-name-{{ kennel.id }}">Kennel Name:</label>
+                                    <label for="edit-name-{{ kennel.id }}" class="form-label">
+                                        <span class="label-icon">🏠</span>
+                                        Kennel Name
+                                    </label>
                                     <input type="text" name="name" id="edit-name-{{ kennel.id }}" value="{{ kennel.name }}" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="edit-size-{{ kennel.id }}">Kennel Size:</label>
+                                    <label for="edit-size-{{ kennel.id }}" class="form-label">
+                                        <span class="label-icon">📏</span>
+                                        Kennel Size
+                                    </label>
                                     <select name="size" id="edit-size-{{ kennel.id }}" required>
                                         <option value="small" {% if kennel.size == "small" %}selected{% endif %}>Small</option>
                                         <option value="medium" {% if kennel.size == "medium" %}selected{% endif %}>Medium</option>
@@ -116,12 +205,21 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="edit-description-{{ kennel.id }}">Description:</label>
+                                <label for="edit-description-{{ kennel.id }}" class="form-label">
+                                    <span class="label-icon">📝</span>
+                                    Description
+                                </label>
                                 <textarea name="description" id="edit-description-{{ kennel.id }}" rows="3">{{ kennel.description }}</textarea>
                             </div>
                             <div class="edit-actions">
-                                <button type="submit" class="doggy-btn success">Save Changes</button>
-                                <button type="button" class="doggy-btn" onclick="toggleEdit({{ kennel.id }})">Cancel</button>
+                                <button type="submit" class="action-btn primary">
+                                    <span class="btn-icon">💾</span>
+                                    Save Changes
+                                </button>
+                                <button type="button" class="action-btn secondary" onclick="toggleEdit({{ kennel.id }})">
+                                    <span class="btn-icon">❌</span>
+                                    Cancel
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -129,290 +227,717 @@
             {% endfor %}
         </div>
     {% else %}
-        <p>No kennels found matching your filters. <a href="{% url 'staff_kennel_management' %}">Clear filters</a> or add your first kennel above!</p>
+        <div class="empty-state-main">
+            <div class="empty-icon">🏠</div>
+            <h3>No Kennels Found</h3>
+            <p>There are no kennels matching your current filters.</p>
+            <div class="empty-actions">
+                <a href="{% url 'staff_kennel_management' %}" class="action-btn secondary">Show All Kennels</a>
+            </div>
+        </div>
     {% endif %}
-    
-    <div class="staff-actions">
-        <a href="{% url 'staff_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
-        <a href="{% url 'staff_booking_list' %}" class="doggy-btn">View All Bookings</a>
-        <a href="/admin/" class="doggy-btn">Admin Panel</a>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h3>🚀 Quick Actions</h3>
+        <div class="action-grid">
+            <a href="{% url 'staff_dashboard' %}" class="quick-action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-text">Dashboard</span>
+            </a>
+            <a href="{% url 'staff_booking_list' %}" class="quick-action-card">
+                <span class="action-icon">📋</span>
+                <span class="action-text">All Bookings</span>
+            </a>
+            <a href="{% url 'staff_payment_list' %}" class="quick-action-card">
+                <span class="action-icon">💰</span>
+                <span class="action-text">Payments</span>
+            </a>
+            <a href="{% url 'staff_calendar' %}" class="quick-action-card">
+                <span class="action-icon">📅</span>
+                <span class="action-text">Calendar</span>
+            </a>
+        </div>
     </div>
 </div>
 
 <style>
+/* Hero Section */
+.kennel-hero {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 2.5em;
+    color: #fff;
+    margin: 0 0 10px 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    font-weight: 800;
+}
+
+.hero-subtitle {
+    color: #fff;
+    font-size: 1.2em;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.hero-stats {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 20px;
+    z-index: 2;
+}
+
+.stat-item {
+    text-align: center;
+    color: #fff;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2em;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* Add Kennel Section */
 .add-kennel-section {
     background: #fff;
-    border: 2px solid #f7d08a;
-    border-radius: 8px;
-    padding: 15px;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+}
+
+.section-header {
     margin-bottom: 20px;
-    overflow: hidden;
 }
-.add-kennel-section h3 {
-    margin: 0 0 15px 0;
-    color: #d2691e;
+
+.section-header h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.kennel-form {
+
+.section-header p {
     margin: 0;
+    color: #666;
+    font-size: 0.95em;
 }
-.form-row {
+
+.modern-kennel-form {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 20px;
 }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
 }
-.form-group label {
-    margin-bottom: 5px;
-    color: #d2691e;
-    font-weight: bold;
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.95em;
 }
+
+.label-icon {
+    font-size: 1.1em;
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {
-    padding: 8px;
-    border: 1px solid #f7d08a;
-    border-radius: 4px;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
     font-size: 1em;
+    background: #fff;
+    color: #333;
+    transition: all 0.3s ease;
     box-sizing: border-box;
 }
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4facfe;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+}
+
 .form-group textarea {
     resize: vertical;
-    min-height: 60px;
+    min-height: 80px;
 }
-.kennel-form .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-}
-.filter-section {
+
+/* Smart Filter Section */
+.smart-filter-section {
     background: #fff;
-    border: 2px solid #f7d08a;
-    border-radius: 8px;
-    padding: 15px;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-    overflow: hidden;
 }
-.filter-section h3 {
-    margin: 0 0 15px 0;
-    color: #d2691e;
-}
-.filter-form {
+
+.filter-header h3 {
     margin: 0;
+    color: #333;
+    font-size: 1.3em;
 }
-.filter-row {
+
+.filter-stats {
+    display: flex;
+    gap: 10px;
+}
+
+.stat-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.stat-badge.active {
+    background: #4facfe;
+    color: #fff;
+}
+
+.modern-filter-form {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 15px;
-    align-items: end;
+    gap: 20px;
 }
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
 .filter-group {
     display: flex;
     flex-direction: column;
 }
-.filter-group label {
-    margin-bottom: 5px;
-    color: #d2691e;
-    font-weight: bold;
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.95em;
 }
-.filter-control {
-    padding: 8px;
-    border: 1px solid #f7d08a;
-    border-radius: 4px;
+
+.modern-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
     font-size: 1em;
     background: #fff;
     color: #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
-.filter-actions {
-    display: flex;
-    gap: 10px;
+
+.modern-select:focus {
+    outline: none;
+    border-color: #4facfe;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
 }
-.filter-actions .doggy-btn {
-    padding: 8px 15px;
-    margin: 0;
-    white-space: nowrap;
+
+/* Kennels Grid */
+.kennels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
 }
-.doggy-btn.secondary {
-    background: #6c757d;
-    border-color: #6c757d;
-}
-.kennels-list {
-    margin: 20px 0;
-}
-.kennel-card {
-    border: 2px solid #f7d08a;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
+
+.kennel-card-modern {
     background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    position: relative;
     overflow: hidden;
 }
-.kennel-header {
+
+.kennel-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-color: #4facfe;
+}
+
+.kennel-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.kennel-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.kennel-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+}
+
+.kennel-name {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+.kennel-size-text {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.availability-badge {
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.availability-badge.available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.availability-badge.occupied {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-icon {
+    font-size: 1.1em;
+}
+
+/* Card Content */
+.card-content {
+    margin-bottom: 20px;
+}
+
+.description-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.desc-icon {
+    font-size: 1.2em;
+    margin-top: 2px;
+}
+
+.description-text {
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
+}
+
+.bookings-section {
+    margin-top: 15px;
+}
+
+.section-title {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bookings-list {
+    display: grid;
+    gap: 10px;
+}
+
+.booking-item-modern {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    border-left: 4px solid #4facfe;
+}
+
+.booking-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 8px;
+}
+
+.dog-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.booking-status {
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-confirmed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-completed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.booking-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
     margin-bottom: 10px;
-    flex-wrap: wrap;
 }
-.kennel-header h3 {
+
+.owner-name, .booking-dates {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.manage-btn {
+    background: #4facfe;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.manage-btn:hover {
+    background: #3a8bfe;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.empty-icon {
+    font-size: 2em;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.empty-text {
     margin: 0;
-    color: #d2691e;
+    color: #666;
+    font-style: italic;
 }
-.kennel-actions {
+
+/* Card Actions */
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: #fff;
+    flex: 1;
+    justify-content: center;
+}
+
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+.action-btn.secondary {
+    background: #f0f0f0;
+    color: #666;
+    flex: 1;
+    justify-content: center;
+}
+
+.action-btn.secondary:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-icon {
+    font-size: 1.1em;
+}
+
+/* Edit Form */
+.edit-form-modern {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 2px solid #e0e0e0;
+}
+
+.edit-header {
+    margin-bottom: 20px;
+}
+
+.edit-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modern-edit-form {
+    display: grid;
+    gap: 20px;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Empty State Main */
+.empty-state-main {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.empty-state-main .empty-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.empty-state-main h3 {
+    color: #333;
+    margin: 0 0 10px 0;
+    font-size: 1.5em;
+}
+
+.empty-state-main p {
+    color: #666;
+    margin: 0 0 25px 0;
+    font-size: 1.1em;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+}
+
+.quick-actions h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.3em;
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.kennel-status {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    white-space: nowrap;
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
 }
-.kennel-status.available {
-    background: #d4edda;
-    color: #155724;
+
+.quick-action-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: #333;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
 }
-.kennel-status.occupied {
-    background: #f8d7da;
-    color: #721c24;
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #4facfe;
+    background: linear-gradient(135deg, #fff, #f8f9fa);
 }
-.kennel-info {
-    margin-bottom: 15px;
-}
-.kennel-size {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-.kennel-size.small {
-    background: #e3f2fd;
-    color: #1565c0;
-}
-.kennel-size.medium {
-    background: #f3e5f5;
-    color: #7b1fa2;
-}
-.kennel-size.large {
-    background: #fff3e0;
-    color: #ef6c00;
-}
-.edit-btn {
-    background: #f7d08a;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8em;
-    color: #d2691e;
-}
-.edit-btn:hover {
-    background: #d2691e;
-    color: white;
-}
-.kennel-content {
-    margin-bottom: 15px;
-}
-.edit-form {
-    border-top: 1px solid #f7d08a;
-    padding-top: 15px;
-    margin-top: 15px;
-}
-.kennel-edit-form {
-    margin: 0;
-}
-.edit-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-.edit-actions .doggy-btn {
-    flex: 1;
-    box-sizing: border-box;
-    margin: 0;
-}
-.doggy-btn.success {
-    background: #28a745;
-    border-color: #28a745;
-}
-.current-bookings {
-    margin-top: 15px;
-}
-.current-bookings h4 {
-    margin: 0 0 10px 0;
-    color: #d2691e;
-}
-.booking-item {
-    border-bottom: 1px solid #f7d08a;
-    padding: 10px 0;
+
+.action-icon {
+    font-size: 2em;
+    display: block;
     margin-bottom: 10px;
-    word-wrap: break-word;
 }
-.booking-item:last-child {
-    border-bottom: none;
+
+.action-text {
+    font-weight: 600;
+    font-size: 0.95em;
 }
-.booking-item .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 5px;
-}
-.status {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    white-space: nowrap;
-}
-.status.pending {
-    background: #fff3cd;
-    color: #856404;
-}
-.status.confirmed {
-    background: #d4edda;
-    color: #155724;
-}
-.status.completed {
-    background: #d1ecf1;
-    color: #0c5460;
-}
-.status.cancelled {
-    background: #f8d7da;
-    color: #721c24;
-}
-.staff-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    width: 100%;
-}
-.staff-actions .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .form-row {
+    .hero-title {
+        font-size: 2em;
+    }
+    
+    .kennels-grid {
         grid-template-columns: 1fr;
     }
-    .filter-row {
+    
+    .form-grid {
         grid-template-columns: 1fr;
     }
-    .filter-actions {
-        flex-direction: column;
+    
+    .filter-grid {
+        grid-template-columns: 1fr;
     }
-    .kennel-actions {
+    
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .hero-stats {
+        position: static;
+        margin-top: 20px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .kennel-hero {
+        padding: 20px;
+    }
+    
+    .card-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 5px;
+        gap: 15px;
     }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+    
     .edit-actions {
         flex-direction: column;
     }
@@ -422,14 +947,17 @@
 <script>
 function toggleEdit(kennelId) {
     const editForm = document.getElementById(`edit-form-${kennelId}`);
-    const kennelContent = document.querySelector(`#kennel-${kennelId} .kennel-content`);
+    const kennelContent = document.querySelector(`#kennel-${kennelId} .card-content`);
+    const cardActions = document.querySelector(`#kennel-${kennelId} .card-actions`);
     
     if (editForm.style.display === 'none') {
         editForm.style.display = 'block';
         kennelContent.style.display = 'none';
+        cardActions.style.display = 'none';
     } else {
         editForm.style.display = 'none';
         kennelContent.style.display = 'block';
+        cardActions.style.display = 'flex';
     }
 }
 </script>
