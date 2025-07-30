@@ -1,77 +1,396 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>🐕 Book Boarding Stay</h2>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .form-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #666;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 16px;
+        background: white;
+        color: #333;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .date-input-container {
+        display: flex;
+        gap: 10px;
+    }
+
+    .date-picker-btn {
+        padding: 12px 16px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+    }
+
+    .date-picker-btn:hover {
+        background: #5a6fd8;
+        transform: translateY(-1px);
+    }
+
+    .size-info, .kennel-info {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 8px;
+        font-size: 0.9em;
+        color: #666;
+        line-height: 1.4;
+    }
+
+    .size-info strong, .kennel-info strong {
+        color: #333;
+    }
+
+    .submit-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1.1em;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .booking-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Date Picker Modal Styles */
+    .date-picker-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .date-picker-content {
+        background: rgba(255, 255, 255, 0.95);
+        margin: 5% auto;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .date-picker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .date-picker-header button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+    }
+
+    .date-picker-header button:hover {
+        background: #5a6fd8;
+    }
+
+    .date-picker-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .date-picker-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+    }
+
+    .date-picker-day {
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .date-picker-day:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    .date-picker-day.selected {
+        background: #667eea;
+        color: white;
+    }
+
+    .date-picker-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .date-picker-footer button {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .date-picker-footer button:first-child {
+        background: #6c757d;
+        color: white;
+    }
+
+    .date-picker-footer button:last-child {
+        background: #667eea;
+        color: white;
+    }
+
+    .date-picker-footer button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .booking-actions {
+            flex-direction: column;
+        }
+        
+        .date-input-container {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">🐕 Book Boarding Stay</h1>
+        <p class="dashboard-subtitle">Schedule your dog's boarding reservation</p>
+    </div>
     
-    <form method="post" class="booking-form">
-        {% csrf_token %}
-        <div class="form-section">
-            <label for="{{ form.dog.id_for_label }}">Select Dog:</label>
-            {{ form.dog }}
+    <div class="form-section">
+        <div class="section-title">
+            <span>📋</span>
+            Booking Details
         </div>
-        <div class="form-section">
-            <label for="{{ form.dog_size.id_for_label }}">Dog Size:</label>
-            {{ form.dog_size }}
-            <small class="size-info">
-                <strong>Size Guide:</strong> Small dogs can use any kennel. Medium dogs need medium or large kennels. Large dogs need large kennels only.
-            </small>
-        </div>
-        <div class="form-section">
-            <label for="{{ form.start_date.id_for_label }}">Check-in Date:</label>
-            <div class="date-input-container">
-                {{ form.start_date }}
-                <button type="button" class="date-picker-btn" onclick="openDatePicker('{{ form.start_date.id_for_label }}')">📅</button>
+        
+        <form method="post" class="booking-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.dog.id_for_label }}" class="form-label">Select Dog</label>
+                {{ form.dog }}
             </div>
-        </div>
-        <div class="form-section">
-            <label for="{{ form.end_date.id_for_label }}">Check-out Date:</label>
-            <div class="date-input-container">
-                {{ form.end_date }}
-                <button type="button" class="date-picker-btn" onclick="openDatePicker('{{ form.end_date.id_for_label }}')">📅</button>
+            <div class="form-group">
+                <label for="{{ form.dog_size.id_for_label }}" class="form-label">Dog Size</label>
+                {{ form.dog_size }}
+                <div class="size-info">
+                    <strong>Size Guide:</strong> Small dogs can use any kennel. Medium dogs need medium or large kennels. Large dogs need large kennels only.
+                </div>
             </div>
-        </div>
-        <div class="form-section">
-            <label for="kennel">Select Kennel (Optional):</label>
-            <select name="kennel" id="kennel" class="form-control">
-                <option value="">-- No kennel assignment --</option>
-                {% for kennel in all_kennels %}
-                    <option value="{{ kennel.id }}" 
-                            {% if kennel in available_kennels %}class="available"{% endif %}>
-                        {{ kennel.name }} ({{ kennel.get_size_display }}) - {{ kennel.description }}
-                        {% if kennel not in available_kennels and available_kennels %}
-                            {% if kennel.size == 'small' and form.dog.value.size == 'large' %}
-                                (Too small for your dog)
-                            {% elif kennel.size == 'small' and form.dog.value.size == 'medium' %}
-                                (Too small for your dog)
-                            {% elif kennel.size == 'medium' and form.dog.value.size == 'large' %}
-                                (Too small for your dog)
-                            {% else %}
-                                (Not available for selected dates)
+            <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}" class="form-label">Check-in Date</label>
+                <div class="date-input-container">
+                    {{ form.start_date }}
+                    <button type="button" class="date-picker-btn" onclick="openDatePicker('{{ form.start_date.id_for_label }}')">📅</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}" class="form-label">Check-out Date</label>
+                <div class="date-input-container">
+                    {{ form.end_date }}
+                    <button type="button" class="date-picker-btn" onclick="openDatePicker('{{ form.end_date.id_for_label }}')">📅</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="kennel" class="form-label">Select Kennel (Optional)</label>
+                <select name="kennel" id="kennel" class="form-control">
+                    <option value="">-- No kennel assignment --</option>
+                    {% for kennel in all_kennels %}
+                        <option value="{{ kennel.id }}" 
+                                {% if kennel in available_kennels %}class="available"{% endif %}>
+                            {{ kennel.name }} ({{ kennel.get_size_display }}) - {{ kennel.description }}
+                            {% if kennel not in available_kennels and available_kennels %}
+                                {% if kennel.size == 'small' and form.dog.value.size == 'large' %}
+                                    (Too small for your dog)
+                                {% elif kennel.size == 'small' and form.dog.value.size == 'medium' %}
+                                    (Too small for your dog)
+                                {% elif kennel.size == 'medium' and form.dog.value.size == 'large' %}
+                                    (Too small for your dog)
+                                {% else %}
+                                    (Not available for selected dates)
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    </option>
-                {% endfor %}
-            </select>
-            <small class="kennel-info">
-                {% if available_kennels %}
-                    Available kennels for your selected dates and dog size are highlighted.
-                    <br><strong>Size Guide:</strong> Small dogs can use any kennel. Medium dogs need medium or large kennels. Large dogs need large kennels only.
-                {% else %}
-                    Select dates and a dog to see available kennels.
-                {% endif %}
-            </small>
-        </div>
-        <div class="form-section">
-            <label for="{{ form.notes.id_for_label }}">Special Instructions:</label>
-            {{ form.notes }}
-        </div>
-        <button type="submit" class="doggy-btn">Book Stay</button>
-    </form>
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="kennel-info">
+                    {% if available_kennels %}
+                        Available kennels for your selected dates and dog size are highlighted.
+                        <br><strong>Size Guide:</strong> Small dogs can use any kennel. Medium dogs need medium or large kennels. Large dogs need large kennels only.
+                    {% else %}
+                        Select dates and a dog to see available kennels.
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Special Instructions</label>
+                {{ form.notes }}
+            </div>
+            <button type="submit" class="submit-btn">Book Stay</button>
+        </form>
+    </div>
     
     <div class="booking-actions">
-        <a href="{% url 'booking_calendar' %}" class="doggy-btn">View Calendar</a>
-        <a href="{% url 'booking_list' %}" class="doggy-btn">My Bookings</a>
-        <a href="{% url 'owner_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
+        <a href="{% url 'booking_calendar' %}" class="action-btn">View Calendar</a>
+        <a href="{% url 'booking_list' %}" class="action-btn">My Bookings</a>
+        <a href="{% url 'owner_dashboard' %}" class="action-btn">Back to Dashboard</a>
     </div>
 </div>
 
