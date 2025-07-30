@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Setup - Dog Boarding</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .setup-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .setup-container::before {
+            content: '🔧';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 100px;
+            opacity: 0.1;
+            transform: rotate(15deg);
+        }
+
+        .setup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .setup-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .setup-subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .setup-description {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .setup-description h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .setup-description ul {
+            color: #666;
+            line-height: 1.6;
+            padding-left: 20px;
+        }
+
+        .setup-description li {
+            margin-bottom: 5px;
+        }
+
+        .setup-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .setup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .setup-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box h4 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .home-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .home-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .home-link a:hover {
+            text-decoration: underline;
+        }
+
+        .credentials-box {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1976d2;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .credentials-box h4 {
+            margin-bottom: 10px;
+            color: #1976d2;
+        }
+
+        .credentials-box code {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        @media (max-width: 480px) {
+            .setup-container {
+                padding: 20px;
+            }
+            
+            .setup-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1 class="setup-title">🔧 Database Setup</h1>
+            <p class="setup-subtitle">Initialize your dog boarding system database</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="setup-description">
+            <h3>What this will do:</h3>
+            <ul>
+                <li>✅ Create all necessary database tables</li>
+                <li>✅ Set up Django authentication system</li>
+                <li>✅ Create a default admin user</li>
+                <li>✅ Add sample kennels for testing</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ Important Note</h4>
+            <p>This will create a default admin user with these credentials:</p>
+            <p><strong>Username:</strong> <code>admin</code></p>
+            <p><strong>Password:</strong> <code>admin123456</code></p>
+            <p><em>Please change these credentials after first login!</em></p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="setup-btn" id="setupBtn">
+                🚀 Initialize Database
+            </button>
+        </form>
+
+        <div class="credentials-box">
+            <h4>📋 After Setup - Login Credentials:</h4>
+            <p><strong>Admin Panel:</strong> <code>/admin/</code></p>
+            <p><strong>Staff Dashboard:</strong> <code>/staff/login/</code></p>
+            <p><strong>Owner Registration:</strong> <code>/register/</code></p>
+        </div>
+
+        <div class="home-link">
+            <a href="{% url 'home' %}">← Back to Homepage</a>
+        </div>
+    </div>
+
+    <script>
+        // Add some nice animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.setup-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.5s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+
+            // Form submission animation
+            const form = document.querySelector('form');
+            const setupBtn = document.querySelector('#setupBtn');
+            
+            form.addEventListener('submit', function() {
+                setupBtn.textContent = '🔄 Setting up database...';
+                setupBtn.disabled = true;
+                setupBtn.style.opacity = '0.7';
+            });
+        });
+    </script>
+</body>
+</html> 

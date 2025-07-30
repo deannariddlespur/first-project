@@ -63,13 +63,65 @@ def create_admin_user(request):
     else:
         form = AdminUserForm()
     
-    # Get list of existing users
-    existing_users = User.objects.all().order_by('username')
+    # Get list of existing users (with error handling)
+    try:
+        existing_users = User.objects.all().order_by('username')
+    except Exception as e:
+        existing_users = []
+        messages.error(request, f"Database error: {str(e)}. Please run migrations first.")
     
     return render(request, 'core/create_admin_user.html', {
         'form': form,
         'existing_users': existing_users
     })
+
+def setup_database(request):
+    """Simple view to run database setup"""
+    from django.core.management import execute_from_command_line
+    import sys
+    
+    if request.method == 'POST':
+        try:
+            # Run migrations
+            execute_from_command_line(['manage.py', 'migrate'])
+            messages.success(request, "✅ Database migrations completed successfully!")
+            
+            # Create a default admin user
+            if not User.objects.filter(username='admin').exists():
+                admin_user = User.objects.create_user(
+                    username='admin',
+                    email='admin@dogboarding.com',
+                    password='admin123456',
+                    first_name='Admin',
+                    last_name='User',
+                    is_staff=True,
+                    is_superuser=True
+                )
+                messages.success(request, f"✅ Default admin user created: username='admin', password='admin123456'")
+            
+            # Create some sample kennels
+            from .models import Kennel
+            if not Kennel.objects.exists():
+                kennel_data = [
+                    {'name': 'Kennel 001', 'description': 'Small kennel for small dogs', 'size': 'small'},
+                    {'name': 'Kennel 002', 'description': 'Medium kennel for medium dogs', 'size': 'medium'},
+                    {'name': 'Kennel 003', 'description': 'Large kennel for large dogs', 'size': 'large'},
+                    {'name': 'Kennel 004', 'description': 'Small kennel for small dogs', 'size': 'small'},
+                    {'name': 'Kennel 005', 'description': 'Medium kennel for medium dogs', 'size': 'medium'},
+                    {'name': 'Kennel 006', 'description': 'Large kennel for large dogs', 'size': 'large'},
+                ]
+                
+                for kennel_info in kennel_data:
+                    Kennel.objects.create(**kennel_info)
+                
+                messages.success(request, "✅ Sample kennels created!")
+            
+            return redirect('setup_database')
+            
+        except Exception as e:
+            messages.error(request, f"Error setting up database: {str(e)}")
+    
+    return render(request, 'core/setup_database.html')
 
 class KennelForm(forms.ModelForm):
     class Meta:
