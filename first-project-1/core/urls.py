@@ -10,6 +10,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('create-admin/', views.create_admin_user, name='create_admin_user'),
     path('setup-database/', views.setup_database, name='setup_database'),
+    path('debug-database/', views.debug_database, name='debug_database'),
     path('dashboard/', views.owner_dashboard, name='owner_dashboard'),
     path('dogs/add/', views.add_dog, name='add_dog'),
     path('dogs/<int:dog_id>/edit/', views.edit_dog, name='edit_dog'),

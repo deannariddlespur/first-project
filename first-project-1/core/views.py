@@ -33,6 +33,36 @@ def logout_view(request):
     messages.success(request, "✅ You have been successfully logged out!")
     return redirect('home')
 
+def debug_database(request):
+    """Debug view to check database state"""
+    from django.contrib.auth.models import User
+    from .models import Kennel
+    
+    try:
+        # Check users
+        users = User.objects.all()
+        user_count = users.count()
+        
+        # Check kennels
+        kennels = Kennel.objects.all()
+        kennel_count = kennels.count()
+        
+        # Check if admin exists
+        admin_exists = User.objects.filter(username='admin').exists()
+        
+        context = {
+            'user_count': user_count,
+            'kennel_count': kennel_count,
+            'admin_exists': admin_exists,
+            'users': list(users.values('username', 'email', 'is_staff', 'is_superuser')),
+            'kennels': list(kennels.values('name', 'size', 'is_available')),
+        }
+        
+        return render(request, 'core/debug_database.html', context)
+        
+    except Exception as e:
+        return render(request, 'core/debug_database.html', {'error': str(e)})
+
 class AdminUserForm(forms.Form):
     username = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'placeholder': 'Enter username'}))
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Enter email'}))
