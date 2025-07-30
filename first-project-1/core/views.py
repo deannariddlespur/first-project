@@ -233,6 +233,63 @@ def setup_database(request):
                             FOREIGN KEY (kennel_id) REFERENCES core_kennel (id)
                         )
                     """)
+                    
+                    # Create core_payment table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_payment (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            booking_id INTEGER NOT NULL UNIQUE,
+                            amount DECIMAL(10,2) NOT NULL,
+                            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+                            payment_method VARCHAR(20),
+                            paid_date DATETIME(6),
+                            notes TEXT,
+                            created_at DATETIME(6) NOT NULL,
+                            FOREIGN KEY (booking_id) REFERENCES core_booking (id)
+                        )
+                    """)
+                    
+                    # Create core_dailylog table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_dailylog (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            booking_id INTEGER NOT NULL,
+                            date DATE NOT NULL,
+                            feeding TEXT,
+                            medication TEXT,
+                            exercise TEXT,
+                            notes TEXT,
+                            FOREIGN KEY (booking_id) REFERENCES core_booking (id)
+                        )
+                    """)
+                    
+                    # Create core_staffnote table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_staffnote (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            booking_id INTEGER NOT NULL,
+                            staff_member_id INTEGER NOT NULL,
+                            note TEXT NOT NULL,
+                            picture VARCHAR(100),
+                            created_at DATETIME(6) NOT NULL,
+                            FOREIGN KEY (booking_id) REFERENCES core_booking (id),
+                            FOREIGN KEY (staff_member_id) REFERENCES auth_user (id)
+                        )
+                    """)
+                    
+                    # Create core_facilityavailability table if it doesn't exist
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS core_facilityavailability (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            date DATE NOT NULL,
+                            type VARCHAR(20) NOT NULL,
+                            title VARCHAR(100) NOT NULL,
+                            description TEXT,
+                            created_by_id INTEGER NOT NULL,
+                            created_at DATETIME(6) NOT NULL,
+                            FOREIGN KEY (created_by_id) REFERENCES auth_user (id)
+                        )
+                    """)
                 
                 messages.success(request, "✅ Database tables created!")
                     
