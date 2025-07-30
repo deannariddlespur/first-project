@@ -199,23 +199,25 @@ def setup_database(request):
                     # Check if admin user exists
                     cursor.execute("SELECT id FROM auth_user WHERE username = 'admin'")
                     if not cursor.fetchone():
-                        # Create admin user
+                        # Create admin user with simpler approach
+                        username = 'admin'
+                        password = make_password('admin123456')
+                        email = 'admin@dogboarding.com'
+                        first_name = 'Admin'
+                        last_name = 'User'
+                        is_staff = 1
+                        is_superuser = 1
+                        is_active = 1
+                        date_joined = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                        
                         cursor.execute("""
                             INSERT INTO auth_user (
                                 username, password, email, first_name, last_name,
                                 is_staff, is_superuser, is_active, date_joined
                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (
-                            'admin',
-                            make_password('admin123456'),
-                            'admin@dogboarding.com',
-                            'Admin',
-                            'User',
-                            1,  # is_staff
-                            1,  # is_superuser
-                            1,  # is_active
-                            timezone.now().isoformat()
-                        ))
+                        """, (username, password, email, first_name, last_name, 
+                              is_staff, is_superuser, is_active, date_joined))
+                        
                         messages.success(request, "✅ Admin user created: admin/admin123456")
                     else:
                         messages.info(request, "ℹ️ Admin user already exists")
