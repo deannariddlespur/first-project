@@ -1,23 +1,280 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>💰 Payment Management</h2>
-    
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .filter-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .filter-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-controls {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .filter-group label {
+        color: #666;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .filter-control {
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 16px;
+        background: white;
+        color: #333;
+        min-width: 200px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .payments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .payment-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .payment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .payment-header h3 {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+
+    .payment-status {
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.85em;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .payment-status.pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .payment-status.paid {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .payment-status.overdue {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .payment-status.cancelled {
+        background: #e2e3e5;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
+    .payment-details {
+        margin-bottom: 20px;
+    }
+
+    .payment-details p {
+        margin: 10px 0;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .payment-details strong {
+        color: #333;
+        font-weight: 600;
+    }
+
+    .payment-actions {
+        text-align: center;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .staff-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-size: 1.1em;
+    }
+
+    .empty-state p {
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .payments-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .payment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .staff-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">💰 Payment Management</h1>
+        <p class="dashboard-subtitle">Track and manage all payment transactions</p>
+    </div>
+
+    <!-- Filter Section -->
     <div class="filter-section">
-        <form method="get" class="filter-form">
-            <label for="status-filter">Filter by Status:</label>
-            <select name="status" id="status-filter" class="filter-control" onchange="this.form.submit()">
-                {% for value, label in status_choices %}
-                    <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
+        <div class="filter-title">
+            <span>🔍</span>
+            Filter Payments
+        </div>
+        <form method="get" class="filter-controls">
+            <div class="filter-group">
+                <label for="status-filter">Payment Status</label>
+                <select name="status" id="status-filter" class="filter-control" onchange="this.form.submit()">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
         </form>
     </div>
-    
+
+    <!-- Payments Display -->
     {% if payments %}
-        <div class="payments-list">
+        <div class="payments-grid">
             {% for payment in payments %}
                 <div class="payment-card">
                     <div class="payment-header">
@@ -32,26 +289,29 @@
                         {% if payment.payment_method %}
                             <p><strong>Payment Method:</strong> {{ payment.get_payment_method_display }}</p>
                         {% endif %}
-                                        {% if payment.paid_date %}
-                    <p><strong>Paid Date:</strong> {{ payment.paid_date|date:"m/d/Y" }}</p>
-                {% endif %}
+                        {% if payment.paid_date %}
+                            <p><strong>Paid Date:</strong> {{ payment.paid_date|date:"m/d/Y" }}</p>
+                        {% endif %}
                         {% if payment.notes %}
                             <p><strong>Notes:</strong> {{ payment.notes }}</p>
                         {% endif %}
                     </div>
                     <div class="payment-actions">
-                        <a href="{% url 'staff_payment_detail' payment.id %}" class="doggy-btn">Manage Payment</a>
+                        <a href="{% url 'staff_payment_detail' payment.id %}" class="action-btn">Manage Payment</a>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>No payments found for the selected filter.</p>
+        <div class="empty-state">
+            <p>No payments found for the selected filter.</p>
+        </div>
     {% endif %}
-    
+
+    <!-- Navigation -->
     <div class="staff-actions">
-        <a href="{% url 'staff_dashboard' %}" class="doggy-btn">Back to Dashboard</a>
-        <a href="{% url 'staff_booking_list' %}" class="doggy-btn">View All Bookings</a>
+        <a href="{% url 'staff_dashboard' %}" class="action-btn">Back to Dashboard</a>
+        <a href="{% url 'staff_booking_list' %}" class="action-btn">View All Bookings</a>
     </div>
 </div>
 
@@ -99,118 +359,6 @@
     border: 2px solid #f7d08a;
     border-radius: 12px;
     padding: 20px;
-    margin-bottom: 20px;
-    background: #fff;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.payment-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-.payment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.payment-header h3 {
-    margin: 0;
-    color: #d2691e;
-    font-size: 1.3em;
-    font-weight: bold;
-}
-.payment-status {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: bold;
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.payment-status.pending {
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
-}
-.payment-status.paid {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-.payment-status.overdue {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.payment-status.cancelled {
-    background: #e2e3e5;
-    color: #383d41;
-    border: 1px solid #d6d8db;
-}
-.payment-details {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 15px 0;
-}
-.payment-details p {
-    margin: 8px 0;
-    word-wrap: break-word;
-    line-height: 1.5;
-}
-.payment-details strong {
-    color: #d2691e;
-}
-.payment-actions {
-    margin-top: 15px;
-}
-.payment-actions .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.staff-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 30px;
-    width: 100%;
-}
-.staff-actions .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 15px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .filter-form {
-        flex-direction: column;
-        align-items: stretch;
     }
-    .filter-control {
-        min-width: auto;
-    }
-    .payment-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .payment-status {
-        align-self: flex-start;
-    }
-}
 </style>
 {% endblock %} 
