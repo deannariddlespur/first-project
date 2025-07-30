@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from core import views
+from .admin import dogboarding_admin
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -27,5 +28,7 @@ urlpatterns = [
     path('staff/payments/<int:payment_id>/', views.staff_payment_detail, name='staff_payment_detail'),
     path('staff/calendar/', views.staff_calendar, name='staff_calendar'),
     path('staff/calendar/delete/<int:entry_id>/', views.delete_availability_entry, name='delete_availability_entry'),
+    # Custom Admin URL
+    path('admin-dashboard/', dogboarding_admin.urls),
     
 ] 
