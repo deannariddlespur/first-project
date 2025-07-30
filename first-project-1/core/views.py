@@ -191,68 +191,57 @@ def setup_database(request):
                 messages.error(request, f"❌ Table creation failed: {str(table_error)}")
                 return render(request, 'core/setup_database.html')
             
-            # Step 3: Create admin user using raw SQL
+            # Step 3: Create admin user using Django ORM
             try:
                 messages.info(request, "👤 Creating admin user...")
                 
-                with connection.cursor() as cursor:
-                    # Check if admin user exists
-                    cursor.execute("SELECT id FROM auth_user WHERE username = 'admin'")
-                    if not cursor.fetchone():
-                        # Create admin user with simpler approach
-                        username = 'admin'
-                        password = make_password('admin123456')
-                        email = 'admin@dogboarding.com'
-                        first_name = 'Admin'
-                        last_name = 'User'
-                        is_staff = 1
-                        is_superuser = 1
-                        is_active = 1
-                        date_joined = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        cursor.execute("""
-                            INSERT INTO auth_user (
-                                username, password, email, first_name, last_name,
-                                is_staff, is_superuser, is_active, date_joined
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (username, password, email, first_name, last_name, 
-                              is_staff, is_superuser, is_active, date_joined))
-                        
-                        messages.success(request, "✅ Admin user created: admin/admin123456")
-                    else:
-                        messages.info(request, "ℹ️ Admin user already exists")
+                from django.contrib.auth.models import User
+                
+                # Check if admin user exists
+                if not User.objects.filter(username='admin').exists():
+                    # Create admin user using Django's ORM
+                    admin_user = User.objects.create_user(
+                        username='admin',
+                        email='admin@dogboarding.com',
+                        password='admin123456',
+                        first_name='Admin',
+                        last_name='User',
+                        is_staff=True,
+                        is_superuser=True
+                    )
+                    
+                    messages.success(request, "✅ Admin user created: admin/admin123456")
+                else:
+                    messages.info(request, "ℹ️ Admin user already exists")
                 
             except Exception as user_error:
                 messages.error(request, f"❌ User creation failed: {str(user_error)}")
                 return render(request, 'core/setup_database.html')
             
-            # Step 4: Create sample kennels using raw SQL
+            # Step 4: Create sample kennels using Django ORM
             try:
                 messages.info(request, "🏠 Creating sample kennels...")
                 
-                with connection.cursor() as cursor:
-                    # Check if kennels exist
-                    cursor.execute("SELECT id FROM core_kennel LIMIT 1")
-                    if not cursor.fetchone():
-                        # Create sample kennels
-                        kennel_data = [
-                            ('Small Kennel A', 'Cozy kennel for small dogs', 'small'),
-                            ('Small Kennel B', 'Cozy kennel for small dogs', 'small'),
-                            ('Medium Kennel A', 'Comfortable kennel for medium dogs', 'medium'),
-                            ('Medium Kennel B', 'Comfortable kennel for medium dogs', 'medium'),
-                            ('Large Kennel A', 'Spacious kennel for large dogs', 'large'),
-                            ('Large Kennel B', 'Spacious kennel for large dogs', 'large'),
-                        ]
-                        
-                        for name, description, size in kennel_data:
-                            cursor.execute("""
-                                INSERT INTO core_kennel (name, description, size, is_available)
-                                VALUES (?, ?, ?, ?)
-                            """, [name, description, size, 1])
-                        
-                        messages.success(request, "✅ Sample kennels created!")
-                    else:
-                        messages.info(request, "ℹ️ Kennels already exist")
+                from .models import Kennel
+                
+                # Check if kennels exist
+                if not Kennel.objects.exists():
+                    # Create sample kennels
+                    kennel_data = [
+                        {'name': 'Small Kennel A', 'description': 'Cozy kennel for small dogs', 'size': 'small'},
+                        {'name': 'Small Kennel B', 'description': 'Cozy kennel for small dogs', 'size': 'small'},
+                        {'name': 'Medium Kennel A', 'description': 'Comfortable kennel for medium dogs', 'size': 'medium'},
+                        {'name': 'Medium Kennel B', 'description': 'Comfortable kennel for medium dogs', 'size': 'medium'},
+                        {'name': 'Large Kennel A', 'description': 'Spacious kennel for large dogs', 'size': 'large'},
+                        {'name': 'Large Kennel B', 'description': 'Spacious kennel for large dogs', 'size': 'large'},
+                    ]
+                    
+                    for kennel_info in kennel_data:
+                        Kennel.objects.create(**kennel_info)
+                    
+                    messages.success(request, "✅ Sample kennels created!")
+                else:
+                    messages.info(request, "ℹ️ Kennels already exist")
                 
             except Exception as kennel_error:
                 messages.error(request, f"❌ Kennel creation failed: {str(kennel_error)}")
