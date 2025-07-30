@@ -470,10 +470,18 @@ class OwnerRegistrationForm(forms.ModelForm):
     email = forms.EmailField()
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
+    phone = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'placeholder': '(555) 123-4567',
+            'pattern': '[\\(]?[0-9]{3}[\\)]?[\\s-]?[0-9]{3}[\\s-]?[0-9]{4}',
+            'title': 'Please enter a valid phone number: (555) 123-4567'
+        })
+    )
 
     class Meta:
         model = Owner
-        fields = ['phone', 'address']
+        fields = ['address']
 
     def save(self, commit=True):
         user = User.objects.create_user(

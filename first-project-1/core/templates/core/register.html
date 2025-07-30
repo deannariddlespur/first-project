@@ -339,6 +339,26 @@
 </div>
 
 <script>
+    // Phone number formatting function
+    function formatPhoneNumber(input) {
+        // Remove all non-digits
+        let value = input.value.replace(/\D/g, '');
+        
+        // Limit to 10 digits
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        
+        // Format the number
+        if (value.length >= 6) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+        } else if (value.length >= 3) {
+            value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+        }
+        
+        input.value = value;
+    }
+    
     // Add form validation and styling
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('registration-form');
@@ -347,6 +367,17 @@
         // Add CSS classes to form inputs
         inputs.forEach(input => {
             input.classList.add('form-input');
+            
+            // Add phone number formatting for phone field
+            if (input.name === 'phone') {
+                input.addEventListener('input', function() {
+                    formatPhoneNumber(this);
+                });
+                
+                input.addEventListener('blur', function() {
+                    formatPhoneNumber(this);
+                });
+            }
             
             // Add error styling on blur if field is invalid
             input.addEventListener('blur', function() {
