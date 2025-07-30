@@ -68,83 +68,54 @@ def debug_database(request):
         return render(request, 'core/debug_database.html', context)
 
 def fix_session_table(request):
-    """Quick fix for missing django_session table"""
-    from django.db import connection
+    """Quick fix for missing database tables"""
+    from django.core.management import call_command
+    from django.contrib.auth.models import User
     
     if request.method == 'POST':
         try:
-            with connection.cursor() as cursor:
-                # Create django_session table
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS django_session (
-                        session_key VARCHAR(40) PRIMARY KEY,
-                        session_data TEXT NOT NULL,
-                        expire_date DATETIME(6) NOT NULL
-                    )
-                """)
-                
-                # Create django_content_type table if missing
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS django_content_type (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        app_label VARCHAR(100) NOT NULL,
-                        model VARCHAR(100) NOT NULL,
-                        UNIQUE(app_label, model)
-                    )
-                """)
-                
-                # Create django_admin_log table if missing
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS django_admin_log (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        action_time DATETIME(6) NOT NULL,
-                        object_id TEXT,
-                        object_repr VARCHAR(200) NOT NULL,
-                        action_flag SMALLINT UNSIGNED NOT NULL,
-                        change_message TEXT NOT NULL,
-                        content_type_id INTEGER,
-                        user_id INTEGER NOT NULL,
-                        FOREIGN KEY (content_type_id) REFERENCES django_content_type (id),
-                        FOREIGN KEY (user_id) REFERENCES auth_user (id)
-                    )
-                """)
-                
-                # Create auth_user table if missing
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS auth_user (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        password VARCHAR(128) NOT NULL,
-                        last_login DATETIME(6),
-                        is_superuser BOOLEAN NOT NULL,
-                        username VARCHAR(150) UNIQUE NOT NULL,
-                        first_name VARCHAR(150) NOT NULL,
-                        last_name VARCHAR(150) NOT NULL,
-                        email VARCHAR(254) NOT NULL,
-                        is_staff BOOLEAN NOT NULL,
-                        is_active BOOLEAN NOT NULL,
-                        date_joined DATETIME(6) NOT NULL
-                    )
-                """)
-                
-                # Create admin user if it doesn't exist
-                from django.contrib.auth.models import User
-                if not User.objects.filter(username='admin').exists():
-                    User.objects.create_user(
-                        username='admin',
-                        email='admin@dogboarding.com',
-                        password='admin123456',
-                        first_name='Admin',
-                        last_name='User',
-                        is_staff=True,
-                        is_superuser=True
-                    )
-                
-            messages.success(request, "✅ Session table and essential Django tables created!")
+            # Run all Django migrations to create all tables
+            call_command('migrate')
+            
+            # Create admin user if it doesn't exist
+            if not User.objects.filter(username='admin').exists():
+                User.objects.create_user(
+                    username='admin',
+                    email='admin@dogboarding.com',
+                    password='admin123456',
+                    first_name='Admin',
+                    last_name='User',
+                    is_staff=True,
+                    is_superuser=True
+                )
+            
+            # Create sample kennels if they don't exist
+            from .models import Kennel
+            kennel_sizes = [
+                ('Small Kennel A', 'small', 'Cozy kennel for small dogs'),
+                ('Small Kennel B', 'small', 'Cozy kennel for small dogs'),
+                ('Medium Kennel A', 'medium', 'Comfortable kennel for medium dogs'),
+                ('Medium Kennel B', 'medium', 'Comfortable kennel for medium dogs'),
+                ('Large Kennel A', 'large', 'Spacious kennel for large dogs'),
+                ('Large Kennel B', 'large', 'Spacious kennel for large dogs'),
+            ]
+            
+            for name, size, description in kennel_sizes:
+                Kennel.objects.get_or_create(
+                    name=name,
+                    defaults={
+                        'size': size,
+                        'description': description
+                    }
+                )
+            
+            messages.success(request, "✅ All database tables created successfully!")
             messages.success(request, "🔑 Admin user: admin/admin123456")
+            messages.success(request, "🏠 6 kennels created for bookings")
             return redirect('home')
             
         except Exception as e:
-            messages.error(request, f"❌ Error creating session table: {str(e)}")
+            messages.error(request, f"❌ Error setting up database: {str(e)}")
     
     return render(request, 'core/fix_session.html')
 
