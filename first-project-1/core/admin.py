@@ -36,13 +36,13 @@ class DogAdmin(admin.ModelAdmin):
     photo_display.short_description = "Photo"
 
 class KennelAdmin(admin.ModelAdmin):
-    list_display = ['name', 'size', 'description', 'is_available']
-    list_filter = ['size', 'is_available']
+    list_display = ['name', 'size', 'description', 'availability_status']
+    list_filter = ['size']
     search_fields = ['name', 'description']
     
-    def is_available(self, obj):
+    def availability_status(self, obj):
         return "✅ Available" if obj.is_available_for_dates() else "❌ Occupied"
-    is_available.short_description = "Status"
+    availability_status.short_description = "Status"
 
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['booking', 'amount', 'payment_method', 'status', 'created_at']
@@ -51,10 +51,14 @@ class PaymentAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
 
 class StaffNoteAdmin(admin.ModelAdmin):
-    list_display = ['booking', 'staff_member', 'note_type', 'created_at']
-    list_filter = ['note_type', 'created_at']
-    search_fields = ['content', 'booking__dog__name']
+    list_display = ['booking', 'staff_member', 'note_preview', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['note', 'booking__dog__name']
     date_hierarchy = 'created_at'
+    
+    def note_preview(self, obj):
+        return obj.note[:50] + "..." if len(obj.note) > 50 else obj.note
+    note_preview.short_description = "Note"
 
 class FacilityAvailabilityAdmin(admin.ModelAdmin):
     list_display = ['date', 'type', 'title', 'description']
