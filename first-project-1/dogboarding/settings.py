@@ -30,6 +30,11 @@ ALLOWED_HOSTS = [
     'first-project-production-6e00.up.railway.app'
 ]
 
+# CSRF Trusted Origins for Railway deployment
+CSRF_TRUSTED_ORIGINS = [
+    'https://first-project-production-6e00.up.railway.app'
+]
+
 
 # Application definition
 
