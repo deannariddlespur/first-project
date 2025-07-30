@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+  <h1>Welcome to DogBoarding!</h1>
+  <p>This is the homepage. Choose a section to get started.</p>
+  <ul>
+    <li><a href="{% url 'register_owner' %}">Register</a></li>
+    <li><a href="{% url 'login_owner' %}">Login</a></li>
+  </ul>
+{% endblock %}
