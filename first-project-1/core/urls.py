@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
+from core import views
 
 urlpatterns = [
+    path('', views.home, name='home'),
     path('register/', views.register_owner, name='register_owner'),
     path('login/', views.login_owner, name='login_owner'),
     path('dashboard/', views.owner_dashboard, name='owner_dashboard'),
@@ -23,4 +25,5 @@ urlpatterns = [
     path('staff/payments/<int:payment_id>/', views.staff_payment_detail, name='staff_payment_detail'),
     path('staff/calendar/', views.staff_calendar, name='staff_calendar'),
     path('staff/calendar/delete/<int:entry_id>/', views.delete_availability_entry, name='delete_availability_entry'),
+    
 ] 
