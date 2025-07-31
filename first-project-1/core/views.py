@@ -16,11 +16,22 @@ import time
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
 def home(request):
-    """Homepage view - redirect to dashboard if logged in, otherwise show landing page"""
-    if request.user.is_authenticated:
-        return redirect('owner_dashboard')
-    
-    return render(request, 'core/home.html')
+    """Homepage view - simple version to test"""
+    from django.http import HttpResponse
+    return HttpResponse("""
+    <html>
+    <head><title>Dog Boarding System</title></head>
+    <body>
+        <h1>🐕 Dog Boarding System</h1>
+        <p>The system is running. Please try:</p>
+        <ul>
+            <li><a href="/login/">Login</a></li>
+            <li><a href="/health/">Health Check</a></li>
+            <li><a href="/debug/">Debug Info</a></li>
+        </ul>
+    </body>
+    </html>
+    """)
 
 def health_check(request):
     """Simple health check endpoint for Railway"""
