@@ -580,11 +580,50 @@ def login_owner(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
-            return redirect('owner_dashboard')
+            # Check if user has an Owner record
+            try:
+                owner = Owner.objects.get(user=user)
+                login(request, user)
+                return redirect('owner_dashboard')
+            except Owner.DoesNotExist:
+                # User exists but no Owner record - show error
+                form.add_error(None, "This account is not set up as a dog owner. Please register as an owner first.")
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
+
+def create_test_owner(request):
+    """Create a test owner account for testing"""
+    from django.contrib.auth.models import User
+    
+    if request.method == 'POST':
+        try:
+            # Create test user if it doesn't exist
+            if not User.objects.filter(username='testowner').exists():
+                test_user = User.objects.create_user(
+                    username='testowner',
+                    email='test@example.com',
+                    password='test123456',
+                    first_name='Test',
+                    last_name='Owner'
+                )
+                
+                # Create Owner record
+                Owner.objects.create(
+                    user=test_user,
+                    phone='555-1234',
+                    address='123 Test Street'
+                )
+                messages.success(request, "✅ Test owner created: testowner/test123456")
+            else:
+                messages.info(request, "ℹ️ Test owner already exists: testowner/test123456")
+            
+            return redirect('home')
+            
+        except Exception as e:
+            messages.error(request, f"❌ Error creating test owner: {str(e)}")
+    
+    return render(request, 'core/create_test_owner.html')
 
 class DogForm(ModelForm):
     class Meta:

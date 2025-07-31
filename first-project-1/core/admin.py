@@ -71,7 +71,7 @@ class OwnerAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email', 'phone']
     
     def dog_count(self, obj):
-        return obj.dog_set.count()
+        return obj.dogs.count()
     dog_count.short_description = "Dogs"
 
 # Register models with custom admin site

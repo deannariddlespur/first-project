@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('create-admin/', views.create_admin_user, name='create_admin_user'),
     path('setup-database/', views.setup_database, name='setup_database'),
+    path('create-test-owner/', views.create_test_owner, name='create_test_owner'),
     path('debug-database/', views.debug_database, name='debug_database'),
     path('emergency-fix/', views.emergency_fix_database, name='emergency_fix_database'),
     path('dashboard/', views.owner_dashboard, name='owner_dashboard'),
