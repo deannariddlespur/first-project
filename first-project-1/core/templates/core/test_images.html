@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Test</title>
+    <style>
+        .test-image {
+            width: 100px;
+            height: 100px;
+            border: 2px solid red;
+            margin: 10px;
+        }
+        .debug-info {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Test Page</h1>
+    
+    {% for dog in dogs %}
+    <div class="debug-info">
+        <h3>{{ dog.name }}</h3>
+        <p><strong>Photo URL:</strong> {{ dog.get_photo_url }}</p>
+        <p><strong>Photo exists:</strong> {{ dog.photo|yesno:"Yes,No" }}</p>
+        
+        {% if dog.get_photo_url %}
+        <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}" class="test-image">
+        <p>Image should appear above</p>
+        {% else %}
+        <p>No photo URL available</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html> 

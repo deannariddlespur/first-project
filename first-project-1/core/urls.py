@@ -21,4 +21,6 @@ urlpatterns = [
     path('bookings/', views.booking_list, name='booking_list'),
     path('bookings/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
     path('admin-dashboard/', dogboarding_admin.urls),
+    path('debug-images/', views.debug_images, name='debug_images'),
+    path('test-images/', views.test_images_simple, name='test_images_simple'),
 ] 

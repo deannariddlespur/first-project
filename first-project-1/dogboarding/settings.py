@@ -27,7 +27,10 @@ SECRET_KEY = 'django-insecure-hd4!20=flj7j06&*6b8i!^z!pl(db^vkh9*wxlw0vncbdvw78x
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'first-project-production-6e00.up.railway.app'
+    'first-project-production-6e00.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0'
 ]
 
 # CSRF Trusted Origins for Railway deployment

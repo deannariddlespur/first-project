@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div style="padding: 20px; font-family: Arial, sans-serif;">
+    <h1>🐕 Image Debug Information</h1>
+    
+    <h2>Dog Photos Debug</h2>
+    {% for info in debug_info %}
+    <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <h3>{{ info.name }}</h3>
+        <p><strong>Photo Field:</strong> {{ info.photo_field }}</p>
+        <p><strong>Photo URL:</strong> {{ info.photo_url }}</p>
+        <p><strong>Photo Exists:</strong> {{ info.photo_exists }}</p>
+        <p><strong>Photo Name:</strong> {{ info.photo_name }}</p>
+        
+        {% if info.photo_url %}
+        <div style="margin-top: 10px;">
+            <p><strong>Image Test:</strong></p>
+            <img src="{{ info.photo_url }}" alt="{{ info.name }}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd;">
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    
+    <h2>Media Settings</h2>
+    <p><strong>MEDIA_URL:</strong> {{ MEDIA_URL }}</p>
+    <p><strong>MEDIA_ROOT:</strong> {{ MEDIA_ROOT }}</p>
+    
+    <h2>Test Direct Image Access</h2>
+    <p>Try accessing these URLs directly:</p>
+    <ul>
+    {% for info in debug_info %}
+        {% if info.photo_url %}
+        <li><a href="{{ info.photo_url }}" target="_blank">{{ info.name }} - {{ info.photo_url }}</a></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %} 

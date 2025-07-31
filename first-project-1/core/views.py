@@ -710,13 +710,29 @@ class DogForm(ModelForm):
 
 @login_required
 def owner_dashboard(request):
-    """Owner dashboard view"""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
     try:
-        owner = get_object_or_404(Owner, user=request.user)
-        dogs = owner.dogs.all()
-        return render(request, 'core/dashboard.html', {'dogs': dogs})
-    except Exception as e:
-        return HttpResponse(f"Dashboard Error: {str(e)}")
+        owner = request.user.owner
+    except Owner.DoesNotExist:
+        return redirect('create_owner')
+    
+    dogs = owner.dogs.all()
+    
+    # Debug logging for image URLs
+    for dog in dogs:
+        photo_url = dog.get_photo_url()
+        print(f"Dog: {dog.name}, Photo URL: {photo_url}")
+        if dog.photo:
+            print(f"  Photo field exists: {dog.photo.name}")
+            print(f"  Photo URL from field: {dog.photo.url}")
+    
+    context = {
+        'owner': owner,
+        'dogs': dogs,
+    }
+    return render(request, 'core/dashboard.html', context)
 
 @login_required
 def add_dog(request):
@@ -1782,3 +1798,25 @@ def list_users(request):
             'error': str(e),
             'users': []
         })
+
+def debug_images(request):
+    """Debug view to test image URLs"""
+    dogs = Dog.objects.all()
+    debug_info = []
+    
+    for dog in dogs:
+        info = {
+            'name': dog.name,
+            'photo_field': str(dog.photo),
+            'photo_url': dog.get_photo_url(),
+            'photo_exists': bool(dog.photo),
+            'photo_name': dog.photo.name if dog.photo else None,
+        }
+        debug_info.append(info)
+    
+    return render(request, 'core/debug_images.html', {'debug_info': debug_info})
+
+def test_images_simple(request):
+    """Simple test view for images"""
+    dogs = Dog.objects.all()
+    return render(request, 'core/test_images.html', {'dogs': dogs})
