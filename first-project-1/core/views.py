@@ -692,17 +692,24 @@ def owner_dashboard(request):
 
 @login_required
 def add_dog(request):
-    owner = get_object_or_404(Owner, user=request.user)
-    if request.method == 'POST':
-        form = DogForm(request.POST, request.FILES)
-        if form.is_valid():
-            dog = form.save(commit=False)
-            dog.owner = owner
-            dog.save()
-            return redirect('owner_dashboard')
-    else:
-        form = DogForm()
-    return render(request, 'core/add_dog.html', {'form': form})
+    try:
+        owner = get_object_or_404(Owner, user=request.user)
+        if request.method == 'POST':
+            form = DogForm(request.POST, request.FILES)
+            if form.is_valid():
+                dog = form.save(commit=False)
+                dog.owner = owner
+                dog.save()
+                messages.success(request, f"✅ {dog.name} has been successfully added!")
+                return redirect('owner_dashboard')
+            else:
+                messages.error(request, "❌ Please correct the errors below.")
+        else:
+            form = DogForm()
+        return render(request, 'core/add_dog.html', {'form': form})
+    except Exception as e:
+        messages.error(request, f"❌ Error: {str(e)}")
+        return render(request, 'core/add_dog.html', {'form': DogForm()})
 
 @login_required
 def edit_dog(request, dog_id):
