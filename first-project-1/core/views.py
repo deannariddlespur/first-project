@@ -710,12 +710,26 @@ class DogForm(ModelForm):
 
 @login_required
 def owner_dashboard(request):
-    """Minimal dashboard - no database access"""
+    """Full dashboard with database access and error handling"""
     try:
-        return render(request, 'core/dashboard_minimal.html', {
-            'owner': None,
-            'dogs': []
-        })
+        # Get owner
+        try:
+            owner = request.user.owner
+        except Owner.DoesNotExist:
+            return redirect('create_owner')
+        
+        # Get dogs with safe field access
+        try:
+            dogs = Dog.objects.filter(owner=owner).values('id', 'name', 'breed', 'size')
+        except Exception as e:
+            print(f"Error fetching dogs: {e}")
+            dogs = []
+        
+        context = {
+            'owner': owner,
+            'dogs': dogs,
+        }
+        return render(request, 'core/dashboard_minimal.html', context)
     except Exception as e:
         return HttpResponse(f"Dashboard Error: {str(e)}")
 
@@ -980,11 +994,41 @@ def booking_calendar(request):
 
 @login_required
 def create_booking(request):
+    """Create booking with error handling"""
     try:
         owner = get_object_or_404(Owner, user=request.user)
         
-        # Return a simple message for now
-        return HttpResponse("Booking creation is temporarily disabled while we fix database issues. Please try again later.")
+        if request.method == 'POST':
+            form = BookingForm(owner, request.POST)
+            if form.is_valid():
+                try:
+                    booking = form.save(commit=False)
+                    booking.dog = form.cleaned_data['dog']
+                    booking.save()
+                    return redirect('booking_list')
+                except Exception as e:
+                    return HttpResponse(f"Booking creation error: {str(e)}")
+        else:
+            # Handle pre-filling dates from URL parameters
+            initial_data = {}
+            if request.GET.get('start_date') and request.GET.get('end_date'):
+                try:
+                    start_date = datetime.strptime(request.GET.get('start_date'), '%Y-%m-%d').date()
+                    end_date = datetime.strptime(request.GET.get('end_date'), '%Y-%m-%d').date()
+                    initial_data = {
+                        'start_date': start_date.strftime('%m/%d/%Y'),
+                        'end_date': end_date.strftime('%m/%d/%Y')
+                    }
+                except ValueError:
+                    pass
+            
+            form = BookingForm(owner, initial=initial_data)
+        
+        return render(request, 'core/create_booking.html', {
+            'form': form,
+            'available_kennels': [],
+            'all_kennels': []
+        })
         
     except Exception as e:
         return HttpResponse(f"Create booking error: {str(e)}")
