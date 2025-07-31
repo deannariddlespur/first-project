@@ -714,26 +714,7 @@ def owner_dashboard(request):
     try:
         owner = get_object_or_404(Owner, user=request.user)
         dogs = owner.dogs.all()
-        
-        # Simple response for now to avoid template issues
-        from django.http import HttpResponse
-        response = f"""
-        <html>
-        <head><title>Dashboard</title></head>
-        <body>
-            <h1>🐕 Welcome {request.user.username}!</h1>
-            <p>You have {dogs.count()} dogs.</p>
-            <ul>
-        """
-        for dog in dogs:
-            response += f"<li>{dog.name} ({dog.breed})</li>"
-        response += """
-            </ul>
-            <p><a href="/logout/">Logout</a></p>
-        </body>
-        </html>
-        """
-        return HttpResponse(response)
+        return render(request, 'core/dashboard.html', {'dogs': dogs})
     except Exception as e:
         return HttpResponse(f"Dashboard Error: {str(e)}")
 
