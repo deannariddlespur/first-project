@@ -21,7 +21,6 @@ if DATABASE_URL:
     print(f"✅ Using PostgreSQL database from DATABASE_URL")
 else:
     # Fallback to SQLite for local development
-    # Use a persistent location on Railway
     db_path = os.path.join(BASE_DIR, 'data', 'db.sqlite3')
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     
@@ -32,6 +31,8 @@ else:
         }
     }
     print(f"⚠️ Using SQLite database at: {db_path}")
+    print("⚠️ WARNING: SQLite is not persistent on Railway!")
+    print("⚠️ Please add PostgreSQL plugin to your Railway project.")
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
