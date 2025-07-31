@@ -568,20 +568,38 @@ def register_owner(request):
     return render(request, 'core/register.html', {'form': form})
 
 def login_owner(request):
+    """Owner login view"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     if request.method == 'POST':
+        logger.info("Login attempt received")
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            # Check if user has an Owner record
-            try:
-                owner = Owner.objects.get(user=user)
-                login(request, user)
-                return redirect('owner_dashboard')
-            except Owner.DoesNotExist:
-                # User exists but no Owner record - show error
-                form.add_error(None, "This account is not set up as a dog owner. Please register as an owner first.")
+            logger.info("Form is valid, attempting authentication")
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            logger.info(f"Authentication result for {username}: {user is not None}")
+            
+            if user is not None:
+                try:
+                    owner = Owner.objects.get(user=user)
+                    logger.info(f"Owner found: {owner}")
+                    login(request, user)
+                    logger.info("User logged in successfully")
+                    return redirect('owner_dashboard')
+                except Owner.DoesNotExist:
+                    logger.error(f"User {username} exists but no Owner record found")
+                    form.add_error(None, "This account is not set up as a dog owner. Please register as an owner first.")
+            else:
+                logger.error(f"Authentication failed for username: {username}")
+        else:
+            logger.error(f"Form errors: {form.errors}")
     else:
+        logger.info("Rendering login form")
         form = AuthenticationForm()
+    
     return render(request, 'core/login.html', {'form': form})
 
 def create_test_owner(request):
@@ -1659,3 +1677,35 @@ def debug_app(request):
         'owner': owner_status,
         'timestamp': time.time()
     })
+
+def list_users(request):
+    """Debug endpoint to list existing users"""
+    from django.http import JsonResponse
+    from django.contrib.auth.models import User
+    
+    try:
+        users = []
+        for user in User.objects.all():
+            try:
+                owner = Owner.objects.get(user=user)
+                owner_status = "has owner record"
+            except Owner.DoesNotExist:
+                owner_status = "no owner record"
+            
+            users.append({
+                'username': user.username,
+                'email': user.email,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
+                'owner_status': owner_status
+            })
+        
+        return JsonResponse({
+            'users': users,
+            'total_users': len(users)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'users': []
+        })
