@@ -1,36 +1,348 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>Add a New Dog 🐕</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <p>
-            <label for="{{ form.name.id_for_label }}">Dog's Name:</label>
-            {{ form.name }}
-        </p>
-        <p>
-            <label for="{{ form.breed.id_for_label }}">Breed:</label>
-            {{ form.breed }}
-        </p>
-        <p>
-            <label for="{{ form.age.id_for_label }}">Age:</label>
-            {{ form.age }}
-        </p>
-        <p>
-            <label for="{{ form.size.id_for_label }}">Size:</label>
-            {{ form.size }}
-            <!-- Debug: Size field HTML: {{ form.size|safe }} -->
-        </p>
-        <p>
-            <label for="{{ form.notes.id_for_label }}">Notes:</label>
-            {{ form.notes }}
-        </p>
-        <p>
-            <label for="{{ form.photo.id_for_label }}">Photo:</label>
-            {{ form.photo }}
-        </p>
-        <button type="submit" class="doggy-btn">Add Dog</button>
-    </form>
-    <p><a href="{% url 'owner_dashboard' %}">Back to Dashboard</a></p>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        color: white;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .header-text {
+        flex: 1;
+        text-align: left;
+    }
+
+    .header-actions {
+        flex-shrink: 0;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .dashboard-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .form-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .section-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #666;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 16px;
+        background: white;
+        color: #333;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .file-input-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-input-container input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-input-label {
+        display: block;
+        padding: 12px 16px;
+        background: #f8f9fa;
+        border: 2px dashed #e1e5e9;
+        border-radius: 10px;
+        text-align: center;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .file-input-label:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .submit-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1.1em;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .size-info {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 8px;
+        font-size: 0.9em;
+        color: #666;
+        line-height: 1.4;
+    }
+
+    .size-info strong {
+        color: #333;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .header-text {
+            text-align: center;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="dashboard-title">🐕 Add a New Dog</h1>
+                <p class="dashboard-subtitle">Register your furry friend for boarding</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'logout' %}" class="logout-btn">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-section">
+        <div class="section-title">
+            <span>📋</span>
+            Dog Information
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Dog's Name</label>
+                {{ form.name }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.breed.id_for_label }}" class="form-label">Breed</label>
+                {{ form.breed }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.age.id_for_label }}" class="form-label">Age (years)</label>
+                {{ form.age }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.size.id_for_label }}" class="form-label">Size</label>
+                {{ form.size }}
+                <div class="size-info">
+                    <strong>Size Guide:</strong> Small (under 25 lbs), Medium (25-50 lbs), Large (over 50 lbs)
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Special Notes</label>
+                {{ form.notes }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.photo.id_for_label }}" class="form-label">Photo (Optional)</label>
+                <div class="file-input-container">
+                    {{ form.photo }}
+                    <label for="{{ form.photo.id_for_label }}" class="file-input-label">
+                        📷 Click to upload a photo of your dog
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">Add Dog</button>
+        </form>
+    </div>
+    
+    <div class="form-actions">
+        <a href="{% url 'owner_dashboard' %}" class="action-btn">Back to Dashboard</a>
+        <a href="{% url 'dog_list' %}" class="action-btn">View My Dogs</a>
+    </div>
 </div>
+
+<script>
+// Add custom styling to form fields
+document.addEventListener('DOMContentLoaded', function() {
+    const formFields = document.querySelectorAll('input, select, textarea');
+    
+    formFields.forEach(field => {
+        field.classList.add('form-control');
+    });
+    
+    // Handle file input styling
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileLabel = document.querySelector('.file-input-label');
+    
+    if (fileInput && fileLabel) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileLabel.textContent = `📷 Selected: ${this.files[0].name}`;
+                fileLabel.style.background = 'rgba(102, 126, 234, 0.1)';
+                fileLabel.style.borderColor = '#667eea';
+            } else {
+                fileLabel.textContent = '📷 Click to upload a photo of your dog';
+                fileLabel.style.background = '#f8f9fa';
+                fileLabel.style.borderColor = '#e1e5e9';
+            }
+        });
+    }
+});
+</script>
 {% endblock %} 

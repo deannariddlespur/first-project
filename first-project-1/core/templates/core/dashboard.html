@@ -20,13 +20,50 @@
     }
 
     .dashboard-header {
-        text-align: center;
         color: white;
         margin-bottom: 30px;
         padding: 20px;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .header-text {
+        flex: 1;
+        text-align: left;
+    }
+
+    .header-actions {
+        flex-shrink: 0;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
     }
 
     .dashboard-title {
@@ -210,6 +247,15 @@
             padding: 10px;
         }
         
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .header-text {
+            text-align: center;
+        }
+        
         .quick-actions {
             grid-template-columns: 1fr;
         }
@@ -223,8 +269,15 @@
 <div class="dashboard-container">
     <!-- Header -->
     <div class="dashboard-header">
-        <h1 class="dashboard-title">🐕 Welcome to the Doggy Dashboard!</h1>
-        <p class="dashboard-subtitle">Here you can manage your dogs, bookings, and more.</p>
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="dashboard-title">🐕 Welcome to the Doggy Dashboard!</h1>
+                <p class="dashboard-subtitle">Here you can manage your dogs, bookings, and more.</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'logout' %}" class="logout-btn">🚪 Logout</a>
+            </div>
+        </div>
     </div>
     
     <!-- Quick Actions Section -->
