@@ -1829,3 +1829,7 @@ def test_images_simple(request):
     """Simple test view for images"""
     dogs = Dog.objects.all()
     return render(request, 'core/test_images.html', {'dogs': dogs})
+
+def test_simple(request):
+    """Very simple test view"""
+    return HttpResponse("Test page is working!")
