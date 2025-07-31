@@ -1,1 +1,1 @@
-web: python startup_with_migrations.py 
+web: python keep_alive.py 
