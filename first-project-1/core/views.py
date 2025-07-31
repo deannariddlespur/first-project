@@ -1,27 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Owner
-from django import forms
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Dog
 from django.forms import ModelForm
-from django.shortcuts import get_object_or_404
-from datetime import datetime, timedelta
+from django import forms
 from django.utils import timezone
-from .models import Booking
-from .models import Kennel
-from .models import Payment
-import time
-from .models import StaffNote
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote
-from django import forms
-from .models import FacilityAvailability
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from datetime import datetime, timedelta
+import time
+
+from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
 def home(request):
     """Homepage view - landing page for the dog boarding system"""
