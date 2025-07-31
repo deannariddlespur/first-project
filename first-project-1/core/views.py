@@ -710,21 +710,12 @@ class DogForm(ModelForm):
 
 @login_required
 def owner_dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
+    """Minimal dashboard - no database access"""
     try:
-        owner = request.user.owner
-    except Owner.DoesNotExist:
-        return redirect('create_owner')
-    
-    try:
-        # Don't access any database fields that might not exist
-        context = {
-            'owner': owner,
-            'dogs': [],  # Empty list to avoid database issues
-        }
-        return render(request, 'core/dashboard_minimal.html', context)
+        return render(request, 'core/dashboard_minimal.html', {
+            'owner': None,
+            'dogs': []
+        })
     except Exception as e:
         return HttpResponse(f"Dashboard Error: {str(e)}")
 
