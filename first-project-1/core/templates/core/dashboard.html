@@ -164,6 +164,42 @@
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
+    .placeholder-photo {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .placeholder-photo:hover {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        transform: scale(1.05);
+    }
+
+    .placeholder-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .placeholder-icon {
+        font-size: 1.2em;
+        color: #6c757d;
+    }
+
+    .placeholder-text {
+        font-size: 0.6em;
+        color: #6c757d;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1;
+    }
+
     .dog-info {
         flex: 1;
     }
@@ -327,7 +363,12 @@
                         {% if dog.photo %}
                             <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo">
                         {% else %}
-                            <div class="dog-photo" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8em;">🐕</div>
+                            <div class="dog-photo placeholder-photo">
+                                <div class="placeholder-content">
+                                    <span class="placeholder-icon">📷</span>
+                                    <span class="placeholder-text">Add Photo</span>
+                                </div>
+                            </div>
                         {% endif %}
                         <div class="dog-info">
                             <h4>{{ dog.name }}</h4>
