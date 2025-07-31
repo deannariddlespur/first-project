@@ -35,9 +35,48 @@
         right: 20px;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 2em;
-        opacity: 0.3;
+        font-size: 2.5em;
+        opacity: 0.7;
         animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        z-index: 1;
+    }
+
+    #header::after {
+        content: '🐩';
+        position: absolute;
+        left: 30px;
+        top: 30%;
+        font-size: 1.8em;
+        opacity: 0.6;
+        animation: float 4s ease-in-out infinite reverse;
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        z-index: 1;
+    }
+
+    /* Additional floating dogs */
+    #header .floating-dog-1 {
+        content: '🦮';
+        position: absolute;
+        right: 80px;
+        top: 20%;
+        font-size: 1.5em;
+        opacity: 0.5;
+        animation: float 5s ease-in-out infinite;
+        filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+        z-index: 1;
+    }
+
+    #header .floating-dog-2 {
+        content: '🐕‍🦺';
+        position: absolute;
+        left: 60px;
+        bottom: 20%;
+        font-size: 1.3em;
+        opacity: 0.6;
+        animation: float 6s ease-in-out infinite reverse;
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        z-index: 1;
     }
 
     @keyframes float {
@@ -129,6 +168,32 @@
         background: var(--light-bg);
         padding: 25px;
         min-height: calc(100vh - 60px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    #content::before {
+        content: '🐕';
+        position: absolute;
+        right: 50px;
+        top: 50px;
+        font-size: 3em;
+        opacity: 0.1;
+        animation: float 8s ease-in-out infinite;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #content::after {
+        content: '🐩';
+        position: absolute;
+        left: 30px;
+        bottom: 100px;
+        font-size: 2.5em;
+        opacity: 0.08;
+        animation: float 10s ease-in-out infinite reverse;
+        z-index: 0;
+        pointer-events: none;
     }
 
     .module {
