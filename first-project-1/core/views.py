@@ -729,11 +729,14 @@ def add_dog(request):
             logger.info("Rendering add_dog form")
             form = DogForm()
         
+        logger.info("About to render template")
         return render(request, 'core/add_dog.html', {'form': form})
     except Exception as e:
         logger.error(f"Error in add_dog view: {str(e)}", exc_info=True)
         messages.error(request, f"❌ Error: {str(e)}")
-        return render(request, 'core/add_dog.html', {'form': DogForm()})
+        # Return a simple error page instead of trying to render the template again
+        from django.http import HttpResponse
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 @login_required
 def edit_dog(request, dog_id):
