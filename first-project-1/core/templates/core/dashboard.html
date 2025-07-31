@@ -360,8 +360,8 @@
             {% for dog in dogs %}
                 <div class="dog-card">
                     <div class="dog-header">
-                        {% if dog.photo %}
-                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo">
+                        {% if dog.get_photo_url %}
+                            <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}" class="dog-photo">
                         {% else %}
                             <div class="dog-photo placeholder-photo">
                                 <div class="placeholder-content">
