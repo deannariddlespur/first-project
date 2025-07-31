@@ -692,22 +692,36 @@ def owner_dashboard(request):
 
 @login_required
 def add_dog(request):
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
+        logger.info(f"Add dog view accessed by user: {request.user.username}")
         owner = get_object_or_404(Owner, user=request.user)
+        logger.info(f"Found owner: {owner}")
+        
         if request.method == 'POST':
+            logger.info("Processing POST request for add_dog")
             form = DogForm(request.POST, request.FILES)
+            logger.info(f"Form is valid: {form.is_valid()}")
+            
             if form.is_valid():
                 dog = form.save(commit=False)
                 dog.owner = owner
                 dog.save()
+                logger.info(f"Successfully saved dog: {dog.name}")
                 messages.success(request, f"✅ {dog.name} has been successfully added!")
                 return redirect('owner_dashboard')
             else:
+                logger.error(f"Form errors: {form.errors}")
                 messages.error(request, "❌ Please correct the errors below.")
         else:
+            logger.info("Rendering add_dog form")
             form = DogForm()
+        
         return render(request, 'core/add_dog.html', {'form': form})
     except Exception as e:
+        logger.error(f"Error in add_dog view: {str(e)}", exc_info=True)
         messages.error(request, f"❌ Error: {str(e)}")
         return render(request, 'core/add_dog.html', {'form': DogForm()})
 
@@ -1614,3 +1628,42 @@ def delete_availability_entry(request, entry_id):
         from django.urls import reverse
         return redirect(f"{reverse('staff_calendar')}?year={year}&month={month}")
     return redirect('staff_calendar')
+
+def debug_app(request):
+    """Debug endpoint to check application status"""
+    from django.http import JsonResponse
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    logger.info("Debug endpoint accessed")
+    
+    try:
+        # Check database connection
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    # Check if user is authenticated
+    user_status = "authenticated" if request.user.is_authenticated else "not authenticated"
+    
+    # Check if owner exists for current user
+    owner_status = "not found"
+    if request.user.is_authenticated:
+        try:
+            owner = Owner.objects.get(user=request.user)
+            owner_status = f"found: {owner}"
+        except Owner.DoesNotExist:
+            owner_status = "does not exist"
+        except Exception as e:
+            owner_status = f"error: {str(e)}"
+    
+    return JsonResponse({
+        'status': 'running',
+        'database': db_status,
+        'user': user_status,
+        'owner': owner_status,
+        'timestamp': time.time()
+    })
