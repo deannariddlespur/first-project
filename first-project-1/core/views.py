@@ -759,15 +759,35 @@ def add_dog(request):
 
 @login_required
 def edit_dog(request, dog_id):
+    import logging
+    logger = logging.getLogger(__name__)
+    
     owner = get_object_or_404(Owner, user=request.user)
     dog = get_object_or_404(Dog, id=dog_id, owner=owner)
+    
     if request.method == 'POST':
+        logger.info(f"Edit dog POST request for {dog.name}")
+        logger.info(f"Files in request: {list(request.FILES.keys())}")
+        
         form = DogForm(request.POST, request.FILES, instance=dog)
         if form.is_valid():
-            form.save()
+            logger.info("Form is valid, saving dog")
+            dog = form.save()
+            
+            # Check if photo was uploaded
+            if 'photo' in request.FILES:
+                logger.info(f"Photo uploaded: {request.FILES['photo'].name}")
+                logger.info(f"Photo size: {request.FILES['photo'].size}")
+            else:
+                logger.info("No photo uploaded")
+            
+            logger.info(f"Dog photo after save: {dog.photo}")
             return redirect('owner_dashboard')
+        else:
+            logger.error(f"Form errors: {form.errors}")
     else:
         form = DogForm(instance=dog)
+    
     return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})
 
 @login_required
