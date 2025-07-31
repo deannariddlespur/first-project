@@ -719,12 +719,10 @@ def owner_dashboard(request):
         return redirect('create_owner')
     
     try:
-        # Get dogs with minimal field access
-        dogs = Dog.objects.filter(owner=owner).values('id', 'name', 'breed', 'size')
-        
+        # Don't access any database fields that might not exist
         context = {
             'owner': owner,
-            'dogs': dogs,
+            'dogs': [],  # Empty list to avoid database issues
         }
         return render(request, 'core/dashboard_minimal.html', context)
     except Exception as e:
@@ -994,50 +992,9 @@ def create_booking(request):
     try:
         owner = get_object_or_404(Owner, user=request.user)
         
-        if request.method == 'POST':
-            form = BookingForm(owner, request.POST)
-            if form.is_valid():
-                try:
-                    booking = form.save(commit=False)
-                    booking.dog = form.cleaned_data['dog']
-                    
-                    # Simple save without complex validation for now
-                    booking.save()
-                    
-                    # Create simple payment record
-                    try:
-                        Payment.objects.create(
-                            booking=booking,
-                            amount=50.00,  # Default amount
-                            status='pending'
-                        )
-                    except Exception as e:
-                        print(f"Payment creation error: {e}")
-                    
-                    return redirect('booking_list')
-                except Exception as e:
-                    return HttpResponse(f"Booking creation error: {str(e)}")
-        else:
-            # Handle pre-filling dates from URL parameters
-            initial_data = {}
-            if request.GET.get('start_date') and request.GET.get('end_date'):
-                try:
-                    start_date = datetime.strptime(request.GET.get('start_date'), '%Y-%m-%d').date()
-                    end_date = datetime.strptime(request.GET.get('end_date'), '%Y-%m-%d').date()
-                    initial_data = {
-                        'start_date': start_date.strftime('%m/%d/%Y'),
-                        'end_date': end_date.strftime('%m/%d/%Y')
-                    }
-                except ValueError:
-                    pass
-            
-            form = BookingForm(owner, initial=initial_data)
+        # Return a simple message for now
+        return HttpResponse("Booking creation is temporarily disabled while we fix database issues. Please try again later.")
         
-        return render(request, 'core/create_booking.html', {
-            'form': form,
-            'available_kennels': [],
-            'all_kennels': []
-        })
     except Exception as e:
         return HttpResponse(f"Create booking error: {str(e)}")
 
@@ -1741,3 +1698,7 @@ def test_images_simple(request):
 def test_basic(request):
     """Very basic test view - no database access"""
     return HttpResponse("Basic test page is working! No database access.")
+
+def test_deployment(request):
+    """Simple test view to verify deployment is working"""
+    return HttpResponse("✅ Deployment is working! Database issues are being resolved.")
