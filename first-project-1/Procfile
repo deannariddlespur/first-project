@@ -1,1 +1,1 @@
-web: python railway_startup.py; gunicorn dogboarding.wsgi --bind 0.0.0.0:$PORT 
+web: gunicorn dogboarding.wsgi --bind 0.0.0.0:$PORT --workers 1 --timeout 120 
