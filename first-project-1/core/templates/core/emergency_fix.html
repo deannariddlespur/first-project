@@ -1,0 +1,242 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Emergency Database Fix{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>🚨 Emergency Database Fix</h1>
+        <p>Use this page when the database is completely empty</p>
+    </div>
+
+    <div class="section-card">
+        <div class="card-header">
+            <h2>Database Status</h2>
+        </div>
+        
+        <div class="status-section">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="info-section">
+            <div class="info-card">
+                <h3>⚠️ Emergency Use Only</h3>
+                <ul>
+                    <li>This tool creates all database tables</li>
+                    <li>Creates admin user: admin/admin123456</li>
+                    <li>Sets up sample kennels</li>
+                    <li>Use only when you can't login</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>🔧 What This Does</h3>
+                <ul>
+                    <li>Runs all Django migrations</li>
+                    <li>Creates missing database tables</li>
+                    <li>Sets up initial admin user</li>
+                    <li>Creates sample kennels</li>
+                </ul>
+            </div>
+        </div>
+
+        <form method="post" class="maintenance-form">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="action-btn danger">
+                    🚨 Run Emergency Database Fix
+                </button>
+                <a href="{% url 'home' %}" class="action-btn secondary">
+                    ← Back to Home
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .section-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 0 auto;
+        max-width: 800px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .card-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-header h2 {
+        color: #333;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .status-section {
+        margin-bottom: 30px;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+    }
+
+    .alert-error {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+    }
+
+    .info-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 4px solid #f44336;
+    }
+
+    .info-card h3 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .info-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-card li {
+        padding: 8px 0;
+        color: #555;
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .info-card li:before {
+        content: "•";
+        color: #f44336;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+    }
+
+    .maintenance-form {
+        text-align: center;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .action-btn.danger {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+    }
+
+    .action-btn.danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+    }
+
+    .action-btn.secondary {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        color: white;
+    }
+
+    .action-btn.secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 15px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+
+        .info-section {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %} 
