@@ -21,13 +21,17 @@ if DATABASE_URL:
     print(f"✅ Using PostgreSQL database from DATABASE_URL")
 else:
     # Fallback to SQLite for local development
+    # Use a persistent location on Railway
+    db_path = os.path.join(BASE_DIR, 'data', 'db.sqlite3')
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'NAME': db_path,
         }
     }
-    print("⚠️ Using SQLite database (not recommended for production)")
+    print(f"⚠️ Using SQLite database at: {db_path}")
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

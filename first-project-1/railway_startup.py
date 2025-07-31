@@ -41,16 +41,34 @@ def setup_railway():
         if 'postgresql' in db_engine:
             print("✅ Using PostgreSQL database")
         else:
-            print("⚠️ Using SQLite database (not persistent on Railway)")
+            print("⚠️ Using SQLite database - will try to make it persistent")
+            # Try to ensure SQLite file is in a persistent location
+            db_path = connection.settings_dict.get('NAME', '')
+            if db_path and not db_path.startswith('/tmp'):
+                print(f"✅ SQLite database at: {db_path}")
+            else:
+                print("⚠️ SQLite database may not be persistent")
         
         # Check if tables exist
         print("🔍 Checking database tables...")
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT table_name FROM information_schema.tables 
-                WHERE table_schema = 'public' AND table_name = 'auth_user'
-            """)
-            table_exists = cursor.fetchone() is not None
+        db_engine = connection.settings_dict['ENGINE']
+        
+        if 'postgresql' in db_engine:
+            # PostgreSQL check
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT table_name FROM information_schema.tables 
+                    WHERE table_schema = 'public' AND table_name = 'auth_user'
+                """)
+                table_exists = cursor.fetchone() is not None
+        else:
+            # SQLite check
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT name FROM sqlite_master 
+                    WHERE type='table' AND name='auth_user'
+                """)
+                table_exists = cursor.fetchone() is not None
         
         if not table_exists:
             print("📦 Running Django migrations...")
