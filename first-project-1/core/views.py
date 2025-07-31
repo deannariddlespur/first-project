@@ -718,21 +718,27 @@ def owner_dashboard(request):
     except Owner.DoesNotExist:
         return redirect('create_owner')
     
-    dogs = owner.dogs.all()
-    
-    # Debug logging for image URLs
-    for dog in dogs:
-        photo_url = dog.get_photo_url()
-        print(f"Dog: {dog.name}, Photo URL: {photo_url}")
-        if dog.photo:
-            print(f"  Photo field exists: {dog.photo.name}")
-            print(f"  Photo URL from field: {dog.photo.url}")
-    
-    context = {
-        'owner': owner,
-        'dogs': dogs,
-    }
-    return render(request, 'core/dashboard.html', context)
+    try:
+        dogs = owner.dogs.all()
+        
+        # Debug logging for image URLs
+        for dog in dogs:
+            try:
+                photo_url = dog.get_photo_url()
+                print(f"Dog: {dog.name}, Photo URL: {photo_url}")
+                if dog.photo:
+                    print(f"  Photo field exists: {dog.photo.name}")
+                    print(f"  Photo URL from field: {dog.photo.url}")
+            except Exception as e:
+                print(f"Error getting photo for {dog.name}: {e}")
+        
+        context = {
+            'owner': owner,
+            'dogs': dogs,
+        }
+        return render(request, 'core/dashboard.html', context)
+    except Exception as e:
+        return HttpResponse(f"Dashboard Error: {str(e)}")
 
 @login_required
 def add_dog(request):
@@ -1826,9 +1832,12 @@ def debug_images(request):
     return render(request, 'core/debug_images.html', {'debug_info': debug_info})
 
 def test_images_simple(request):
-    """Simple test view for images"""
-    dogs = Dog.objects.all()
-    return render(request, 'core/test_images.html', {'dogs': dogs})
+    """Simple test view for images - safe version"""
+    try:
+        dogs = Dog.objects.all()
+        return render(request, 'core/test_images.html', {'dogs': dogs})
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
 
 def test_simple(request):
     """Very simple test view"""
