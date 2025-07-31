@@ -17,4 +17,13 @@ try:
 except Exception as e:
     print(f"❌ Error during migrations: {e}")
 
+print("🔧 Fixing database schema...")
+
+try:
+    # Run database schema fix
+    call_command('fix_database_schema')
+    print("✅ Database schema fixed successfully!")
+except Exception as e:
+    print(f"❌ Error fixing database schema: {e}")
+
 print("🎯 Startup script completed!") 

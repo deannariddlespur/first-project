@@ -1,1 +1,1 @@
-web: gunicorn dogboarding.wsgi:application --bind 0.0.0.0:$PORT --workers 1 
+web: python startup_simple.py && gunicorn dogboarding.wsgi:application --bind 0.0.0.0:$PORT --workers 1 
