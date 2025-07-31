@@ -5,7 +5,7 @@ Keep alive script for Railway
 import os
 import sys
 import time
-import requests
+import urllib.request
 import threading
 
 def make_health_request():
@@ -18,12 +18,18 @@ def make_health_request():
         port = os.environ.get('PORT', '8080')
         
         # Make request to health endpoint
-        response = requests.get(f'http://localhost:{port}/health/', timeout=10)
-        print(f"✅ Health check request successful: {response.status_code}")
+        try:
+            response = urllib.request.urlopen(f'http://localhost:{port}/health/', timeout=10)
+            print(f"✅ Health check request successful: {response.getcode()}")
+        except Exception as e:
+            print(f"⚠️ Health check request failed: {e}")
         
         # Make request to homepage
-        response = requests.get(f'http://localhost:{port}/', timeout=10)
-        print(f"✅ Homepage request successful: {response.status_code}")
+        try:
+            response = urllib.request.urlopen(f'http://localhost:{port}/', timeout=10)
+            print(f"✅ Homepage request successful: {response.getcode()}")
+        except Exception as e:
+            print(f"⚠️ Homepage request failed: {e}")
         
     except Exception as e:
         print(f"⚠️ Health request warning: {e}")
