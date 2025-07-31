@@ -1,0 +1,281 @@
+/* Custom Admin Styling for Dog Boarding */
+
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #f7d08a;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+    --dark-text: #333;
+    --light-text: #666;
+    --dog-orange: #ff6b35;
+    --dog-blue: #4facfe;
+}
+
+/* Modern Admin Header */
+#header {
+    background: linear-gradient(135deg, var(--dog-blue) 0%, var(--primary-color) 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+    position: relative;
+    overflow: hidden;
+    padding: 15px 20px;
+}
+
+#header::before {
+    content: '🐕';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2em;
+    opacity: 0.3;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(-50%) translateX(0px); }
+    50% { transform: translateY(-50%) translateX(-5px); }
+}
+
+#header h1 {
+    font-size: 1.8em;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+#header h1::before {
+    content: '🏠';
+    font-size: 1.2em;
+}
+
+#header a:link, #header a:visited {
+    color: white;
+    text-decoration: none;
+}
+
+/* Modern Navigation */
+#nav-sidebar {
+    background: white;
+    border-right: 1px solid #e1e5e9;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+#nav-sidebar .current-app .section {
+    background: var(--light-bg);
+    border-radius: 12px;
+    margin: 8px;
+    padding: 15px;
+    border-left: 4px solid var(--dog-blue);
+    transition: all 0.3s ease;
+}
+
+#nav-sidebar .current-app .section:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2);
+}
+
+#nav-sidebar .current-app .section h2 {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#nav-sidebar .current-app .section h2::before {
+    content: '📊';
+    font-size: 1.1em;
+}
+
+/* Model List Styling */
+.model-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.model-list th {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    font-weight: bold;
+    padding: 15px;
+    border: none;
+}
+
+.model-list td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.model-list tr:hover td {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+/* Action Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+/* Add Button */
+.addlink {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.addlink:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+/* Changelink */
+.changelink {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.changelink:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+/* Form Styling */
+.form-row {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.form-row label {
+    color: var(--dark-text);
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-row input, .form-row select, .form-row textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Status Indicators */
+.status-available {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.status-occupied {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.status-pending {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #header h1 {
+        font-size: 1.4em;
+    }
+    
+    .model-list {
+        font-size: 14px;
+    }
+    
+    .button, input[type=submit], input[type=button] {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Success Messages */
+.messagelist {
+    background: rgba(40, 167, 69, 0.1);
+    border: 2px solid var(--success-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+/* Error Messages */
+.errornote {
+    background: rgba(220, 53, 69, 0.1);
+    border: 2px solid var(--danger-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    color: var(--danger-color);
+    font-weight: bold;
+} 

@@ -43,6 +43,10 @@ print("🚀 Starting with immediate traffic...")
 print("🔄 Running migrations...")
 os.system('python manage.py setup_railway')
 
+# Collect static files
+print("📦 Collecting static files...")
+os.system('python manage.py collectstatic --noinput')
+
 # Test database connection with retry logic
 print("🔍 Testing database connection...")
 max_retries = 3
