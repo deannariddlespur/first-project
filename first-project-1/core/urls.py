@@ -23,5 +23,5 @@ urlpatterns = [
     path('admin-dashboard/', dogboarding_admin.urls),
     path('debug-images/', views.debug_images, name='debug_images'),
     path('test-images/', views.test_images_simple, name='test_images_simple'),
-    path('test-simple/', views.test_simple, name='test_simple'),
+    path('test-basic/', views.test_basic, name='test_basic'),
 ] 

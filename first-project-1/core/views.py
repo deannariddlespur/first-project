@@ -1839,6 +1839,6 @@ def test_images_simple(request):
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
 
-def test_simple(request):
-    """Very simple test view"""
-    return HttpResponse("Test page is working!")
+def test_basic(request):
+    """Very basic test view - no database access"""
+    return HttpResponse("Basic test page is working! No database access.")
