@@ -5,7 +5,6 @@ Test script to verify Django app startup
 import os
 import sys
 import time
-import requests
 
 print("🧪 Testing Django app startup...")
 
