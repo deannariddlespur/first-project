@@ -27,6 +27,15 @@ def home(request):
     """Homepage view - landing page for the dog boarding system"""
     return render(request, 'core/home.html')
 
+def health_check(request):
+    """Simple health check endpoint for Railway"""
+    from django.http import JsonResponse
+    return JsonResponse({
+        'status': 'healthy',
+        'message': 'Dog Boarding System is running',
+        'timestamp': time.time()
+    })
+
 def logout_view(request):
     """Logout view"""
     logout(request)
