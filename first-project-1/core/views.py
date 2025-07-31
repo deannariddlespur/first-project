@@ -719,18 +719,8 @@ def owner_dashboard(request):
         return redirect('create_owner')
     
     try:
+        # Get dogs but don't access photo fields yet
         dogs = owner.dogs.all()
-        
-        # Debug logging for image URLs
-        for dog in dogs:
-            try:
-                photo_url = dog.get_photo_url()
-                print(f"Dog: {dog.name}, Photo URL: {photo_url}")
-                if dog.photo:
-                    print(f"  Photo field exists: {dog.photo.name}")
-                    print(f"  Photo URL from field: {dog.photo.url}")
-            except Exception as e:
-                print(f"Error getting photo for {dog.name}: {e}")
         
         context = {
             'owner': owner,
