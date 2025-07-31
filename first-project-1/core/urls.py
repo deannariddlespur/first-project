@@ -11,7 +11,6 @@ urlpatterns = [
     path('create-admin/', views.create_admin_user, name='create_admin_user'),
     path('setup-database/', views.setup_database, name='setup_database'),
     path('debug-database/', views.debug_database, name='debug_database'),
-    path('fix-session/', views.fix_session_table, name='fix_session_table'),
     path('dashboard/', views.owner_dashboard, name='owner_dashboard'),
     path('dogs/add/', views.add_dog, name='add_dog'),
     path('dogs/<int:dog_id>/edit/', views.edit_dog, name='edit_dog'),
@@ -31,6 +30,7 @@ urlpatterns = [
     path('staff/payments/<int:payment_id>/', views.staff_payment_detail, name='staff_payment_detail'),
     path('staff/calendar/', views.staff_calendar, name='staff_calendar'),
     path('staff/calendar/delete/<int:entry_id>/', views.delete_availability_entry, name='delete_availability_entry'),
+    path('staff/fix-database/', views.fix_session_table, name='fix_session_table'),
     # Custom Admin URL
     path('admin-dashboard/', dogboarding_admin.urls),
     
