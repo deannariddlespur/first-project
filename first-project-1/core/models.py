@@ -25,7 +25,6 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_base64 = models.TextField(blank=True, null=True)  # Keep field for future use
 
     def __str__(self):
         return f"{self.name} ({self.owner})"
