@@ -1,1 +1,1 @@
-web: python manage.py setup_railway && gunicorn dogboarding.wsgi:application --bind 0.0.0.0:$PORT --workers=1 --log-file - 
+web: python startup_simple.py 
