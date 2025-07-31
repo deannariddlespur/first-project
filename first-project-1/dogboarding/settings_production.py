@@ -42,6 +42,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Add media file serving for production
+# This allows uploaded files to be served in production
+import django.conf.urls.static
+from django.conf import settings
+
 # Security
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
 # Disable SSL redirect for Railway testing

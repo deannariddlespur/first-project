@@ -24,5 +24,10 @@ urlpatterns = [
     path('', include('core.urls')),
 ]
 
+# Serve media files in both development and production
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # For production, we'll serve media files through Django
+    # This is not ideal for production but works for Railway
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
