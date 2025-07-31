@@ -43,6 +43,33 @@ print("🚀 Starting with immediate traffic...")
 print("🔄 Running migrations...")
 os.system('python manage.py setup_railway')
 
-# Start gunicorn
+# Test database connection
+print("🔍 Testing database connection...")
+try:
+    import os
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dogboarding.settings_production')
+    import django
+    django.setup()
+    
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+    print("✅ Database connection test successful")
+except Exception as e:
+    print(f"❌ Database connection test failed: {e}")
+    # Continue anyway - might be temporary issue
+
+# Start gunicorn with better settings for Railway
 print("🚀 Starting gunicorn...")
-os.execvp('gunicorn', ['gunicorn', 'dogboarding.wsgi:application', '--bind', f'0.0.0.0:{os.environ.get("PORT", "8080")}', '--workers=1', '--log-file', '-']) 
+os.execvp('gunicorn', [
+    'gunicorn', 
+    'dogboarding.wsgi:application', 
+    '--bind', f'0.0.0.0:{os.environ.get("PORT", "8080")}', 
+    '--workers=1', 
+    '--timeout=300',
+    '--keep-alive=5',
+    '--max-requests=1000',
+    '--max-requests-jitter=100',
+    '--preload',
+    '--log-file', '-'
+]) 
