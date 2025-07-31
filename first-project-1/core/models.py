@@ -1,8 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-import base64
-from io import BytesIO
-from PIL import Image
 
 # Create your models here.
 
@@ -28,58 +25,19 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_base64 = models.TextField(blank=True, null=True)  # Store image as base64 for Railway
+    photo_base64 = models.TextField(blank=True, null=True)  # Keep field for future use
 
     def __str__(self):
         return f"{self.name} ({self.owner})"
     
     def get_photo_url(self):
-        """Get photo URL, preferring base64 data for Railway compatibility"""
+        """Get photo URL - simplified version to avoid 500 errors"""
         try:
-            # For now, just use the original photo field to avoid 500 errors
             if self.photo:
                 return self.photo.url
-            # TODO: Add base64 support once migration is applied
-            # if hasattr(self, 'photo_base64') and self.photo_base64:
-            #     return f"data:image/jpeg;base64,{self.photo_base64}"
         except Exception as e:
             print(f"Error getting photo URL: {e}")
         return None
-    
-    def save_photo_as_base64(self, image_file):
-        """Convert uploaded image to base64 and save"""
-        try:
-            # Check if PIL is available
-            try:
-                from PIL import Image
-            except ImportError:
-                print("PIL not available, skipping base64 conversion")
-                return False
-            
-            # Open and resize image
-            img = Image.open(image_file)
-            # Convert to RGB if necessary
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            # Resize to reasonable size
-            img.thumbnail((300, 300), Image.Resampling.LANCZOS)
-            
-            # Convert to base64
-            buffer = BytesIO()
-            img.save(buffer, format='JPEG', quality=85)
-            img_str = base64.b64encode(buffer.getvalue()).decode()
-            
-            # Check if photo_base64 field exists
-            if hasattr(self, 'photo_base64'):
-                self.photo_base64 = img_str
-                self.save()
-                return True
-            else:
-                print("photo_base64 field not available")
-                return False
-        except Exception as e:
-            print(f"Error converting image to base64: {e}")
-            return False
 
 class Kennel(models.Model):
     SIZE_CHOICES = [
