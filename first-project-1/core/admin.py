@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import AdminSite
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
 # Custom Admin Site
@@ -256,6 +258,7 @@ class OwnerAdmin(admin.ModelAdmin):
     created_date.short_description = "Joined"
 
 # Register models with custom admin site
+dogboarding_admin.register(User, UserAdmin)
 dogboarding_admin.register(Owner, OwnerAdmin)
 dogboarding_admin.register(Dog, DogAdmin)
 dogboarding_admin.register(Kennel, KennelAdmin)
