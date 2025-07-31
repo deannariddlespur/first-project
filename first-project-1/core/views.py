@@ -625,6 +625,53 @@ def create_test_owner(request):
     
     return render(request, 'core/create_test_owner.html')
 
+def test_admin_fix(request):
+    """Test the admin fix by creating an owner and checking the relationship"""
+    from django.contrib.auth.models import User
+    
+    try:
+        # Create a test owner if it doesn't exist
+        if not User.objects.filter(username='admintest').exists():
+            test_user = User.objects.create_user(
+                username='admintest',
+                email='admintest@example.com',
+                password='admintest123',
+                first_name='Admin',
+                last_name='Test'
+            )
+            
+            owner = Owner.objects.create(
+                user=test_user,
+                phone='555-9999',
+                address='999 Test Street'
+            )
+            
+            # Test the dogs relationship
+            dog_count = owner.dogs.count()
+            
+            return render(request, 'core/test_admin_fix.html', {
+                'success': True,
+                'owner': owner,
+                'dog_count': dog_count,
+                'message': f"✅ Admin fix working! Owner has {dog_count} dogs."
+            })
+        else:
+            owner = Owner.objects.get(user__username='admintest')
+            dog_count = owner.dogs.count()
+            
+            return render(request, 'core/test_admin_fix.html', {
+                'success': True,
+                'owner': owner,
+                'dog_count': dog_count,
+                'message': f"✅ Admin fix working! Owner has {dog_count} dogs."
+            })
+            
+    except Exception as e:
+        return render(request, 'core/test_admin_fix.html', {
+            'success': False,
+            'error': str(e)
+        })
+
 class DogForm(ModelForm):
     class Meta:
         model = Dog
