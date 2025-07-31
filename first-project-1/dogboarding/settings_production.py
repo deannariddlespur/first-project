@@ -1,20 +1,17 @@
 import os
+import dj_database_url
 from .settings import *
 
 # Security settings
 DEBUG = False
 ALLOWED_HOSTS = ['*']  # Will be updated with your actual domain
 
-# Database (PostgreSQL for production)
+# Database configuration
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'dogboarding'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 # Static files
