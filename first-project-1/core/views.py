@@ -719,14 +719,14 @@ def owner_dashboard(request):
         return redirect('create_owner')
     
     try:
-        # Get dogs but don't access photo fields yet
-        dogs = owner.dogs.all()
+        # Get dogs with minimal field access
+        dogs = Dog.objects.filter(owner=owner).values('id', 'name', 'breed', 'size')
         
         context = {
             'owner': owner,
             'dogs': dogs,
         }
-        return render(request, 'core/dashboard.html', context)
+        return render(request, 'core/dashboard_minimal.html', context)
     except Exception as e:
         return HttpResponse(f"Dashboard Error: {str(e)}")
 

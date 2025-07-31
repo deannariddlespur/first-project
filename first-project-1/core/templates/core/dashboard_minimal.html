@@ -1,0 +1,315 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .dashboard-title {
+        font-size: 2.5em;
+        margin: 0;
+        font-weight: bold;
+    }
+    
+    .dashboard-subtitle {
+        font-size: 1.1em;
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+    
+    .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .section-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .action-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .dogs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .dog-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e1e5e9;
+    }
+    
+    .dog-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .dog-photo-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 2em;
+    }
+    
+    .dog-info {
+        flex: 1;
+    }
+    
+    .dog-info h4 {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .dog-breed {
+        color: #666;
+        font-size: 0.95em;
+        margin-bottom: 8px;
+    }
+    
+    .dog-size {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .dog-size.small {
+        background: #28a745;
+        color: white;
+    }
+    
+    .dog-size.medium {
+        background: #ffc107;
+        color: #333;
+    }
+    
+    .dog-size.large {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .dog-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .dog-actions a {
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .edit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .edit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .delete-btn {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .delete-btn:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+    
+    .add-dog-section {
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .add-dog-section .action-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        display: inline-block;
+        padding: 15px 30px;
+        font-size: 1.1em;
+    }
+    
+    .add-dog-section .action-btn:hover {
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .header-text {
+            text-align: center;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .dogs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="dashboard-title">🐕 Your Dogs</h1>
+                <p class="dashboard-subtitle">Manage your furry friends and their boarding needs</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'logout' %}" class="logout-btn">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions Section -->
+    <div class="section-card">
+        <div class="section-title">
+            <span>⚡</span>
+            Quick Actions
+        </div>
+        <div class="quick-actions">
+            <a href="{% url 'booking_calendar' %}" class="action-btn">📅 View Calendar</a>
+            <a href="{% url 'create_booking' %}" class="action-btn">🐕 Book Boarding</a>
+            <a href="{% url 'booking_list' %}" class="action-btn">📋 My Bookings</a>
+        </div>
+    </div>
+    
+    <!-- Your Dogs Section -->
+    <div class="section-card">
+        <div class="section-title">
+            <span>🐕</span>
+            Your Dogs
+        </div>
+        {% if dogs %}
+            <div class="dogs-grid">
+            {% for dog in dogs %}
+                <div class="dog-card">
+                    <div class="dog-header">
+                        <div class="dog-photo-placeholder">
+                            🐕
+                        </div>
+                        <div class="dog-info">
+                            <h4>{{ dog.name }}</h4>
+                            <div class="dog-breed">{{ dog.breed|default:"Mixed breed" }}</div>
+                            <span class="dog-size {{ dog.size }}">{{ dog.size|title }}</span>
+                        </div>
+                    </div>
+                    <div class="dog-actions">
+                        <a href="{% url 'edit_dog' dog.id %}" class="edit-btn">Edit</a>
+                        <a href="{% url 'delete_dog' dog.id %}" class="delete-btn">Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>You haven't added any dogs yet. Add your first furry friend!</p>
+            </div>
+        {% endif %}
+        <div class="add-dog-section">
+            <a href="{% url 'add_dog' %}" class="action-btn">🐕 Add a Dog</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 
