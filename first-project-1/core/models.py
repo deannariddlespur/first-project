@@ -35,15 +35,27 @@ class Dog(models.Model):
     
     def get_photo_url(self):
         """Get photo URL, preferring base64 data for Railway compatibility"""
-        if self.photo_base64:
-            return f"data:image/jpeg;base64,{self.photo_base64}"
-        elif self.photo:
-            return self.photo.url
+        try:
+            # For now, just use the original photo field to avoid 500 errors
+            if self.photo:
+                return self.photo.url
+            # TODO: Add base64 support once migration is applied
+            # if hasattr(self, 'photo_base64') and self.photo_base64:
+            #     return f"data:image/jpeg;base64,{self.photo_base64}"
+        except Exception as e:
+            print(f"Error getting photo URL: {e}")
         return None
     
     def save_photo_as_base64(self, image_file):
         """Convert uploaded image to base64 and save"""
         try:
+            # Check if PIL is available
+            try:
+                from PIL import Image
+            except ImportError:
+                print("PIL not available, skipping base64 conversion")
+                return False
+            
             # Open and resize image
             img = Image.open(image_file)
             # Convert to RGB if necessary
@@ -57,9 +69,14 @@ class Dog(models.Model):
             img.save(buffer, format='JPEG', quality=85)
             img_str = base64.b64encode(buffer.getvalue()).decode()
             
-            self.photo_base64 = img_str
-            self.save()
-            return True
+            # Check if photo_base64 field exists
+            if hasattr(self, 'photo_base64'):
+                self.photo_base64 = img_str
+                self.save()
+                return True
+            else:
+                print("photo_base64 field not available")
+                return False
         except Exception as e:
             print(f"Error converting image to base64: {e}")
             return False
