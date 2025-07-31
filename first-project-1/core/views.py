@@ -1644,36 +1644,32 @@ def delete_availability_entry(request, entry_id):
     return redirect('staff_calendar')
 
 def debug_app(request):
-    """Debug endpoint to check application status"""
-    from django.http import JsonResponse
+    """Debug endpoint to check app status"""
     import logging
-    
     logger = logging.getLogger(__name__)
-    logger.info("Debug endpoint accessed")
     
     try:
-        # Check database connection
+        # Test database connection
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
-            db_status = "connected"
+        db_status = "connected"
     except Exception as e:
         db_status = f"error: {str(e)}"
     
-    # Check if user is authenticated
-    user_status = "authenticated" if request.user.is_authenticated else "not authenticated"
-    
-    # Check if owner exists for current user
-    owner_status = "not found"
+    # Check user authentication
     if request.user.is_authenticated:
+        user_status = f"authenticated as {request.user.username}"
         try:
             owner = Owner.objects.get(user=request.user)
-            owner_status = f"found: {owner}"
+            owner_status = f"owner found: {owner}"
         except Owner.DoesNotExist:
-            owner_status = "does not exist"
-        except Exception as e:
-            owner_status = f"error: {str(e)}"
+            owner_status = "no owner record"
+    else:
+        user_status = "not authenticated"
+        owner_status = "not found"
     
+    import time
     return JsonResponse({
         'status': 'running',
         'database': db_status,
@@ -1681,6 +1677,52 @@ def debug_app(request):
         'owner': owner_status,
         'timestamp': time.time()
     })
+
+def create_test_user_simple(request):
+    """Create a simple test user for debugging"""
+    try:
+        from django.contrib.auth.models import User
+        from django.contrib.auth.hashers import make_password
+        
+        # Create test user
+        username = 'testuser'
+        password = 'testpass123'
+        
+        # Check if user already exists
+        if User.objects.filter(username=username).exists():
+            user = User.objects.get(username=username)
+            user.set_password(password)
+            user.save()
+        else:
+            user = User.objects.create_user(
+                username=username,
+                email='test@example.com',
+                password=password,
+                first_name='Test',
+                last_name='User'
+            )
+        
+        # Create owner record
+        owner, created = Owner.objects.get_or_create(
+            user=user,
+            defaults={
+                'phone': '555-1234',
+                'address': '123 Test St'
+            }
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Test user created: {username} / {password}',
+            'user_id': user.id,
+            'owner_id': owner.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
 
 def list_users(request):
     """Debug endpoint to list existing users"""
