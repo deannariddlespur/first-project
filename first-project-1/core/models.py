@@ -31,12 +31,12 @@ class Dog(models.Model):
         return f"{self.name} ({self.owner})"
     
     def get_photo_url(self):
-        """Get photo URL - simplified version to avoid 500 errors"""
+        """Get photo URL - simplified version to avoid errors"""
         try:
             if self.photo:
                 return self.photo.url
-        except Exception as e:
-            print(f"Error getting photo URL: {e}")
+        except:
+            pass
         return None
 
 class Kennel(models.Model):
