@@ -1,1 +1,1 @@
-web: python test_startup.py 
+web: gunicorn dogboarding.wsgi --log-file - 
