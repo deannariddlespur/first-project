@@ -44,9 +44,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Security
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Disable SSL redirect for Railway testing
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # Logging
 LOGGING = {
