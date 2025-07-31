@@ -753,23 +753,10 @@ def edit_dog(request, dog_id):
     
     if request.method == 'POST':
         logger.info(f"Edit dog POST request for {dog.name}")
-        logger.info(f"Files in request: {list(request.FILES.keys())}")
-        
         form = DogForm(request.POST, request.FILES, instance=dog)
         if form.is_valid():
             logger.info("Form is valid, saving dog")
-            dog = form.save()
-            
-            # Save photo as base64 for Railway compatibility
-            if 'photo' in request.FILES:
-                logger.info(f"Photo uploaded: {request.FILES['photo'].name}")
-                logger.info(f"Photo size: {request.FILES['photo'].size}")
-                success = dog.save_photo_as_base64(request.FILES['photo'])
-                logger.info(f"Base64 conversion success: {success}")
-            else:
-                logger.info("No photo uploaded")
-            
-            logger.info(f"Dog photo after save: {dog.photo}")
+            form.save()
             return redirect('owner_dashboard')
         else:
             logger.error(f"Form errors: {form.errors}")

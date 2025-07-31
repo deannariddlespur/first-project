@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-import base64
-from io import BytesIO
 
 # Create your models here.
 
@@ -27,17 +25,15 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_base64 = models.TextField(blank=True, null=True)  # Store photo as base64
+    photo_base64 = models.TextField(blank=True, null=True)  # Keep field for future use
 
     def __str__(self):
         return f"{self.name} ({self.owner})"
     
     def get_photo_url(self):
-        """Get photo URL - prefers base64 for Railway compatibility"""
+        """Get photo URL - simplified version to avoid errors"""
         try:
-            if self.photo_base64:
-                return f"data:image/jpeg;base64,{self.photo_base64}"
-            elif self.photo:
+            if self.photo:
                 return self.photo.url
         except:
             pass
