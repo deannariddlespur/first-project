@@ -754,6 +754,10 @@ def add_dog(request):
                 dog.owner = owner
                 dog.save()
                 
+                # Save image as base64 if uploaded
+                if 'photo' in request.FILES:
+                    dog.save_photo_as_base64(request.FILES['photo'])
+                
                 logger.info(f"Successfully saved dog: {dog.name}")
                 messages.success(request, f"✅ {dog.name} has been successfully added!")
                 return redirect('owner_dashboard')
@@ -786,7 +790,12 @@ def edit_dog(request, dog_id):
         form = DogForm(request.POST, request.FILES, instance=dog)
         if form.is_valid():
             logger.info("Form is valid, saving dog")
-            form.save()
+            dog = form.save()
+            
+            # Save image as base64 if uploaded
+            if 'photo' in request.FILES:
+                dog.save_photo_as_base64(request.FILES['photo'])
+            
             return redirect('owner_dashboard')
         else:
             logger.error(f"Form errors: {form.errors}")
