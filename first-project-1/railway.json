@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python railway_startup.py && gunicorn dogboarding.wsgi",
+    "startCommand": "python railway_startup.py; gunicorn dogboarding.wsgi --bind 0.0.0.0:$PORT",
     "healthcheckPath": "/",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

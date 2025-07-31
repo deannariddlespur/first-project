@@ -124,11 +124,18 @@ if __name__ == '__main__':
     print("🐕 Dog Boarding Railway Startup")
     print("=" * 50)
     
-    success = setup_railway()
-    
-    if success:
-        print("✅ Railway setup completed successfully!")
-    else:
-        print("⚠️ Railway setup had issues, but continuing...")
-    
-    print("=" * 50) 
+    try:
+        success = setup_railway()
+        
+        if success:
+            print("✅ Railway setup completed successfully!")
+        else:
+            print("⚠️ Railway setup had issues, but continuing...")
+        
+        print("=" * 50)
+        print("🚀 Starting web server...")
+        
+    except Exception as e:
+        print(f"❌ Critical error in startup: {e}")
+        print("⚠️ Continuing anyway...")
+        print("=" * 50) 
