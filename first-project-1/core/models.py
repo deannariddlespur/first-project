@@ -32,20 +32,12 @@ class Dog(models.Model):
         return f"{self.name} ({self.owner})"
     
     def get_photo_url(self):
-        """Get photo URL - try file first, then base64"""
+        """Get photo URL - simplified version to avoid errors"""
         try:
             if self.photo:
                 return self.photo.url
         except:
             pass
-        
-        # If file doesn't exist, try base64 (only if column exists)
-        try:
-            if hasattr(self, 'photo_base64') and self.photo_base64:
-                return f"data:image/jpeg;base64,{self.photo_base64}"
-        except:
-            pass
-        
         return None
     
     def save_photo_as_base64(self, image_file):
