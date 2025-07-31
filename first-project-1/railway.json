@@ -7,7 +7,7 @@
     }
   },
   "deploy": {
-    "startCommand": "gunicorn dogboarding.wsgi --bind 0.0.0.0:$PORT --workers=1 --log-file -",
+    "startCommand": "gunicorn dogboarding.wsgi:application --bind 0.0.0.0:$PORT --workers=1 --log-file -",
     "healthcheckPath": "/health/",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
