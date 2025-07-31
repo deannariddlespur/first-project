@@ -1724,6 +1724,37 @@ def create_test_user_simple(request):
             'error': str(e)
         })
 
+def reset_jane_password(request):
+    """Reset jane.doe password for debugging"""
+    try:
+        from django.contrib.auth.models import User
+        
+        # Find jane.doe user
+        user = User.objects.get(username='jane.doe')
+        
+        # Set new password
+        new_password = 'Sunshine101!'
+        user.set_password(new_password)
+        user.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Password reset for jane.doe: {new_password}',
+            'username': 'jane.doe',
+            'password': new_password
+        })
+        
+    except User.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'jane.doe user not found'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
 def list_users(request):
     """Debug endpoint to list existing users"""
     from django.http import JsonResponse
