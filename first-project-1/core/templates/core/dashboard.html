@@ -360,10 +360,14 @@
             {% for dog in dogs %}
                 <div class="dog-card">
                     <div class="dog-header">
-                        {% if dog.get_photo_url %}
-                            <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}" class="dog-photo">
-                        {% elif dog.photo %}
-                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo">
+                        {% if dog.photo %}
+                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="dog-photo placeholder-photo" style="display: none;">
+                                <div class="placeholder-content">
+                                    <span class="placeholder-icon">📷</span>
+                                    <span class="placeholder-text">Photo</span>
+                                </div>
+                            </div>
                         {% else %}
                             <div class="dog-photo placeholder-photo">
                                 <div class="placeholder-content">
