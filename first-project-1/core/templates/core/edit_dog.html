@@ -1,35 +1,315 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>Edit Dog 🐾</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <p>
-            <label for="{{ form.name.id_for_label }}">Dog's Name:</label>
-            {{ form.name }}
-        </p>
-        <p>
-            <label for="{{ form.breed.id_for_label }}">Breed:</label>
-            {{ form.breed }}
-        </p>
-        <p>
-            <label for="{{ form.age.id_for_label }}">Age:</label>
-            {{ form.age }}
-        </p>
-        <p>
-            <label for="{{ form.size.id_for_label }}">Size:</label>
-            {{ form.size }}
-        </p>
-        <p>
-            <label for="{{ form.notes.id_for_label }}">Notes:</label>
-            {{ form.notes }}
-        </p>
-        <p>
-            <label for="{{ form.photo.id_for_label }}">Photo:</label>
-            {{ form.photo }}
-        </p>
-        <button type="submit" class="doggy-btn">Save Changes</button>
-    </form>
-    <p><a href="{% url 'owner_dashboard' %}">Back to Dashboard</a></p>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .edit-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .edit-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .edit-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .edit-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .edit-subtitle {
+        color: #666;
+        font-size: 1.1em;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 1.1em;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: white;
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: white;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .photo-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .current-photo {
+        margin-bottom: 15px;
+    }
+
+    .current-photo a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .current-photo a:hover {
+        text-decoration: underline;
+    }
+
+    .clear-checkbox {
+        margin-bottom: 15px;
+    }
+
+    .clear-checkbox label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: normal;
+        color: #666;
+    }
+
+    .file-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .file-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .save-btn {
+        flex: 1;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    .back-btn {
+        flex: 1;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 1.1em;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .edit-container {
+            margin: 20px auto;
+            padding: 10px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="edit-container">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h1 class="edit-title">
+                <span>🐾</span>
+                Edit Dog
+            </h1>
+            <p class="edit-subtitle">Update your furry friend's information</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.name.id_for_label }}">Dog's Name</label>
+                {{ form.name }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.breed.id_for_label }}">Breed</label>
+                {{ form.breed }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.age.id_for_label }}">Age</label>
+                {{ form.age }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.size.id_for_label }}">Size</label>
+                {{ form.size }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.notes.id_for_label }}">Notes</label>
+                {{ form.notes }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Photo</label>
+                <div class="photo-section">
+                    {% if dog.photo %}
+                        <div class="current-photo">
+                            <strong>Currently:</strong> <a href="{{ dog.photo.url }}" target="_blank">{{ dog.photo.name }}</a>
+                        </div>
+                        <div class="clear-checkbox">
+                            <label>
+                                <input type="checkbox" name="photo-clear" id="photo-clear">
+                                Clear
+                            </label>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <strong>Change:</strong> {{ form.photo }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="save-btn">💾 Save Changes</button>
+                <a href="{% url 'owner_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script>
+    // Add modern styling to form inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea, select');
+        inputs.forEach(input => {
+            input.classList.add('form-input');
+        });
+        
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.classList.add('form-textarea');
+        });
+        
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.classList.add('form-select');
+        });
+        
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            input.classList.add('file-input');
+        });
+    });
+</script>
 {% endblock %} 
