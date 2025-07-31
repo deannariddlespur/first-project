@@ -7,20 +7,27 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']  # Will be updated with your actual domain
 
 # Database configuration
-if os.environ.get('DATABASE_URL'):
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Use PostgreSQL on Railway
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
         )
     }
+    print(f"✅ Using PostgreSQL database from DATABASE_URL")
 else:
+    # Fallback to SQLite for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+    print("⚠️ Using SQLite database (not recommended for production)")
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
