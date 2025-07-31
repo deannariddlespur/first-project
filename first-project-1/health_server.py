@@ -10,10 +10,12 @@ import threading
 
 class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        # Respond to any path with a 200 status
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        
         if self.path == '/health/':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
             response = {
                 'status': 'healthy',
                 'message': 'Dog Boarding System is running',
@@ -21,13 +23,9 @@ class HealthHandler(BaseHTTPRequestHandler):
             }
             self.wfile.write(str(response).encode())
         elif self.path == '/':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
             self.wfile.write(b'<h1>Dog Boarding System</h1><p>Starting up...</p>')
         else:
-            self.send_response(404)
-            self.end_headers()
+            self.wfile.write(b'<h1>Dog Boarding System</h1><p>Starting up...</p>')
     
     def log_message(self, format, *args):
         # Suppress logging for cleaner output
@@ -41,12 +39,15 @@ def start_health_server():
     server.serve_forever()
 
 if __name__ == '__main__':
+    print("🚀 Starting health check server...")
+    
     # Start health server in background
     health_thread = threading.Thread(target=start_health_server, daemon=True)
     health_thread.start()
     
-    # Give health server time to start
-    time.sleep(2)
+    print("⏳ Waiting for health server to start...")
+    time.sleep(3)
+    print("✅ Health server is ready!")
     
     # Run migrations before starting Django
     print("🔄 Running database migrations...")
@@ -58,6 +59,7 @@ if __name__ == '__main__':
     
     # Now start the main Django application
     print("🚀 Starting Django application...")
+    print("🎯 Gunicorn will now take over...")
     os.execvp('gunicorn', [
         'gunicorn',
         'dogboarding.wsgi:application',
