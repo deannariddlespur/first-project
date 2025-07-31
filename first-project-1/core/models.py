@@ -39,15 +39,23 @@ class Dog(models.Model):
         except:
             pass
         
-        # If file doesn't exist, try base64
-        if self.photo_base64:
-            return f"data:image/jpeg;base64,{self.photo_base64}"
+        # If file doesn't exist, try base64 (only if column exists)
+        try:
+            if hasattr(self, 'photo_base64') and self.photo_base64:
+                return f"data:image/jpeg;base64,{self.photo_base64}"
+        except:
+            pass
         
         return None
     
     def save_photo_as_base64(self, image_file):
         """Convert uploaded image to base64 and save"""
         try:
+            # Check if photo_base64 field exists
+            if not hasattr(self, 'photo_base64'):
+                print("photo_base64 field not available")
+                return False
+                
             # Read the image file
             image_data = image_file.read()
             image_file.seek(0)  # Reset file pointer
