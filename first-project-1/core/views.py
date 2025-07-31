@@ -17,7 +17,21 @@ from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, F
 
 def home(request):
     """Homepage view - landing page for the dog boarding system"""
-    return render(request, 'core/home.html')
+    from django.http import HttpResponse
+    return HttpResponse("""
+    <html>
+    <head><title>Dog Boarding System</title></head>
+    <body>
+        <h1>🐕 Dog Boarding System</h1>
+        <p>The system is running. Please try:</p>
+        <ul>
+            <li><a href="/login/">Login</a></li>
+            <li><a href="/health/">Health Check</a></li>
+            <li><a href="/debug/">Debug Info</a></li>
+        </ul>
+    </body>
+    </html>
+    """)
 
 def health_check(request):
     """Simple health check endpoint for Railway"""
