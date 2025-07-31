@@ -43,21 +43,31 @@ print("🚀 Starting with immediate traffic...")
 print("🔄 Running migrations...")
 os.system('python manage.py setup_railway')
 
-# Test database connection
+# Test database connection with retry logic
 print("🔍 Testing database connection...")
-try:
-    import os
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dogboarding.settings_production')
-    import django
-    django.setup()
-    
-    from django.db import connection
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT 1")
-    print("✅ Database connection test successful")
-except Exception as e:
-    print(f"❌ Database connection test failed: {e}")
-    # Continue anyway - might be temporary issue
+max_retries = 3
+retry_count = 0
+
+while retry_count < max_retries:
+    try:
+        import os
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dogboarding.settings_production')
+        import django
+        django.setup()
+        
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        print("✅ Database connection test successful")
+        break
+    except Exception as e:
+        retry_count += 1
+        print(f"❌ Database connection test failed (attempt {retry_count}/{max_retries}): {e}")
+        if retry_count < max_retries:
+            print("🔄 Retrying in 2 seconds...")
+            time.sleep(2)
+        else:
+            print("⚠️ Continuing without successful database test - app may have connection issues")
 
 # Start gunicorn with better settings for Railway
 print("🚀 Starting gunicorn...")
@@ -66,10 +76,12 @@ os.execvp('gunicorn', [
     'dogboarding.wsgi:application', 
     '--bind', f'0.0.0.0:{os.environ.get("PORT", "8080")}', 
     '--workers=1', 
-    '--timeout=300',
-    '--keep-alive=5',
-    '--max-requests=1000',
-    '--max-requests-jitter=100',
+    '--timeout=120',  # Reduced timeout
+    '--keep-alive=2',  # Reduced keep-alive
+    '--max-requests=500',  # Reduced max requests
+    '--max-requests-jitter=50',  # Reduced jitter
     '--preload',
-    '--log-file', '-'
+    '--log-file', '-',
+    '--access-logfile', '-',
+    '--error-logfile', '-'
 ]) 

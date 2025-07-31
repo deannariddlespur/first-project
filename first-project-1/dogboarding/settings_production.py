@@ -14,8 +14,8 @@ if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True
+            conn_max_age=0,  # Disable connection pooling to avoid timeout issues
+            conn_health_checks=False  # Disable health checks to reduce connection overhead
         )
     }
     print(f"✅ Using PostgreSQL database from DATABASE_URL")
