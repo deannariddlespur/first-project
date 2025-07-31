@@ -18,9 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+
+def redirect_to_custom_admin(request):
+    """Redirect from default admin to custom admin dashboard"""
+    return redirect('/admin-dashboard/')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', redirect_to_custom_admin, name='admin_redirect'),
     path('', include('core.urls')),
 ]
 

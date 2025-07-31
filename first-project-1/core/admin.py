@@ -9,6 +9,10 @@ class DogBoardingAdminSite(AdminSite):
     index_title = "Dashboard"
     site_url = "/"
     
+    # Use custom admin templates
+    index_template = "admin/base_site.html"
+    app_index_template = "admin/base_site.html"
+    
     def get_app_list(self, request):
         """
         Override to customize the admin app list
