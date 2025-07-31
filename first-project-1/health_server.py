@@ -48,6 +48,14 @@ if __name__ == '__main__':
     # Give health server time to start
     time.sleep(2)
     
+    # Run migrations before starting Django
+    print("🔄 Running database migrations...")
+    try:
+        os.system('python run_migrations.py')
+        print("✅ Database setup complete!")
+    except Exception as e:
+        print(f"⚠️ Migration warning: {e}")
+    
     # Now start the main Django application
     print("🚀 Starting Django application...")
     os.execvp('gunicorn', [
