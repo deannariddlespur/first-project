@@ -67,11 +67,16 @@ def debug_database(request):
         }
         return render(request, 'core/debug_database.html', context)
 
-@user_passes_test(is_staff)
 def fix_session_table(request):
     """Database maintenance tool for staff only"""
     from django.core.management import call_command
     from django.contrib.auth.models import User
+    from django.contrib.auth.decorators import user_passes_test
+    
+    # Check if user is staff
+    if not request.user.is_authenticated or not (request.user.is_staff or request.user.is_superuser):
+        from django.shortcuts import redirect
+        return redirect('staff_login')
     
     if request.method == 'POST':
         try:
