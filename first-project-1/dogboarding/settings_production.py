@@ -15,12 +15,7 @@ if DATABASE_URL:
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            conn_health_checks=True,
-            # Add connection retry settings
-            options={
-                'connect_timeout': 60,
-                'application_name': 'dogboarding',
-            }
+            conn_health_checks=True
         )
     }
     print(f"✅ Using PostgreSQL database from DATABASE_URL")
