@@ -1,1 +1,1 @@
-web: python startup.py && gunicorn dogboarding.wsgi 
+web: gunicorn dogboarding.wsgi 
