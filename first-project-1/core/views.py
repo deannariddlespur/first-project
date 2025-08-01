@@ -744,20 +744,43 @@ def add_dog(request):
 
 @login_required
 def edit_dog(request, dog_id):
-    """Edit dog with error handling"""
+    """Edit dog with improved error handling"""
     try:
-        owner = get_object_or_404(Owner, user=request.user)
-        dog = get_object_or_404(Dog, id=dog_id, owner=owner)
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return redirect('login_owner')
+        
+        # Try to get owner, redirect to create owner if not found
+        try:
+            owner = get_object_or_404(Owner, user=request.user)
+        except:
+            return redirect('register_owner')
+        
+        # Try to get dog, handle 404 gracefully
+        try:
+            dog = get_object_or_404(Dog, id=dog_id, owner=owner)
+        except:
+            return HttpResponse(f"Dog with ID {dog_id} not found or you don't have permission to edit it.")
         
         if request.method == 'POST':
-            form = DogForm(request.POST, request.FILES, instance=dog)
-            if form.is_valid():
-                dog = form.save()
-                return redirect('owner_dashboard')
+            try:
+                form = DogForm(request.POST, request.FILES, instance=dog)
+                if form.is_valid():
+                    dog = form.save()
+                    # Comment out base64 saving for now to avoid errors
+                    # dog.save_photo_as_base64()
+                    return redirect('owner_dashboard')
+                else:
+                    return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})
+            except Exception as e:
+                return HttpResponse(f"Error saving dog: {str(e)}")
         else:
-            form = DogForm(instance=dog)
+            try:
+                form = DogForm(instance=dog)
+                return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})
+            except Exception as e:
+                return HttpResponse(f"Error loading dog form: {str(e)}")
         
-        return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})
     except Exception as e:
         return HttpResponse(f"Edit dog error: {str(e)}")
 
