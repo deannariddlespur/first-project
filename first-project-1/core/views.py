@@ -1819,15 +1819,18 @@ def create_test_dog(request):
         
         # Create a test dog if it doesn't exist
         if not Dog.objects.filter(owner=owner, name='Buddy').exists():
-            dog = Dog.objects.create(
-                owner=owner,
-                name='Buddy',
-                breed='Golden Retriever',
-                age=3,
-                size='large',
-                notes='A friendly test dog for testing the application.'
-            )
-            return HttpResponse(f"✅ Test dog created! Dog ID: {dog.id}<br><br>You can now test:<br>- <a href='/dogs/{dog.id}/edit/'>Edit Dog</a><br>- <a href='/dashboard/'>Dashboard</a>")
+            # Use raw SQL to avoid the photo_base64 column issue
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO core_dog (owner_id, name, breed, age, size, notes, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
+                """, [owner.id, 'Buddy', 'Golden Retriever', 3, 'large', 'A friendly test dog for testing the application.'])
+                
+                # Get the created dog's ID
+                dog_id = cursor.lastrowid if hasattr(cursor, 'lastrowid') else cursor.execute("SELECT LASTVAL()").fetchone()[0]
+                
+            return HttpResponse(f"✅ Test dog created! Dog ID: {dog_id}<br><br>You can now test:<br>- <a href='/dogs/{dog_id}/edit/'>Edit Dog</a><br>- <a href='/dashboard/'>Dashboard</a>")
         else:
             dog = Dog.objects.get(owner=owner, name='Buddy')
             return HttpResponse(f"✅ Test dog already exists! Dog ID: {dog.id}<br><br>You can test:<br>- <a href='/dogs/{dog.id}/edit/'>Edit Dog</a><br>- <a href='/dashboard/'>Dashboard</a>")
