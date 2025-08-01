@@ -1789,3 +1789,48 @@ def test_basic(request):
 def test_deployment(request):
     """Simple test view to verify deployment is working"""
     return HttpResponse("✅ Deployment is working! Database issues are being resolved.")
+
+def create_test_dog(request):
+    """Create a test dog for testing purposes"""
+    try:
+        # Get or create test owner
+        test_user, created = User.objects.get_or_create(
+            username='testowner',
+            defaults={
+                'email': 'test@example.com',
+                'first_name': 'Test',
+                'last_name': 'Owner'
+            }
+        )
+        
+        if created:
+            test_user.set_password('test123456')
+            test_user.save()
+            
+            # Create Owner record
+            Owner.objects.create(
+                user=test_user,
+                phone='555-1234',
+                address='123 Test Street'
+            )
+        
+        # Get the owner
+        owner = Owner.objects.get(user=test_user)
+        
+        # Create a test dog if it doesn't exist
+        if not Dog.objects.filter(owner=owner, name='Buddy').exists():
+            dog = Dog.objects.create(
+                owner=owner,
+                name='Buddy',
+                breed='Golden Retriever',
+                age=3,
+                size='large',
+                notes='A friendly test dog for testing the application.'
+            )
+            return HttpResponse(f"✅ Test dog created! Dog ID: {dog.id}<br><br>You can now test:<br>- <a href='/dogs/{dog.id}/edit/'>Edit Dog</a><br>- <a href='/dashboard/'>Dashboard</a>")
+        else:
+            dog = Dog.objects.get(owner=owner, name='Buddy')
+            return HttpResponse(f"✅ Test dog already exists! Dog ID: {dog.id}<br><br>You can test:<br>- <a href='/dogs/{dog.id}/edit/'>Edit Dog</a><br>- <a href='/dashboard/'>Dashboard</a>")
+            
+    except Exception as e:
+        return HttpResponse(f"❌ Error creating test dog: {str(e)}")
