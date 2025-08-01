@@ -7,12 +7,17 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         with connection.cursor() as cursor:
             try:
-                # Check if the column already exists
-                cursor.execute("PRAGMA table_info(core_dailylog)")
-                columns = [row[1] for row in cursor.fetchall()]
+                # Check if the column already exists (PostgreSQL syntax)
+                cursor.execute("""
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'core_dailylog' 
+                    AND column_name = 'photo'
+                """)
+                columns = [row[0] for row in cursor.fetchall()]
                 
                 if 'photo' not in columns:
-                    # Add the photo column
+                    # Add the photo column (PostgreSQL syntax)
                     cursor.execute("ALTER TABLE core_dailylog ADD COLUMN photo VARCHAR(100) NULL")
                     self.stdout.write(
                         self.style.SUCCESS('Successfully added photo column to core_dailylog table')
