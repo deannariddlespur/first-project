@@ -160,10 +160,11 @@
         width: 80px;
         height: 80px;
         border-radius: 12px;
-        object-fit: contain;
+        object-fit: cover;
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         border: 2px solid #ddd;
         background-color: #f8f9fa;
+        display: block;
     }
 
     .placeholder-photo {
@@ -362,17 +363,16 @@
             {% for dog in dogs %}
                 <div class="dog-card">
                     <div class="dog-header">
-                        {% if dog.get_photo_url %}
-                            <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}" class="dog-photo" 
-                                 onerror="console.log('Image failed to load: {{ dog.get_photo_url }}'); this.style.border='3px solid red'; this.style.display='none'; this.nextElementSibling.style.display='flex';" 
-                                 onload="console.log('Image loaded successfully: {{ dog.get_photo_url }}'); this.style.border='3px solid green';">
+                        {% if dog.photo %}
+                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                 onload="this.nextElementSibling.style.display='none';">
                             <div class="dog-photo placeholder-photo" style="display: none;">
                                 <div class="placeholder-content">
                                     <span class="placeholder-icon">🐕</span>
                                     <span class="placeholder-text">{{ dog.name }}</span>
                                 </div>
                             </div>
-                            <!-- Debug info: {{ dog.get_photo_url }} -->
                         {% else %}
                             <div class="dog-photo placeholder-photo">
                                 <div class="placeholder-content">
@@ -401,6 +401,7 @@
         {% endif %}
         <div class="add-dog-section">
             <a href="{% url 'add_dog' %}" class="action-btn">🐕 Add a Dog</a>
+            <a href="{% url 'owner_daily_logs' %}" class="action-btn">📊 View Daily Logs</a>
         </div>
     </div>
 </div>

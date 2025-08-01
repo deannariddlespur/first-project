@@ -1,61 +1,211 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<div class="doggy-container">
-    <h2>❌ Cancel Booking</h2>
-    
-    <div class="cancel-confirmation">
-        <h3>Are you sure you want to cancel this booking?</h3>
-        <p><strong>Dog:</strong> {{ booking.dog.name }}</p>
-        <p><strong>Dates:</strong> {{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</p>
-        {% if booking.kennel %}
-            <p><strong>Kennel:</strong> {{ booking.kennel.name }}</p>
-        {% endif %}
-        {% if booking.total_amount %}
-            <p><strong>Total Amount:</strong> ${{ booking.total_amount }}</p>
-        {% endif %}
-    </div>
-    
-    <form method="post">
-        {% csrf_token %}
-        <div class="cancel-actions">
-            <button type="submit" class="doggy-btn danger">Yes, Cancel Booking</button>
-            <a href="{% url 'booking_list' %}" class="doggy-btn">No, Keep Booking</a>
+<div class="cancel-booking-container">
+    <div class="cancel-card">
+        <div class="cancel-header">
+            <div class="cancel-icon">❌</div>
+            <h2>Cancel Booking</h2>
         </div>
-    </form>
+        
+        <div class="cancel-content">
+            <div class="warning-message">
+                <h3>Are you sure you want to cancel this booking?</h3>
+            </div>
+            
+            <div class="booking-details">
+                <div class="detail-item">
+                    <span class="detail-label">Dog:</span>
+                    <span class="detail-value">{{ booking.dog.name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Dates:</span>
+                    <span class="detail-value">{{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</span>
+                </div>
+                {% if booking.kennel %}
+                <div class="detail-item">
+                    <span class="detail-label">Kennel:</span>
+                    <span class="detail-value">{{ booking.kennel.name }}</span>
+                </div>
+                {% endif %}
+                {% if booking.total_amount %}
+                <div class="detail-item">
+                    <span class="detail-label">Total Amount:</span>
+                    <span class="detail-value">${{ booking.total_amount }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="cancel-actions">
+                <button type="submit" class="cancel-btn">Yes, Cancel Booking</button>
+                <a href="{% url 'booking_list' %}" class="keep-btn">No, Keep Booking</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 <style>
-.cancel-confirmation {
-    background: #fff;
-    border: 2px solid #f7d08a;
-    border-radius: 8px;
-    padding: 15px;
-    margin: 20px 0;
-    overflow: hidden;
+.cancel-booking-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.cancel-confirmation h3 {
-    color: #d2691e;
-    margin-top: 0;
+
+.cancel-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
-.cancel-confirmation p {
-    margin: 10px 0;
-    word-wrap: break-word;
+
+.cancel-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
 }
+
+.cancel-icon {
+    font-size: 2.5em;
+    color: #dc3545;
+}
+
+.cancel-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.cancel-content {
+    margin-bottom: 30px;
+}
+
+.warning-message {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.warning-message h3 {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.booking-details {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95em;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: #333;
+    text-align: right;
+    word-break: break-word;
+    max-width: 60%;
+}
+
 .cancel-actions {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    width: 100%;
+    gap: 15px;
 }
-.cancel-actions .doggy-btn {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
+
+.cancel-btn {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
-.doggy-btn.danger {
-    background: #dc3545;
-    border-color: #dc3545;
+
+.cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.keep-btn {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    text-decoration: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    display: block;
+}
+
+.keep-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    .cancel-card {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .cancel-header h2 {
+        font-size: 1.5em;
+    }
+    
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .detail-value {
+        max-width: 100%;
+        text-align: left;
+    }
 }
 </style>
 {% endblock %} 

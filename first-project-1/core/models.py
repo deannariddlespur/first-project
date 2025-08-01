@@ -29,7 +29,7 @@ class Dog(models.Model):
     photo_base64 = models.TextField(blank=True, null=True)  # Store image as base64
 
     def __str__(self):
-        return f"{self.name} ({self.owner})"
+        return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL - simplified version to avoid errors"""
@@ -81,8 +81,8 @@ class Kennel(models.Model):
         """Check if kennel is available for the given date range"""
         conflicting_bookings = Booking.objects.filter(
             kennel=self,
-            start_date__lt=end_date,
-            end_date__gt=start_date,
+            start_date__lte=end_date,
+            end_date__gte=start_date,
             status__in=['pending', 'confirmed']
         )
         
@@ -95,8 +95,8 @@ class Kennel(models.Model):
         """Get bookings that conflict with the given date range"""
         conflicting_bookings = Booking.objects.filter(
             kennel=self,
-            start_date__lt=end_date,
-            end_date__gt=start_date,
+            start_date__lte=end_date,
+            end_date__gte=start_date,
             status__in=['pending', 'confirmed']
         )
         
@@ -252,6 +252,7 @@ class DailyLog(models.Model):
     medication = models.TextField(blank=True)
     exercise = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='daily_logs/', blank=True, null=True)
 
     def __str__(self):
         return f"Log for {self.booking.dog} on {self.date}"

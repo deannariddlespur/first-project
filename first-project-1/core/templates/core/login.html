@@ -145,6 +145,28 @@
         color: #764ba2;
     }
 
+    .back-home-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .back-home-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
     .floating-dogs {
         position: absolute;
         top: 0;
@@ -268,6 +290,13 @@
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #888;">
                 Forgot your password? Contact support for assistance.
             </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{% url 'home' %}" class="back-home-btn">
+                <span>🏠</span>
+                Back to Home
+            </a>
         </div>
     </div>
 </div>

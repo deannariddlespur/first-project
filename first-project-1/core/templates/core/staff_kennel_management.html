@@ -58,23 +58,37 @@
     }
 
     .stat-item {
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 25px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        border-color: rgba(102, 126, 234, 0.3);
     }
 
     .stat-number {
-        font-size: 2.5em;
+        font-size: 3em;
         font-weight: bold;
         color: #667eea;
         display: block;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        margin-bottom: 8px;
     }
 
     .stat-label {
-        color: #666;
-        font-size: 0.9em;
-        margin-top: 5px;
+        color: #333;
+        font-size: 1em;
+        font-weight: 600;
+        margin-top: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .form-section {
@@ -126,6 +140,29 @@
         background: white;
         color: #333;
         transition: all 0.3s ease;
+    }
+
+    /* Make kennel name field bigger */
+    .form-control[name="name"],
+    input[type="text"][name="name"],
+    #id_name {
+        padding: 18px 22px !important;
+        font-size: 20px !important;
+        min-height: 55px !important;
+        font-weight: 500 !important;
+        background: #f8f9fa !important;
+        border: 2px solid #e1e5e9 !important;
+        border-radius: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .form-control[name="name"]:focus,
+    input[type="text"][name="name"]:focus,
+    #id_name:focus {
+        border-color: #667eea !important;
+        background: white !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
     }
 
     .form-control:focus {
@@ -212,17 +249,18 @@
 
     .kennel-card {
         background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        padding: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         backdrop-filter: blur(10px);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .kennel-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        border-color: rgba(102, 126, 234, 0.3);
     }
 
     .kennel-header {
@@ -328,6 +366,41 @@
         <p class="dashboard-subtitle">Manage your dog boarding facilities and track availability</p>
     </div>
 
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="section-title">
+            <span>🔍</span>
+            Filter Kennels
+        </div>
+        <form method="get" class="filter-controls">
+            <div class="filter-group">
+                <label for="size-filter">Size Filter</label>
+                <select name="size" id="size-filter" class="filter-control" onchange="this.form.submit()">
+                    <option value="all" {% if size_filter == 'all' %}selected{% endif %}>All Sizes</option>
+                    {% for value, label in size_choices %}
+                        <option value="{{ value }}" {% if size_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="availability-filter">Availability</label>
+                <select name="availability" id="availability-filter" class="filter-control" onchange="this.form.submit()">
+                    <option value="all" {% if availability_filter == 'all' %}selected{% endif %}>All Kennels</option>
+                    <option value="available" {% if availability_filter == 'available' %}selected{% endif %}>Available</option>
+                    <option value="occupied" {% if availability_filter == 'occupied' %}selected{% endif %}>Occupied</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="period-filter">Time Period</label>
+                <select name="period" id="period-filter" class="filter-control" onchange="this.form.submit()">
+                    <option value="all" {% if period_filter == 'all' %}selected{% endif %}>All Time</option>
+                    <option value="week" {% if period_filter == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if period_filter == 'month' %}selected{% endif %}>This Month</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
     <!-- Stats Section -->
     <div class="stats-section">
         <div class="section-title">
@@ -336,12 +409,20 @@
         </div>
         <div class="stats-grid">
             <div class="stat-item">
-                <span class="stat-number">{{ kennels.count }}</span>
+                <span class="stat-number">{{ total_kennels }}</span>
                 <span class="stat-label">Total Kennels</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">{{ kennels|length }}</span>
+                <span class="stat-number">{{ available_kennels }}</span>
                 <span class="stat-label">Available</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ occupied_kennels }}</span>
+                <span class="stat-label">Occupied</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ total_bookings_period }}</span>
+                <span class="stat-label">Bookings (Period)</span>
             </div>
         </div>
     </div>
@@ -385,33 +466,6 @@
         </form>
     </div>
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <div class="section-title">
-            <span>🔍</span>
-            Filter Kennels
-        </div>
-        <form method="get" class="filter-controls">
-            <div class="filter-group">
-                <label for="size-filter">Size Filter</label>
-                <select name="size" id="size-filter" class="filter-control" onchange="this.form.submit()">
-                    <option value="all" {% if size_filter == 'all' %}selected{% endif %}>All Sizes</option>
-                    {% for value, label in size_choices %}
-                        <option value="{{ value }}" {% if size_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="availability-filter">Availability</label>
-                <select name="availability" id="availability-filter" class="filter-control" onchange="this.form.submit()">
-                    <option value="all" {% if availability_filter == 'all' %}selected{% endif %}>All Kennels</option>
-                    <option value="available" {% if availability_filter == 'available' %}selected{% endif %}>Available</option>
-                    <option value="occupied" {% if availability_filter == 'occupied' %}selected{% endif %}>Occupied</option>
-                </select>
-            </div>
-        </form>
-    </div>
-
     <!-- Kennels Display -->
     {% if kennels %}
         <div class="kennels-grid">
@@ -433,10 +487,10 @@
                         {% endif %}
                     </div>
                     <div class="kennel-actions">
-                        <button class="action-btn" onclick="toggleEdit({{ kennel.id }})">
+                        <a href="{% url 'edit_kennel' kennel.id %}" class="action-btn">
                             <span>✏️</span>
                             Edit Kennel
-                        </button>
+                        </a>
                     </div>
                 </div>
             {% endfor %}
@@ -455,10 +509,5 @@
 </div>
 
 
-<script>
-function toggleEdit(kennelId) {
-    // Simple toggle for edit functionality
-    console.log('Edit kennel:', kennelId);
-}
-</script>
+
 {% endblock %} 

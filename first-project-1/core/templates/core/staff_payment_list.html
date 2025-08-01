@@ -261,13 +261,53 @@
         <form method="get" class="filter-controls">
             <div class="filter-group">
                 <label for="status-filter">Payment Status</label>
-                <select name="status" id="status-filter" class="filter-control" onchange="this.form.submit()">
+                <select name="status" id="status-filter" class="filter-control">
                     {% for value, label in status_choices %}
                         <option value="{{ value }}" {% if current_filter == value %}selected{% endif %}>
                             {{ label }}
                         </option>
                     {% endfor %}
                 </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filter-type">Time Period</label>
+                <select name="filter_type" id="filter-type" class="filter-control" onchange="toggleFilterOptions()">
+                    <option value="all_time" {% if filter_type == 'all_time' %}selected{% endif %}>All Time</option>
+                    <option value="month" {% if filter_type == 'month' %}selected{% endif %}>Specific Month</option>
+                    <option value="year" {% if filter_type == 'year' %}selected{% endif %}>Specific Year</option>
+                </select>
+            </div>
+            
+            <div class="filter-group" id="month-filter-group" style="display: {% if filter_type == 'month' %}block{% else %}none{% endif %};">
+                <label for="month-filter">Month</label>
+                <select name="month" id="month-filter" class="filter-control">
+                    <option value="1" {% if filter_month == 1 %}selected{% endif %}>January</option>
+                    <option value="2" {% if filter_month == 2 %}selected{% endif %}>February</option>
+                    <option value="3" {% if filter_month == 3 %}selected{% endif %}>March</option>
+                    <option value="4" {% if filter_month == 4 %}selected{% endif %}>April</option>
+                    <option value="5" {% if filter_month == 5 %}selected{% endif %}>May</option>
+                    <option value="6" {% if filter_month == 6 %}selected{% endif %}>June</option>
+                    <option value="7" {% if filter_month == 7 %}selected{% endif %}>July</option>
+                    <option value="8" {% if filter_month == 8 %}selected{% endif %}>August</option>
+                    <option value="9" {% if filter_month == 9 %}selected{% endif %}>September</option>
+                    <option value="10" {% if filter_month == 10 %}selected{% endif %}>October</option>
+                    <option value="11" {% if filter_month == 11 %}selected{% endif %}>November</option>
+                    <option value="12" {% if filter_month == 12 %}selected{% endif %}>December</option>
+                </select>
+            </div>
+            
+            <div class="filter-group" id="year-filter-group" style="display: {% if filter_type == 'year' %}block{% else %}none{% endif %};">
+                <label for="year-filter">Year</label>
+                <select name="year" id="year-filter" class="filter-control">
+                    {% for year in year_options %}
+                        <option value="{{ year }}" {% if filter_year == year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <button type="submit" class="apply-filter-btn">Apply Filter</button>
             </div>
         </form>
     </div>
@@ -315,6 +355,25 @@
     </div>
 </div>
 
+<script>
+    function toggleFilterOptions() {
+        const filterType = document.getElementById('filter-type').value;
+        const monthGroup = document.getElementById('month-filter-group');
+        const yearGroup = document.getElementById('year-filter-group');
+        
+        if (filterType === 'month') {
+            monthGroup.style.display = 'block';
+            yearGroup.style.display = 'none';
+        } else if (filterType === 'year') {
+            monthGroup.style.display = 'none';
+            yearGroup.style.display = 'block';
+        } else if (filterType === 'all_time') {
+            monthGroup.style.display = 'none';
+            yearGroup.style.display = 'none';
+        }
+    }
+</script>
+
 <style>
 .filter-section {
     background: #fff;
@@ -351,6 +410,24 @@
     outline: none;
     border-color: #d2691e;
     box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.1);
+}
+
+.apply-filter-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.apply-filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 .payments-list {
     margin: 25px 0;

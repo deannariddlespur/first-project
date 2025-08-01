@@ -13,13 +13,26 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from datetime import datetime, timedelta
 import time
+import csv
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
+def is_staff(user):
+    return user.is_staff or user.is_superuser
+
+def is_owner(user):
+    """Check if user is an owner (not staff)"""
+    return not user.is_staff and not user.is_superuser
+
 def home(request):
-    """Homepage view - redirect to dashboard if logged in, otherwise show landing page"""
+    """Homepage view - redirect to appropriate dashboard if logged in, otherwise show landing page"""
     if request.user.is_authenticated:
-        return redirect('owner_dashboard')
+        if request.user.is_staff:
+            return redirect('staff_dashboard')
+        else:
+            return redirect('owner_dashboard')
     
     return render(request, 'core/home.html')
 
@@ -722,6 +735,7 @@ class DogForm(ModelForm):
         }
 
 @login_required
+@user_passes_test(is_owner)
 def owner_dashboard(request):
     """Full dashboard with database access and error handling"""
     try:
@@ -733,7 +747,7 @@ def owner_dashboard(request):
         
         # Get dogs with safe field access
         try:
-            dogs = Dog.objects.filter(owner=owner).values('id', 'name', 'breed', 'size')
+            dogs = Dog.objects.filter(owner=owner)
         except Exception as e:
             print(f"Error fetching dogs: {e}")
             dogs = []
@@ -747,6 +761,7 @@ def owner_dashboard(request):
         return HttpResponse(f"Dashboard Error: {str(e)}")
 
 @login_required
+@user_passes_test(is_owner)
 def add_dog(request):
     """Add dog with improved error handling"""
     try:
@@ -786,6 +801,7 @@ def add_dog(request):
         return HttpResponse(f"Add dog error: {str(e)}")
 
 @login_required
+@user_passes_test(is_owner)
 def edit_dog(request, dog_id):
     """Edit dog with improved error handling"""
     try:
@@ -828,6 +844,7 @@ def edit_dog(request, dog_id):
         return HttpResponse(f"Edit dog error: {str(e)}")
 
 @login_required
+@user_passes_test(is_owner)
 def delete_dog(request, dog_id):
     owner = get_object_or_404(Owner, user=request.user)
     dog = get_object_or_404(Dog, id=dog_id, owner=owner)
@@ -837,30 +854,19 @@ def delete_dog(request, dog_id):
     return render(request, 'core/delete_dog.html', {'dog': dog})
 
 class BookingForm(forms.ModelForm):
-    # Add dog size field for booking
-    dog_size = forms.ChoiceField(
-        choices=[
-            ('small', 'Small'),
-            ('medium', 'Medium'),
-            ('large', 'Large'),
-        ],
-        required=False,
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
-    )
-
     class Meta:
         model = Booking
         fields = ['dog', 'start_date', 'end_date', 'notes']
         widgets = {
             'start_date': forms.DateInput(attrs={
-                'type': 'date',
+                'type': 'text',
                 'class': 'form-control',
+                'placeholder': 'mm/dd/yyyy',
             }),
             'end_date': forms.DateInput(attrs={
-                'type': 'date',
+                'type': 'text',
                 'class': 'form-control',
+                'placeholder': 'mm/dd/yyyy',
             }),
             'notes': forms.Textarea(attrs={
                 'rows': 3,
@@ -899,6 +905,7 @@ class BookingForm(forms.ModelForm):
         return cleaned_data
 
 @login_required
+@user_passes_test(is_owner)
 def booking_calendar(request):
     """Booking calendar with improved error handling"""
     try:
@@ -973,7 +980,7 @@ def booking_calendar(request):
             bookings = Booking.objects.filter(
                 start_date__lte=month_end,
                 end_date__gte=month_start
-            )
+            ).exclude(status='cancelled')
         except Exception as e:
             return HttpResponse(f"Error loading bookings: {str(e)}")
         
@@ -1009,9 +1016,19 @@ def booking_calendar(request):
                         )
                         has_booking = day_bookings.exists()
                         booking_count = day_bookings.count()
+                        
+                        # Get booking details for display
+                        booking_details = []
+                        for booking in day_bookings:
+                            booking_details.append({
+                                'dog_name': booking.dog.name,
+                                'owner_name': f"{booking.dog.owner.user.first_name} {booking.dog.owner.user.last_name}".strip(),
+                                'kennel_name': booking.kennel.name if booking.kennel else 'No kennel assigned'
+                            })
                     except Exception as e:
                         has_booking = False
                         booking_count = 0
+                        booking_details = []
                     
                     week_days.append({
                         'date': current_date,
@@ -1019,6 +1036,7 @@ def booking_calendar(request):
                         'is_other_month': False,
                         'has_booking': has_booking,
                         'booking_count': booking_count,
+                        'booking_details': booking_details,
                         'available_kennels': len(available_kennels),
                         'total_kennels': total_kennels,
                         'availability_percentage': availability_percentage,
@@ -1031,6 +1049,7 @@ def booking_calendar(request):
                         'is_other_month': True,
                         'has_booking': False,
                         'booking_count': 0,
+                        'booking_details': [],
                         'available_kennels': 0,
                         'total_kennels': 0,
                         'availability_percentage': 0,
@@ -1047,7 +1066,7 @@ def booking_calendar(request):
             'prev_year': prev_year,
             'next_month': next_month,
             'next_year': next_year,
-            'month_name': first_day.strftime('%B'),
+            'month_name': first_day.strftime('%m/%Y'),
             'year_name': first_day.strftime('%Y'),
         }
         
@@ -1056,6 +1075,7 @@ def booking_calendar(request):
         return HttpResponse(f"Booking calendar error: {str(e)}")
 
 @login_required
+@user_passes_test(is_owner)
 def create_booking(request):
     """Create booking with improved error handling"""
     try:
@@ -1095,16 +1115,85 @@ def create_booking(request):
             
             form = BookingForm(owner, initial=initial_data)
         
+        # Get all kennels for the dropdown
+        all_kennels = Kennel.objects.all().order_by('name')
+        
+        # Get available kennels based on selected dates and dog size
+        available_kennels = []
+        if request.GET.get('start_date') and request.GET.get('end_date'):
+            try:
+                start_date = datetime.strptime(request.GET.get('start_date'), '%Y-%m-%d').date()
+                end_date = datetime.strptime(request.GET.get('end_date'), '%Y-%m-%d').date()
+                
+                # Get all kennels that are available for the selected dates
+                for kennel in all_kennels:
+                    if kennel.is_available_for_dates(start_date, end_date):
+                        available_kennels.append(kennel)
+            except ValueError:
+                pass
+        
         return render(request, 'core/create_booking.html', {
             'form': form,
-            'available_kennels': [],
-            'all_kennels': []
+            'available_kennels': available_kennels,
+            'all_kennels': all_kennels
         })
         
     except Exception as e:
         return HttpResponse(f"Create booking error: {str(e)}")
 
 @login_required
+@user_passes_test(is_owner)
+def get_available_kennels(request):
+    """Get available kennels for selected dates via AJAX"""
+    try:
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        dog_size = request.GET.get('dog_size', 'medium')
+        
+        if not start_date_str or not end_date_str:
+            return JsonResponse({'kennels': [], 'message': 'Please select both start and end dates'})
+        
+        # Convert dates from mm/dd/yyyy to YYYY-MM-DD
+        try:
+            start_date = datetime.strptime(start_date_str, '%m/%d/%Y').date()
+            end_date = datetime.strptime(end_date_str, '%m/%d/%Y').date()
+        except ValueError:
+            return JsonResponse({'kennels': [], 'message': 'Invalid date format'})
+        
+        # Get all kennels
+        all_kennels = Kennel.objects.all().order_by('name')
+        available_kennels = []
+        
+        # Size compatibility mapping
+        size_compatibility = {
+            'small': ['small', 'medium', 'large'],
+            'medium': ['medium', 'large'],
+            'large': ['large']
+        }
+        
+        for kennel in all_kennels:
+            # Check if kennel is available for the dates
+            if kennel.is_available_for_dates(start_date, end_date):
+                # Check if kennel size is compatible with dog size
+                if kennel.size in size_compatibility.get(dog_size, ['large']):
+                    available_kennels.append({
+                        'id': kennel.id,
+                        'name': kennel.name,
+                        'size': kennel.get_size_display(),
+                        'description': kennel.description
+                    })
+        
+
+        return JsonResponse({
+            'kennels': available_kennels,
+            'message': f'Found {len(available_kennels)} available kennels for your dates'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'kennels': [], 'message': f'Error: {str(e)}'})
+
+@login_required
+@user_passes_test(is_owner)
 def booking_list(request):
     owner = get_object_or_404(Owner, user=request.user)
     
@@ -1126,6 +1215,7 @@ def booking_list(request):
     return render(request, 'core/booking_list.html', context)
 
 @login_required
+@user_passes_test(is_owner)
 def cancel_booking(request, booking_id):
     owner = get_object_or_404(Owner, user=request.user)
     booking = get_object_or_404(Booking, id=booking_id, dog__owner=owner)
@@ -1136,9 +1226,6 @@ def cancel_booking(request, booking_id):
         return redirect('booking_list')
     
     return render(request, 'core/cancel_booking.html', {'booking': booking})
-
-def is_staff(user):
-    return user.is_staff or user.is_superuser
 
 def test_staff_status(request):
     """Test view to check if user is staff"""
@@ -1165,6 +1252,7 @@ def staff_dashboard(request):
     """Staff dashboard with error handling"""
     try:
         # Get filter parameters
+        filter_type = request.GET.get('filter_type', 'month')  # 'month', 'year', 'all_time'
         filter_month = request.GET.get('month', timezone.now().month)
         filter_year = request.GET.get('year', timezone.now().year)
         
@@ -1175,22 +1263,45 @@ def staff_dashboard(request):
             filter_month = timezone.now().month
             filter_year = timezone.now().year
         
-        # Calculate date range for filtering
-        if filter_month == 12:
-            next_month = 1
-            next_year = filter_year + 1
+        # Calculate date range for filtering based on filter type
+        if filter_type == 'all_time':
+            # No date filtering - show all time data
+            start_date = None
+            end_date = None
+            bookings = Booking.objects.all().order_by('start_date')
+            period_payments = Payment.objects.all()
+        elif filter_type == 'year':
+            # Filter by specific year
+            start_date = datetime(filter_year, 1, 1).date()
+            end_date = datetime(filter_year, 12, 31).date()
+            bookings = Booking.objects.filter(
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            ).order_by('start_date')
+            period_payments = Payment.objects.filter(
+                booking__start_date__lte=end_date,
+                booking__end_date__gte=start_date
+            )
         else:
-            next_month = filter_month + 1
-            next_year = filter_year
-        
-        start_date = datetime(filter_year, filter_month, 1).date()
-        end_date = datetime(next_year, next_month, 1).date() - timedelta(days=1)
-        
-        # Get all bookings for the filtered period
-        bookings = Booking.objects.filter(
-            start_date__lte=end_date,
-            end_date__gte=start_date
-        ).order_by('start_date')
+            # Default: filter by specific month
+            if filter_month == 12:
+                next_month = 1
+                next_year = filter_year + 1
+            else:
+                next_month = filter_month + 1
+                next_year = filter_year
+            
+            start_date = datetime(filter_year, filter_month, 1).date()
+            end_date = datetime(next_year, next_month, 1).date() - timedelta(days=1)
+            
+            bookings = Booking.objects.filter(
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            ).order_by('start_date')
+            period_payments = Payment.objects.filter(
+                booking__start_date__lte=end_date,
+                booking__end_date__gte=start_date
+            )
         
         # Get upcoming bookings (next 7 days)
         today = timezone.now().date()
@@ -1202,34 +1313,76 @@ def staff_dashboard(request):
         # Get pending bookings for the filtered period
         pending_bookings = bookings.filter(status='pending')
         
+        # Get cancelled bookings for the filtered period
+        cancelled_bookings = bookings.filter(status='cancelled')
+        
         # Get kennel assignments
         kennels = Kennel.objects.all()
         
-        # Calculate payment statistics for the filtered period
-        payments = Payment.objects.filter(
-            booking__start_date__lte=end_date,
-            booking__end_date__gte=start_date
-        )
-        total_revenue = sum(payment.amount for payment in payments.filter(status='paid'))
-        pending_payments = sum(payment.amount for payment in payments.filter(status='pending'))
+        # Calculate payment statistics
+        # Total revenue for the filtered period
+        total_revenue = sum(payment.amount for payment in period_payments.filter(status='paid'))
+        
+        # Pending payments filtered by the selected period
+        if filter_type == 'all_time':
+            # Show all pending payments for all time
+            pending_payments = sum(payment.amount for payment in Payment.objects.filter(status='pending'))
+        elif filter_type == 'year':
+            # Filter pending payments by the selected year
+            year_start = datetime(filter_year, 1, 1).date()
+            year_end = datetime(filter_year, 12, 31).date()
+            pending_payments = sum(
+                payment.amount for payment in Payment.objects.filter(
+                    status='pending',
+                    booking__start_date__lte=year_end,
+                    booking__end_date__gte=year_start
+                )
+            )
+        else:
+            # Filter pending payments by the selected month
+            if filter_month == 12:
+                next_month = 1
+                next_year = filter_year + 1
+            else:
+                next_month = filter_month + 1
+                next_year = filter_year
+            
+            month_start = datetime(filter_year, filter_month, 1).date()
+            month_end = datetime(next_year, next_month, 1).date() - timedelta(days=1)
+            
+            pending_payments = sum(
+                payment.amount for payment in Payment.objects.filter(
+                    status='pending',
+                    booking__start_date__lte=month_end,
+                    booking__end_date__gte=month_start
+                )
+            )
         
         # Get all bookings for total count (not filtered by period)
         all_bookings = Booking.objects.all()
         
+        # Generate year options for the dropdown
+        current_year = timezone.now().year
+        year_options = range(current_year - 2, current_year + 3)  # 2 years back, 2 years forward
+        
         context = {
             'upcoming_bookings': upcoming_bookings,
             'pending_bookings': pending_bookings,
+            'cancelled_bookings': cancelled_bookings,
             'kennels': kennels,
             'total_bookings': all_bookings.count(),
             'filtered_bookings': bookings.count(),
             'total_pending': pending_bookings.count(),
+            'total_cancelled': cancelled_bookings.count(),
             'total_revenue': total_revenue,
             'pending_payments': pending_payments,
+            'filter_type': filter_type,
             'filter_month': filter_month,
             'filter_year': filter_year,
             'start_date': start_date,
             'end_date': end_date,
-            'month_name': datetime(filter_year, filter_month, 1).strftime('%B %Y'),
+            'year_options': year_options,
+            'month_name': datetime(filter_year, filter_month, 1).strftime('%m/%Y') if filter_type == 'month' else f'{filter_year}' if filter_type == 'year' else 'All Time',
         }
         return render(request, 'core/staff_dashboard.html', context)
     except Exception as e:
@@ -1237,8 +1390,19 @@ def staff_dashboard(request):
 
 @user_passes_test(is_staff)
 def staff_booking_list(request):
-    # Get filter parameter
+    # Get filter parameters
     status_filter = request.GET.get('status', 'all')
+    filter_type = request.GET.get('filter_type', 'all_time')  # 'month', 'year', 'all_time'
+    filter_month = request.GET.get('month', timezone.now().month)
+    filter_year = request.GET.get('year', timezone.now().year)
+    kennel_size_filter = request.GET.get('kennel_size', 'all')
+    
+    try:
+        filter_month = int(filter_month)
+        filter_year = int(filter_year)
+    except (ValueError, TypeError):
+        filter_month = timezone.now().month
+        filter_year = timezone.now().year
     
     # Get all bookings
     bookings = Booking.objects.all().order_by('-created_at')
@@ -1247,99 +1411,151 @@ def staff_booking_list(request):
     if status_filter != 'all':
         bookings = bookings.filter(status=status_filter)
     
+    # Apply date filter
+    if filter_type == 'month':
+        # Filter by specific month
+        if filter_month == 12:
+            next_month = 1
+            next_year = filter_year + 1
+        else:
+            next_month = filter_month + 1
+            next_year = filter_year
+        
+        start_date = datetime(filter_year, filter_month, 1).date()
+        end_date = datetime(next_year, next_month, 1).date() - timedelta(days=1)
+        
+        bookings = bookings.filter(
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        )
+    elif filter_type == 'year':
+        # Filter by specific year
+        start_date = datetime(filter_year, 1, 1).date()
+        end_date = datetime(filter_year, 12, 31).date()
+        
+        bookings = bookings.filter(
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        )
+    # 'all_time' - no date filtering
+    
+    # Apply kennel size filter
+    if kennel_size_filter != 'all':
+        bookings = bookings.filter(kennel__size=kennel_size_filter)
+    
     # Get all status choices for the filter dropdown
     status_choices = [('all', 'All Bookings')] + list(Booking.STATUS_CHOICES)
+    
+    # Get kennel size choices
+    kennel_size_choices = [('all', 'All Sizes')] + list(Kennel.SIZE_CHOICES)
+    
+    # Generate year options for the dropdown
+    current_year = timezone.now().year
+    year_options = range(current_year - 2, current_year + 3)  # 2 years back, 2 years forward
     
     context = {
         'bookings': bookings,
         'status_choices': status_choices,
+        'kennel_size_choices': kennel_size_choices,
         'current_filter': status_filter,
+        'filter_type': filter_type,
+        'filter_month': filter_month,
+        'filter_year': filter_year,
+        'kennel_size_filter': kennel_size_filter,
+        'year_options': year_options,
+        'month_name': datetime(filter_year, filter_month, 1).strftime('%m/%Y') if filter_type == 'month' else f'{filter_year}' if filter_type == 'year' else 'All Time',
     }
     return render(request, 'core/staff_booking_list.html', context)
 
 @user_passes_test(is_staff)
 def staff_booking_detail(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-    
-    if request.method == 'POST':
-        # Update booking status
-        new_status = request.POST.get('status')
-        if new_status in dict(Booking.STATUS_CHOICES):
-            booking.status = new_status
-            # Clear kennel assignment when status is changed to pending
-            if new_status == 'pending':
-                booking.kennel = None
+    """Staff view to manage a specific booking"""
+    try:
+        booking = get_object_or_404(Booking, id=booking_id)
         
-        # Assign kennel with availability check
-        kennel_id = request.POST.get('kennel')
-        if kennel_id:
-            try:
-                kennel = Kennel.objects.get(id=kennel_id)
-                if not kennel.is_available_for_dates(booking.start_date, booking.end_date, booking):
-                    # Add error message but don't save the kennel assignment
+        if request.method == 'POST':
+            # Update booking status
+            new_status = request.POST.get('status')
+            if new_status in dict(Booking.STATUS_CHOICES):
+                booking.status = new_status
+                # Clear kennel assignment when status is changed to pending
+                if new_status == 'pending':
+                    booking.kennel = None
+            
+            # Assign kennel with availability check
+            kennel_id = request.POST.get('kennel')
+            if kennel_id:
+                try:
+                    kennel = Kennel.objects.get(id=kennel_id)
+                    if kennel.is_available_for_dates(booking.start_date, booking.end_date, booking):
+                        # Check size compatibility
+                        size_compatibility = {
+                            'small': ['small', 'medium', 'large'],
+                            'medium': ['medium', 'large'],
+                            'large': ['large']
+                        }
+                        if kennel.size in size_compatibility.get(booking.dog.size, ['large']):
+                            booking.kennel = kennel
+                            # Recalculate pricing when kennel changes
+                            booking.recalculate_pricing()
+                except Kennel.DoesNotExist:
                     pass
-                else:
-                    # Check size compatibility
-                    size_compatibility = {
-                        'small': ['small', 'medium', 'large'],
-                        'medium': ['medium', 'large'],
-                        'large': ['large']
-                    }
-                    if kennel.size not in size_compatibility.get(booking.dog.size, ['large']):
-                        # Add error message but don't save the kennel assignment
-                        pass
-                    else:
-                        booking.kennel = kennel
-                        # Recalculate pricing when kennel changes
-                        booking.recalculate_pricing()
-            except Kennel.DoesNotExist:
-                pass
+            
+            booking.save()
+            
+            # Handle staff note creation
+            staff_note = request.POST.get('staff_note')
+            staff_picture = request.FILES.get('staff_picture')
+            
+            if staff_note or staff_picture:
+                StaffNote.objects.create(
+                    booking=booking,
+                    staff_member=request.user,
+                    note=staff_note or '',
+                    picture=staff_picture
+                )
+            
+            return redirect('staff_booking_detail', booking_id=booking_id)
         
-        booking.save()
+        # Get available kennels for this booking's dates
+        available_kennels = []
+        all_kennels = Kennel.objects.all()
         
-        # Handle staff note creation
-        staff_note = request.POST.get('staff_note')
-        staff_picture = request.FILES.get('staff_picture')
+        # Size compatibility rules
+        size_compatibility = {
+            'small': ['small', 'medium', 'large'],
+            'medium': ['medium', 'large'],
+            'large': ['large']
+        }
         
-        if staff_note or staff_picture:
-            StaffNote.objects.create(
-                booking=booking,
-                staff_member=request.user,
-                note=staff_note or '',
-                picture=staff_picture
-            )
-        
-        return redirect('staff_booking_detail', booking_id=booking_id)
-    
-    # Get available kennels for this booking's dates
-    available_kennels = []
-    all_kennels = Kennel.objects.all()
-    
-    # Size compatibility rules
-    size_compatibility = {
-        'small': ['small', 'medium', 'large'],
-        'medium': ['medium', 'large'],
-        'large': ['large']
-    }
-    
-    for kennel in all_kennels:
-        if kennel.is_available_for_dates(booking.start_date, booking.end_date, booking):
-            # Only include kennels appropriate for the dog's size
-            if kennel.size in size_compatibility.get(booking.dog.size, ['large']):
+        for kennel in all_kennels:
+            if kennel.is_available_for_dates(booking.start_date, booking.end_date, booking):
+                # Only include kennels appropriate for the dog's size
+                if kennel.size in size_compatibility.get(booking.dog.size, ['large']):
+                    available_kennels.append(kennel)
+            elif booking.kennel == kennel:
+                # Include current kennel even if it would conflict (for editing)
                 available_kennels.append(kennel)
-        elif booking.kennel == kennel:
-            # Include current kennel even if it would conflict (for editing)
-            available_kennels.append(kennel)
-    
-    # Get existing staff notes for this booking
-    staff_notes = booking.staff_notes.all().order_by('-created_at')
-    
-    return render(request, 'core/staff_booking_detail.html', {
-        'booking': booking,
-        'available_kennels': available_kennels,
-        'all_kennels': all_kennels,
-        'staff_notes': staff_notes,
-    })
+        
+        # Get existing staff notes for this booking
+        staff_notes = booking.staff_notes.all().order_by('-created_at')
+        
+        # Calculate nights
+        nights = (booking.end_date - booking.start_date).days
+        
+        context = {
+            'booking': booking,
+            'available_kennels': available_kennels,
+            'all_kennels': all_kennels,
+            'staff_notes': staff_notes,
+            'nights': nights,
+            'owner_name': f"{booking.dog.owner.user.first_name} {booking.dog.owner.user.last_name}".strip() or booking.dog.owner.user.username,
+        }
+        
+        return render(request, 'core/staff_booking_detail.html', context)
+        
+    except Exception as e:
+        return HttpResponse(f"❌ Error loading booking: {str(e)}")
 
 @user_passes_test(is_staff)
 def staff_kennel_management(request):
@@ -1354,6 +1570,7 @@ def staff_kennel_management(request):
     # Get filter parameters
     size_filter = request.GET.get('size', 'all')
     availability_filter = request.GET.get('availability', 'all')
+    period_filter = request.GET.get('period', 'all')  # New period filter
     
     kennels = Kennel.objects.all()
     
@@ -1361,14 +1578,40 @@ def staff_kennel_management(request):
     if size_filter != 'all':
         kennels = kennels.filter(size=size_filter)
     
+    # Calculate date range for period filter
+    today = timezone.now().date()
+    if period_filter == 'week':
+        start_date = today - timedelta(days=7)
+        end_date = today + timedelta(days=7)
+    elif period_filter == 'month':
+        start_date = today - timedelta(days=30)
+        end_date = today + timedelta(days=30)
+    else:  # 'all' or default
+        start_date = None
+        end_date = None
+    
     # Get bookings for each kennel and apply availability filter
     for kennel in kennels:
-        kennel.current_bookings = Booking.objects.filter(
+        booking_query = Booking.objects.filter(
             kennel=kennel,
-            start_date__lte=timezone.now().date(),
-            end_date__gte=timezone.now().date(),
             status__in=['confirmed', 'pending']
         )
+        
+        # Apply period filter if specified
+        if start_date and end_date:
+            booking_query = booking_query.filter(
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+        else:
+            # Default to current bookings
+            booking_query = booking_query.filter(
+                start_date__lte=today,
+                end_date__gte=today
+            )
+        
+        kennel.current_bookings = booking_query
+        kennel.period_bookings = booking_query.count()
     
     # Apply availability filter
     if availability_filter == 'available':
@@ -1376,12 +1619,23 @@ def staff_kennel_management(request):
     elif availability_filter == 'occupied':
         kennels = [kennel for kennel in kennels if kennel.current_bookings]
     
+    # Calculate meaningful statistics
+    total_kennels = Kennel.objects.count()
+    available_kennels = sum(1 for k in kennels if not k.current_bookings)
+    occupied_kennels = sum(1 for k in kennels if k.current_bookings)
+    total_bookings_period = sum(k.period_bookings for k in kennels)
+    
     return render(request, 'core/staff_kennel_management.html', {
         'kennels': kennels,
         'form': form,
         'size_filter': size_filter,
         'availability_filter': availability_filter,
+        'period_filter': period_filter,
         'size_choices': Kennel.SIZE_CHOICES,
+        'total_kennels': total_kennels,
+        'available_kennels': available_kennels,
+        'occupied_kennels': occupied_kennels,
+        'total_bookings_period': total_bookings_period,
     })
 
 @user_passes_test(is_staff)
@@ -1399,10 +1653,14 @@ def edit_kennel(request, kennel_id):
             kennel.description = description
             kennel.size = size
             kennel.save()
-        
-        return redirect('staff_kennel_management')
+            messages.success(request, f"Kennel '{kennel.name}' updated successfully!")
+            return redirect('staff_kennel_management')
+        else:
+            messages.error(request, "Please provide a valid kennel name and size.")
     
-    return redirect('staff_kennel_management')
+    return render(request, 'core/edit_kennel.html', {
+        'kennel': kennel
+    })
 
 def staff_login(request):
     """Staff login with improved error handling"""
@@ -1427,17 +1685,67 @@ def staff_login(request):
 @user_passes_test(is_staff)
 def staff_payment_list(request):
     """Staff view to manage all payments"""
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'all')
+    filter_type = request.GET.get('filter_type', 'all_time')  # 'month', 'year', 'all_time'
+    filter_month = request.GET.get('month', timezone.now().month)
+    filter_year = request.GET.get('year', timezone.now().year)
+    
+    try:
+        filter_month = int(filter_month)
+        filter_year = int(filter_year)
+    except (ValueError, TypeError):
+        filter_month = timezone.now().month
+        filter_year = timezone.now().year
+    
+    # Get all payments
     payments = Payment.objects.all().order_by('-created_at')
     
-    # Get filter parameter
-    status_filter = request.GET.get('status', 'all')
+    # Apply status filter
     if status_filter != 'all':
         payments = payments.filter(status=status_filter)
+    
+    # Apply date filter
+    if filter_type == 'month':
+        # Filter by specific month
+        if filter_month == 12:
+            next_month = 1
+            next_year = filter_year + 1
+        else:
+            next_month = filter_month + 1
+            next_year = filter_year
+        
+        start_date = datetime(filter_year, filter_month, 1).date()
+        end_date = datetime(next_year, next_month, 1).date() - timedelta(days=1)
+        
+        payments = payments.filter(
+            booking__start_date__lte=end_date,
+            booking__end_date__gte=start_date
+        )
+    elif filter_type == 'year':
+        # Filter by specific year
+        start_date = datetime(filter_year, 1, 1).date()
+        end_date = datetime(filter_year, 12, 31).date()
+        
+        payments = payments.filter(
+            booking__start_date__lte=end_date,
+            booking__end_date__gte=start_date
+        )
+    # 'all_time' - no date filtering
+    
+    # Generate year options for the dropdown
+    current_year = timezone.now().year
+    year_options = range(current_year - 2, current_year + 3)  # 2 years back, 2 years forward
     
     context = {
         'payments': payments,
         'status_choices': [('all', 'All Payments')] + list(Payment.PAYMENT_STATUS_CHOICES),
         'current_filter': status_filter,
+        'filter_type': filter_type,
+        'filter_month': filter_month,
+        'filter_year': filter_year,
+        'year_options': year_options,
+        'month_name': datetime(filter_year, filter_month, 1).strftime('%m/%Y') if filter_type == 'month' else f'{filter_year}' if filter_type == 'year' else 'All Time',
     }
     return render(request, 'core/staff_payment_list.html', context)
 
@@ -1463,9 +1771,10 @@ def staff_payment_detail(request, payment_id):
             payment.save()
         elif action == 'update_only':
             payment_method = request.POST.get('payment_method')
-            if payment_method:
-                payment.payment_method = payment_method
-                payment.save()
+            # Allow empty string to clear the payment method
+            payment.payment_method = payment_method if payment_method else ''
+            payment.save()
+            messages.success(request, "Payment method updated successfully!")
         
         return redirect('staff_payment_detail', payment_id=payment.id)
     
@@ -1556,6 +1865,9 @@ def staff_calendar(request):
             availability.save()
             print(f"DEBUG: Saved availability with type: {availability.type}")  # Debug line
             
+            # Add success message
+            messages.success(request, f"Availability entry '{availability.title}' has been saved successfully!")
+            
             # Redirect back to the same month/year
             year = int(request.GET.get('year', timezone.now().year))
             month = int(request.GET.get('month', timezone.now().month))
@@ -1622,7 +1934,7 @@ def _build_calendar_context(request, context):
     bookings = Booking.objects.filter(
         start_date__lte=month_end,
         end_date__gte=month_start
-    )
+    ).exclude(status='cancelled')
     
     # Create calendar weeks
     calendar_weeks = []
@@ -1643,12 +1955,28 @@ def _build_calendar_context(request, context):
                     end_date__gte=day_date
                 )
                 
+                # Get booking details with dog names
+                booking_details = []
+                for booking in day_bookings:
+                    owner_name = 'Unknown'
+                    if booking.dog.owner and booking.dog.owner.user:
+                        owner_name = booking.dog.owner.user.get_full_name() or booking.dog.owner.user.username
+                    
+                    booking_details.append({
+                        'id': booking.id,
+                        'dog_name': booking.dog.name,
+                        'owner_name': owner_name,
+                        'status': booking.status,
+                        'total_amount': booking.total_amount
+                    })
+                
                 week_days.append({
                     'date': current_date,
                     'is_today': current_date.date() == timezone.now().date(),
                     'is_other_month': False,
                     'availability_entries': day_availability,
                     'booking_count': day_bookings.count(),
+                    'booking_details': booking_details,
                     'is_facility_closed': FacilityAvailability.is_facility_closed(day_date),
                 })
             else:
@@ -1882,3 +2210,421 @@ def create_test_dog(request):
             
     except Exception as e:
         return HttpResponse(f"❌ Error creating test dog: {str(e)}")
+
+@user_passes_test(is_staff)
+def staff_daily_logs(request):
+    """Staff view to manage daily logs"""
+    # Get filter parameters
+    date_filter = request.GET.get('date', '')
+    booking_filter = request.GET.get('booking', '')
+    dog_filter = request.GET.get('dog', '')
+    
+    # Get all logs
+    logs = DailyLog.objects.all().order_by('-date', '-id')
+    
+    # Apply filters
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            logs = logs.filter(date=filter_date)
+        except ValueError:
+            pass
+    
+    if booking_filter:
+        logs = logs.filter(booking_id=booking_filter)
+    
+    if dog_filter:
+        logs = logs.filter(booking__dog__name__icontains=dog_filter)
+    
+    # Get all bookings for filter dropdown
+    bookings = Booking.objects.filter(status='confirmed').order_by('-start_date')
+    
+    # Get unique dogs for filter dropdown
+    dogs = Dog.objects.filter(bookings__status='confirmed').distinct().order_by('name')
+    
+    context = {
+        'logs': logs,
+        'bookings': bookings,
+        'dogs': dogs,
+        'date_filter': date_filter,
+        'booking_filter': booking_filter,
+        'dog_filter': dog_filter,
+    }
+    return render(request, 'core/staff_daily_logs.html', context)
+
+@user_passes_test(is_staff)
+def create_daily_log(request):
+    """Create a new daily log"""
+    if request.method == 'POST':
+        booking_id = request.POST.get('booking')
+        date_str = request.POST.get('date')
+        feeding = request.POST.get('feeding', '')
+        medication = request.POST.get('medication', '')
+        exercise = request.POST.get('exercise', '')
+        notes = request.POST.get('notes', '')
+        
+        try:
+            # Parse the date string (mm/dd/yyyy format)
+            from datetime import datetime
+            date_obj = datetime.strptime(date_str, '%m/%d/%Y').date()
+            
+            booking = Booking.objects.get(id=booking_id)
+            log = DailyLog.objects.create(
+                booking=booking,
+                date=date_obj,
+                feeding=feeding,
+                medication=medication,
+                exercise=exercise,
+                notes=notes
+            )
+            
+            # Handle photo upload
+            if 'photo' in request.FILES:
+                log.photo = request.FILES['photo']
+                log.save()
+            
+            # Send notification to owner
+            send_log_notification_to_owner(log)
+            
+            messages.success(request, f"Daily log created for {booking.dog.name} on {date_str}")
+            return redirect('staff_daily_logs')
+        except Booking.DoesNotExist:
+            messages.error(request, "Invalid booking selected")
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use mm/dd/yyyy format.")
+        except Exception as e:
+            messages.error(request, f"Error creating log: {str(e)}")
+    
+    # Get active bookings for dropdown
+    active_bookings = Booking.objects.filter(
+        status='confirmed',
+        start_date__lte=timezone.now().date(),
+        end_date__gte=timezone.now().date()
+    ).order_by('dog__name')
+    
+    context = {
+        'active_bookings': active_bookings,
+        'today': timezone.now().date(),
+    }
+    return render(request, 'core/create_daily_log.html', context)
+
+@user_passes_test(is_staff)
+def edit_daily_log(request, log_id):
+    """Edit an existing daily log"""
+    log = get_object_or_404(DailyLog, id=log_id)
+    
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        
+        try:
+            # Parse the date string (mm/dd/yyyy format)
+            from datetime import datetime
+            date_obj = datetime.strptime(date_str, '%m/%d/%Y').date()
+            
+            log.date = date_obj
+            log.feeding = request.POST.get('feeding', '')
+            log.medication = request.POST.get('medication', '')
+            log.exercise = request.POST.get('exercise', '')
+            log.notes = request.POST.get('notes', '')
+            
+            # Handle photo upload
+            if 'photo' in request.FILES:
+                log.photo = request.FILES['photo']
+            
+            log.save()
+            
+            messages.success(request, f"Daily log updated for {log.booking.dog.name} on {date_str}")
+            return redirect('staff_daily_logs')
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use mm/dd/yyyy format.")
+        except Exception as e:
+            messages.error(request, f"Error updating log: {str(e)}")
+    
+    context = {
+        'log': log,
+    }
+    return render(request, 'core/edit_daily_log.html', context)
+
+@user_passes_test(is_staff)
+def delete_daily_log(request, log_id):
+    """Delete a daily log"""
+    if request.method == 'POST':
+        log = get_object_or_404(DailyLog, id=log_id)
+        dog_name = log.booking.dog.name
+        log.delete()
+        messages.success(request, f"Daily log deleted for {dog_name}")
+        return redirect('staff_daily_logs')
+    
+    return redirect('staff_daily_logs')
+
+@user_passes_test(is_staff)
+def booking_daily_logs(request, booking_id):
+    """View all daily logs for a specific booking"""
+    booking = get_object_or_404(Booking, id=booking_id)
+    logs = DailyLog.objects.filter(booking=booking).order_by('date')
+    
+    context = {
+        'booking': booking,
+        'logs': logs,
+    }
+    return render(request, 'core/booking_daily_logs.html', context)
+
+@user_passes_test(is_staff)
+def daily_log_detail(request, log_id):
+    """View detailed information for a specific daily log"""
+    log = get_object_or_404(DailyLog, id=log_id)
+    
+    context = {
+        'log': log,
+    }
+    return render(request, 'core/daily_log_detail.html', context)
+
+# Add this new view after the existing views
+
+@login_required
+@user_passes_test(is_owner)
+def owner_daily_logs(request):
+    """Owner view to see their dog's daily logs"""
+    # Get the owner
+    try:
+        owner = Owner.objects.get(user=request.user)
+    except Owner.DoesNotExist:
+        messages.error(request, "Owner profile not found.")
+        return redirect('dashboard')
+    
+    # Get filter parameters
+    dog_filter = request.GET.get('dog', '')
+    date_filter = request.GET.get('date', '')
+    
+    # Get all bookings for this owner's dogs
+    bookings = Booking.objects.filter(dog__owner=owner).order_by('-start_date')
+    
+    # Get all logs for these bookings
+    logs = DailyLog.objects.filter(booking__in=bookings).order_by('-date', '-id')
+    
+    # Apply filters
+    if dog_filter:
+        logs = logs.filter(booking__dog_id=dog_filter)
+    
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            logs = logs.filter(date=filter_date)
+        except ValueError:
+            pass
+    
+    # Get unique dogs for filter dropdown
+    dogs = Dog.objects.filter(owner=owner).order_by('name')
+    
+    context = {
+        'logs': logs,
+        'dogs': dogs,
+        'dog_filter': dog_filter,
+        'date_filter': date_filter,
+        'owner': owner,
+    }
+    return render(request, 'core/owner_daily_logs.html', context)
+
+@login_required
+@user_passes_test(is_owner)
+def owner_dog_logs(request, dog_id):
+    """Owner view to see logs for a specific dog"""
+    try:
+        dog = Dog.objects.get(id=dog_id, owner__user=request.user)
+    except Dog.DoesNotExist:
+        messages.error(request, "Dog not found or you don't have permission to view it.")
+        return redirect('owner_daily_logs')
+    
+    # Get all logs for this dog's bookings
+    logs = DailyLog.objects.filter(booking__dog=dog).order_by('-date', '-id')
+    
+    context = {
+        'dog': dog,
+        'logs': logs,
+    }
+    return render(request, 'core/owner_dog_logs.html', context)
+
+@user_passes_test(is_staff)
+def export_daily_logs(request):
+    """Export daily logs as CSV for reporting"""
+    # Get filter parameters
+    date_filter = request.GET.get('date', '')
+    booking_filter = request.GET.get('booking', '')
+    dog_filter = request.GET.get('dog', '')
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+    
+    # Get all logs
+    logs = DailyLog.objects.all().order_by('-date', '-id')
+    
+    # Apply filters
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            logs = logs.filter(date=filter_date)
+        except ValueError:
+            pass
+    
+    if booking_filter:
+        logs = logs.filter(booking_id=booking_filter)
+    
+    if dog_filter:
+        logs = logs.filter(booking__dog__name__icontains=dog_filter)
+    
+    if start_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            logs = logs.filter(date__gte=start)
+        except ValueError:
+            pass
+    
+    if end_date:
+        try:
+            end = datetime.strptime(end_date, '%Y-%m-%d').date()
+            logs = logs.filter(date__lte=end)
+        except ValueError:
+            pass
+    
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="daily_logs_{timezone.now().date()}.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        'Date',
+        'Dog Name',
+        'Dog Breed',
+        'Owner Name',
+        'Kennel',
+        'Feeding',
+        'Medication',
+        'Exercise',
+        'Notes',
+        'Photo URL'
+    ])
+    
+    for log in logs:
+        writer.writerow([
+            log.date.strftime('%m/%d/%Y'),
+            log.booking.dog.name,
+            log.booking.dog.breed or 'Mixed breed',
+            log.booking.dog.owner.user.get_full_name() or log.booking.dog.owner.user.username,
+            log.booking.kennel.name if log.booking.kennel else 'Not assigned',
+            log.feeding,
+            log.medication,
+            log.exercise,
+            log.notes,
+            log.photo.url if log.photo else ''
+        ])
+    
+    return response
+
+def send_log_notification_to_owner(log):
+    """Send email notification to owner when a daily log is created"""
+    try:
+        booking = log.booking
+        owner = booking.dog.owner
+        owner_email = owner.user.email
+        
+        if not owner_email:
+            print(f"No email found for owner {owner.user.username}")
+            return False
+        
+        subject = f"Daily Log Update for {booking.dog.name}"
+        
+        # Format the date as mm/dd/yyyy
+        log_date = log.date.strftime('%m/%d/%Y')
+        
+        message = f"""
+Hello {owner.user.first_name or owner.user.username},
+
+A daily log has been created for {booking.dog.name} on {log_date}.
+
+Log Details:
+- Feeding: {log.feeding or 'Not specified'}
+- Medication: {log.medication or 'Not specified'}
+- Exercise: {log.exercise or 'Not specified'}
+- Notes: {log.notes or 'No additional notes'}
+
+You can view all logs for {booking.dog.name} by logging into your account.
+
+Best regards,
+The Dog Boarding Team
+        """
+        
+        # Send email
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [owner_email],
+            fail_silently=False,
+        )
+        
+        print(f"Email notification sent to {owner_email}")
+        return True
+        
+    except Exception as e:
+        print(f"Error sending email notification: {e}")
+        return False
+
+@login_required
+def user_profile(request):
+    """User profile page for updating personal information"""
+    user = request.user
+    
+    if request.method == 'POST':
+        # Handle form submission
+        action = request.POST.get('action')
+        
+        if action == 'update_profile':
+            # Update basic profile information
+            user.first_name = request.POST.get('first_name', '').strip()
+            user.last_name = request.POST.get('last_name', '').strip()
+            user.email = request.POST.get('email', '').strip()
+            
+            # Update owner phone if user is an owner
+            try:
+                owner = Owner.objects.get(user=user)
+                owner.phone = request.POST.get('phone', '').strip()
+                owner.save()
+            except Owner.DoesNotExist:
+                pass
+            
+            user.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('user_profile')
+            
+        elif action == 'change_password':
+            # Handle password change
+            current_password = request.POST.get('current_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if not user.check_password(current_password):
+                messages.error(request, 'Current password is incorrect.')
+            elif new_password != confirm_password:
+                messages.error(request, 'New passwords do not match.')
+            elif len(new_password) < 8:
+                messages.error(request, 'Password must be at least 8 characters long.')
+            else:
+                user.set_password(new_password)
+                user.save()
+                # Re-login the user after password change
+                from django.contrib.auth import login
+                login(request, user)
+                messages.success(request, 'Password changed successfully!')
+                return redirect('user_profile')
+    
+    # Get owner information if user is an owner
+    owner = None
+    try:
+        owner = Owner.objects.get(user=user)
+    except Owner.DoesNotExist:
+        pass
+    
+    context = {
+        'user': user,
+        'owner': owner,
+    }
+    return render(request, 'core/user_profile.html', context)

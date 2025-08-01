@@ -1,0 +1,379 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .logs-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .logs-header {
+        color: white;
+        margin-bottom: 30px;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .logs-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="paw" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M10 5c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5 5 2.24 5 5zm0 10c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5 5 2.24 5 5z" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23paw)"/></svg>');
+        opacity: 0.3;
+        animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .logs-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .logs-subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .booking-info-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .dog-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid #667eea;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        flex-shrink: 0;
+    }
+
+    .dog-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .dog-emoji {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5em;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .booking-details h3 {
+        color: #333;
+        font-size: 1.8em;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .booking-details p {
+        color: #666;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+    }
+
+    .logs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .log-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+
+    .log-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .log-date {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+
+    .log-content {
+        margin-bottom: 20px;
+    }
+
+    .log-section {
+        margin-bottom: 15px;
+    }
+
+    .log-section h4 {
+        color: #667eea;
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .log-section p {
+        color: #333;
+        line-height: 1.6;
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 3px solid #667eea;
+    }
+
+    .log-photo {
+        margin-top: 15px;
+    }
+
+    .log-photo img {
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .empty-state p {
+        font-size: 1.1em;
+        margin-bottom: 30px;
+    }
+
+    .back-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        margin: 0 10px;
+    }
+
+    .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .logs-container {
+            padding: 10px;
+        }
+        
+        .logs-title {
+            font-size: 2rem;
+        }
+        
+        .logs-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .booking-info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .dog-avatar {
+            width: 60px;
+            height: 60px;
+        }
+    }
+</style>
+
+<div class="logs-container">
+    <div class="logs-header">
+        <div class="header-content">
+            <h1 class="logs-title">📊 Daily Logs for {{ booking.dog.name }}</h1>
+            <p class="logs-subtitle">All care logs for this specific booking</p>
+        </div>
+    </div>
+
+    <div class="booking-info-card">
+        <div class="dog-avatar">
+            {% if booking.dog.photo %}
+                <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}">
+            {% else %}
+                <span class="dog-emoji">🐕</span>
+            {% endif %}
+        </div>
+        <div class="booking-details">
+            <h3>{{ booking.dog.name }}</h3>
+            <p>{{ booking.dog.breed|default:"Mixed breed" }} • {{ booking.dog.size|title }}</p>
+            <p><strong>Stay:</strong> {{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</p>
+            <p><strong>Owner:</strong> {{ booking.dog.owner.user.get_full_name|default:booking.dog.owner.user.username }}</p>
+            {% if booking.kennel %}
+                <p><strong>Kennel:</strong> {{ booking.kennel.name }} ({{ booking.kennel.get_size_display }})</p>
+            {% endif %}
+            <p><strong>Status:</strong> {{ booking.get_status_display }}</p>
+        </div>
+    </div>
+
+    {% if logs %}
+        <div class="logs-grid">
+            {% for log in logs %}
+                <div class="log-card">
+                    <div class="log-header">
+                        <div>
+                            <h4>📅 {{ log.date|date:"m/d/Y" }}</h4>
+                        </div>
+                        <div class="log-date">
+                            {{ log.date|date:"m/d/Y" }}
+                        </div>
+                    </div>
+                    
+                    <div class="log-content">
+                        {% if log.feeding %}
+                        <div class="log-section">
+                            <h4>🍽️ Feeding</h4>
+                            <p>{{ log.feeding }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.medication %}
+                        <div class="log-section">
+                            <h4>💊 Medication</h4>
+                            <p>{{ log.medication }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.exercise %}
+                        <div class="log-section">
+                            <h4>🏃 Exercise</h4>
+                            <p>{{ log.exercise }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.notes %}
+                        <div class="log-section">
+                            <h4>📝 Notes</h4>
+                            <p>{{ log.notes }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.photo %}
+                        <div class="log-section">
+                            <h4>📸 Photo</h4>
+                            <div class="log-photo">
+                                <img src="{{ log.photo.url }}" alt="Daily log photo">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not log.feeding and not log.medication and not log.exercise and not log.notes and not log.photo %}
+                        <div class="log-section">
+                            <h4>📝 No Details</h4>
+                            <p>No activities recorded for this day.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>📊 No Daily Logs Found</h3>
+            <p>No daily logs have been created for this booking yet. This could mean:</p>
+            <ul style="text-align: left; max-width: 400px; margin: 20px auto;">
+                <li>Staff haven't created logs for this booking yet</li>
+                <li>Logs are only created for active bookings</li>
+                <li>The booking may have ended without logs</li>
+            </ul>
+        </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{% url 'staff_dashboard' %}" class="back-btn">
+            <span>🏠</span>
+            Back to Dashboard
+        </a>
+        <a href="{% url 'staff_daily_logs' %}" class="back-btn">
+            <span>📊</span>
+            All Daily Logs
+        </a>
+        <a href="{% url 'staff_booking_detail' booking.id %}" class="back-btn">
+            <span>📋</span>
+            Booking Details
+        </a>
+    </div>
+</div>
+{% endblock %} 

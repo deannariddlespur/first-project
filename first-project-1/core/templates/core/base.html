@@ -15,6 +15,166 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Navigation Header */
+        .nav-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+        
+        .nav-brand:hover {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .nav-brand-icon {
+            font-size: 1.5em;
+        }
+        
+        .nav-user {
+            position: relative;
+        }
+        
+        .user-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .user-dropdown:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #333;
+        }
+        
+        .user-role {
+            font-size: 0.75em;
+            color: #666;
+        }
+        
+        .dropdown-arrow {
+            font-size: 0.8em;
+            color: #666;
+            transition: transform 0.3s ease;
+        }
+        
+        .user-dropdown.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .user-dropdown.active + .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .dropdown-item.logout {
+            color: #dc3545;
+        }
+        
+        .dropdown-item.logout:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            min-height: calc(100vh - 80px);
         }
         
         /* Only apply doggy theme to specific pages, not homepage */
@@ -52,6 +212,23 @@
         
         /* Responsive design */
         @media (max-width: 768px) {
+            .nav-header {
+                padding: 10px 20px;
+            }
+            
+            .nav-brand {
+                font-size: 1.1em;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .dropdown-menu {
+                right: -10px;
+                min-width: 180px;
+            }
+            
             .doggy-container {
                 margin: 20px auto;
                 padding: 1.5em 2em;
@@ -61,7 +238,74 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% block content %}{% endblock %}
+    {% if user.is_authenticated %}
+    <header class="nav-header">
+        <div class="nav-container">
+            <a href="{% if user.is_staff %}{% url 'staff_dashboard' %}{% else %}{% url 'owner_dashboard' %}{% endif %}" class="nav-brand">
+                <span class="nav-brand-icon">🏠</span>
+                <span>Dog Boarding</span>
+            </a>
+            
+            <div class="nav-user">
+                <div class="user-dropdown" onclick="toggleDropdown()">
+                    <div class="user-avatar">
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="user-role">
+                            {% if user.is_staff %}Staff{% else %}Owner{% endif %}
+                        </div>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                
+                <div class="dropdown-menu">
+                    <a href="{% url 'user_profile' %}" class="dropdown-item">
+                        <span>👤</span>
+                        <span>Profile</span>
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'staff_dashboard' %}" class="dropdown-item">
+                        <span>📊</span>
+                        <span>Staff Dashboard</span>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'owner_dashboard' %}" class="dropdown-item">
+                        <span>🏠</span>
+                        <span>Owner Dashboard</span>
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}" class="dropdown-item logout">
+                        <span>🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+    
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.querySelector('.user-dropdown');
+            dropdown.classList.toggle('active');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.user-dropdown');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            
+            if (dropdown && dropdownMenu && !dropdown.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

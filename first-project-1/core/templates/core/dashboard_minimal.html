@@ -125,6 +125,17 @@
         color: #6c757d;
         font-size: 2em;
     }
+
+    .dog-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        border: 2px solid #ddd;
+        background-color: #f8f9fa;
+        display: block;
+    }
     
     .dog-info {
         flex: 1;
@@ -286,9 +297,18 @@
             {% for dog in dogs %}
                 <div class="dog-card">
                     <div class="dog-header">
-                        <div class="dog-photo-placeholder">
-                            🐕
-                        </div>
+                        {% if dog.photo %}
+                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                 onload="this.nextElementSibling.style.display='none';">
+                            <div class="dog-photo-placeholder" style="display: none;">
+                                <span>🐕</span>
+                            </div>
+                        {% else %}
+                            <div class="dog-photo-placeholder">
+                                <span>📷</span>
+                            </div>
+                        {% endif %}
                         <div class="dog-info">
                             <h4>{{ dog.name }}</h4>
                             <div class="dog-breed">{{ dog.breed|default:"Mixed breed" }}</div>

@@ -421,6 +421,14 @@
         <form method="get">
             <div class="filter-controls">
                 <div class="filter-group">
+                    <label for="filter-type">Filter Type</label>
+                    <select name="filter_type" id="filter-type" class="filter-control" onchange="toggleFilterOptions()">
+                        <option value="month" {% if filter_type == 'month' %}selected{% endif %}>By Month</option>
+                        <option value="year" {% if filter_type == 'year' %}selected{% endif %}>By Year</option>
+                        <option value="all_time" {% if filter_type == 'all_time' %}selected{% endif %}>All Time</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="month-filter-group" style="display: {% if filter_type == 'month' %}block{% else %}none{% endif %};">
                     <label for="month-filter">Month</label>
                     <select name="month" id="month-filter" class="filter-control">
                         <option value="1" {% if filter_month == 1 %}selected{% endif %}>January</option>
@@ -437,20 +445,37 @@
                         <option value="12" {% if filter_month == 12 %}selected{% endif %}>December</option>
                     </select>
                 </div>
-                <div class="filter-group">
+                <div class="filter-group" id="year-filter-group" style="display: {% if filter_type == 'year' %}block{% else %}none{% endif %};">
                     <label for="year-filter">Year</label>
                     <select name="year" id="year-filter" class="filter-control">
-                        <option value="2024" {% if filter_year == 2024 %}selected{% endif %}>2024</option>
-                        <option value="2025" {% if filter_year == 2025 %}selected{% endif %}>2025</option>
-                        <option value="2026" {% if filter_year == 2026 %}selected{% endif %}>2026</option>
-                        <option value="2027" {% if filter_year == 2027 %}selected{% endif %}>2027</option>
-                        <option value="2028" {% if filter_year == 2028 %}selected{% endif %}>2028</option>
+                        {% for year in year_options %}
+                            <option value="{{ year }}" {% if filter_year == year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
             <button type="submit" class="apply-filter-btn">Apply Filter</button>
         </form>
     </div>
+
+    <script>
+        function toggleFilterOptions() {
+            const filterType = document.getElementById('filter-type').value;
+            const monthGroup = document.getElementById('month-filter-group');
+            const yearGroup = document.getElementById('year-filter-group');
+            
+            if (filterType === 'month') {
+                monthGroup.style.display = 'block';
+                yearGroup.style.display = 'none';
+            } else if (filterType === 'year') {
+                monthGroup.style.display = 'none';
+                yearGroup.style.display = 'block';
+            } else if (filterType === 'all_time') {
+                monthGroup.style.display = 'none';
+                yearGroup.style.display = 'none';
+            }
+        }
+    </script>
 
     <div class="stats-grid">
         <div class="stat-card">
@@ -463,19 +488,25 @@
             <span class="stat-icon">⏳</span>
             <div class="stat-title">Pending Bookings</div>
             <div class="stat-value">{{ total_pending }}</div>
-            <div class="stat-label">Awaiting confirmation</div>
+            <div class="stat-label">{{ month_name }}</div>
         </div>
         <div class="stat-card">
             <span class="stat-icon">💰</span>
             <div class="stat-title">Total Revenue</div>
             <div class="stat-value">${{ total_revenue|default:"0.00" }}</div>
-            <div class="stat-label">All time</div>
+            <div class="stat-label">{{ month_name }}</div>
         </div>
         <div class="stat-card">
             <span class="stat-icon">💳</span>
             <div class="stat-title">Pending Payments</div>
             <div class="stat-value">${{ pending_payments|default:"0.00" }}</div>
             <div class="stat-label">Awaiting payment</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">❌</span>
+            <div class="stat-title">Cancelled Bookings</div>
+            <div class="stat-value">{{ total_cancelled }}</div>
+            <div class="stat-label">{{ month_name }}</div>
         </div>
     </div>
 
@@ -540,6 +571,39 @@
                 </div>
             {% endif %}
         </div>
+
+        <div class="content-section">
+            <div class="section-header">
+                ❌ Cancelled Bookings
+            </div>
+            {% if cancelled_bookings %}
+                <div class="booking-list">
+                    {% for booking in cancelled_bookings %}
+                        <div class="booking-item">
+                            <div class="booking-dog">{{ booking.dog.name }}</div>
+                            <div class="booking-owner">Owner: {{ booking.dog.owner }}</div>
+                            <div class="booking-dates">{{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</div>
+                            {% if booking.kennel %}
+                                <div class="booking-kennel">Kennel: {{ booking.kennel.name }} ({{ booking.kennel.get_size_display }})</div>
+                            {% else %}
+                                <div class="booking-kennel">Kennel: <em>Not assigned</em></div>
+                            {% endif %}
+                            {% if booking.total_amount %}
+                                <div class="booking-amount">${{ booking.total_amount }}</div>
+                            {% endif %}
+                            <span class="status-badge status-cancelled">{{ booking.get_status_display }}</span>
+                            <br>
+                            <a href="{% url 'staff_booking_detail' booking.id %}" class="manage-btn">View Details</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">✅</div>
+                    <p>No cancelled bookings for this period!</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
     <div class="actions-grid">
@@ -565,6 +629,12 @@
             <span class="action-icon">📅</span>
             <div class="action-title">Facility Calendar</div>
             <div class="action-description">Manage facility availability and closures</div>
+        </a>
+        
+        <a href="{% url 'staff_daily_logs' %}" class="action-card">
+            <span class="action-icon">📊</span>
+            <div class="action-title">Daily Logs</div>
+            <div class="action-description">Track daily activities and care for all dogs</div>
         </a>
         
         <a href="/admin-dashboard/" class="action-card">

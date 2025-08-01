@@ -334,7 +334,13 @@
                             {% if day.date %}
                                 <span class="day-number">{{ day.date.day }}</span>
                                 {% if day.has_booking %}
-                                    <div class="booking-indicator">🐕</div>
+                                    <div class="booking-details">
+                                        {% for booking in day.booking_details %}
+                                            <div class="booking-item" title="{{ booking.dog_name }} - {{ booking.owner_name }} ({{ booking.kennel_name }})">
+                                                <span class="dog-name">{{ booking.dog_name }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
                                 {% endif %}
                                 {% if not day.is_other_month %}
                                     <div class="availability-info">
@@ -377,7 +383,7 @@
                 <span>No Availability</span>
             </div>
             <div class="legend-item">
-                <span class="booking-indicator">🐕</span>
+                <span class="dog-name">Dog Name</span>
                 <span>Existing Booking</span>
             </div>
         </div>
@@ -479,6 +485,39 @@
     display: block;
     margin-bottom: 2px;
 }
+.booking-details {
+    margin-top: 2px;
+    max-height: 40px;
+    overflow: hidden;
+}
+
+.booking-item {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 1px;
+    font-size: 0.7em;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.booking-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.dog-name {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
 .booking-indicator {
     position: absolute;
     bottom: 2px;

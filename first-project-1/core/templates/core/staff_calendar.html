@@ -215,6 +215,41 @@
         border-radius: 10px;
         font-size: 0.8em;
         font-weight: bold;
+        max-width: calc(100% - 10px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .booking-details {
+        margin-top: 5px;
+        font-size: 0.75em;
+        line-height: 1.2;
+    }
+
+    .booking-item {
+        background: #e8f5e8;
+        border: 1px solid #28a745;
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin: 1px 0;
+        color: #155724;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .booking-item.confirmed {
+        background: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+    }
+
+    .booking-item.pending {
+        background: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
     }
 
     .legend-section {
@@ -310,14 +345,21 @@
         text-decoration: none;
     }
 
-    .error-message {
+    .error-message, .messages {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 30px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         backdrop-filter: blur(10px);
+    }
+
+    .error-message {
         border-left: 4px solid #dc3545;
+    }
+
+    .messages {
+        border-left: 4px solid #28a745;
     }
 
     .alert-danger {
@@ -326,6 +368,15 @@
         border: 1px solid #f5c6cb;
         padding: 15px;
         border-radius: 8px;
+    }
+
+    .alert-success {
+        color: #155724;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 1px solid #c3e6cb;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
     }
 
     /* Modal Styles */
@@ -337,54 +388,78 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        backdrop-filter: blur(5px);
-    }
-
-    .modal-content {
-        background: rgba(255, 255, 255, 0.95);
-        margin: 5% auto;
-        padding: 30px;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
         backdrop-filter: blur(10px);
     }
 
+    .modal-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        margin: 5% auto;
+        padding: 35px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 550px;
+        box-shadow: 0 25px 80px rgba(102, 126, 234, 0.3);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modal-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
     .modal-content h3 {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         color: #333;
-        font-size: 1.4em;
+        font-size: 1.6em;
+        font-weight: bold;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .modal-content h3::before {
+        content: '🏠';
+        font-size: 1.2em;
     }
 
     .form-section {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        position: relative;
     }
 
     .form-section label {
         display: block;
-        margin-bottom: 8px;
-        color: #666;
-        font-weight: 600;
-        font-size: 0.9em;
+        margin-bottom: 10px;
+        color: #667eea;
+        font-weight: 700;
+        font-size: 0.95em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .form-section input,
     .form-section select,
     .form-section textarea {
         width: 100%;
-        padding: 12px 16px;
+        padding: 15px 18px;
         border: 2px solid #e1e5e9;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 16px;
         background: white;
         color: #333;
         transition: all 0.3s ease;
         box-sizing: border-box;
+        font-weight: 500;
     }
 
     .form-section input:focus,
@@ -392,39 +467,61 @@
     .form-section textarea:focus {
         outline: none;
         border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        transform: translateY(-1px);
     }
 
     .form-section textarea {
         resize: vertical;
-        min-height: 80px;
+        min-height: 100px;
+        font-family: inherit;
     }
 
-    .date-input-container {
-        display: flex;
-        gap: 10px;
-    }
 
-    .date-picker-btn {
-        padding: 12px 16px;
-        background: #667eea;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 1.1em;
-    }
 
     .modal-actions {
         display: flex;
-        gap: 10px;
+        gap: 15px;
         justify-content: flex-end;
-        margin-top: 25px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e1e5e9;
     }
 
-    .modal-actions .action-btn {
-        padding: 10px 20px;
-        font-size: 0.9em;
+    .doggy-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .doggy-btn:first-child {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 2px solid #e1e5e9;
+    }
+
+    .doggy-btn:first-child:hover {
+        background: #e9ecef;
+        transform: translateY(-1px);
+    }
+
+    .doggy-btn:last-child {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .doggy-btn:last-child:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
 
     @media (max-width: 768px) {
@@ -489,24 +586,25 @@
                     <div class="availability-entry {{ entry.type }}" 
                          onmouseover="showTooltip(this, '{{ entry.title }} - {{ entry.description }}')"
                          onmouseout="hideTooltip()"
-                         onclick="editAvailability({{ entry.id }}, '{{ entry.date|date:'m/d/Y' }}', '{{ entry.type }}', '{{ entry.title }}', '{{ entry.description }}')"
                          data-entry-id="{{ entry.id }}"
                          data-entry-date="{{ entry.date|date:'m/d/Y' }}"
                          data-entry-type="{{ entry.type }}"
                          data-entry-title="{{ entry.title }}"
                          data-entry-description="{{ entry.description }}"
-                         {% if day.booking_count > 0 and entry.type in 'closed,maintenance' %}data-has-conflicts="true"{% endif %}>
-                        <span>{{ entry.get_type_display }}</span>
+                         {% if day.booking_count > 0 and entry.type in 'closed,maintenance' %}data-has-conflicts="true"{% endif %}
+                         style="cursor: pointer;"
+                         title="Click to edit/delete - ID: {{ entry.id }}">
+                        <span class="entry-text">{{ entry.get_type_display }}</span>
                         {% if day.booking_count > 0 and entry.type in 'closed,maintenance' %}
                         <span class="conflict-warning" title="Cannot edit - there are confirmed bookings on this date">⚠️</span>
                         {% endif %}
-                        <div class="entry-actions" style="display: none !important;">
+                        <div class="entry-buttons">
                             {% if day.booking_count > 0 and entry.type in 'closed,maintenance' %}
-                            <button type="button" class="edit-btn disabled" title="Cannot edit - there are confirmed bookings on this date" disabled>✏️</button>
+                            <button type="button" class="entry-btn edit-btn disabled" title="Cannot edit - there are confirmed bookings on this date" disabled>✏️</button>
                             {% else %}
-                            <button type="button" class="edit-btn" onclick="editAvailability({{ entry.id }}, '{{ entry.date|date:'m/d/Y' }}', '{{ entry.type }}', '{{ entry.title }}', '{{ entry.description }}')">✏️</button>
+                            <button type="button" class="entry-btn edit-btn" onclick="editAvailability({{ entry.id }}, '{{ entry.date|date:'m/d/Y' }}', '{{ entry.type }}', '{{ entry.title }}', '{{ entry.description }}')" title="Edit this entry">✏️</button>
                             {% endif %}
-                            <button type="button" class="delete-btn" onclick="deleteAvailability({{ entry.id }}, '{{ entry.title }}')" title="Delete this availability entry">🗑️</button>
+                            <button type="button" class="entry-btn delete-btn" onclick="deleteAvailability({{ entry.id }}, '{{ entry.title }}')" title="Delete this entry">🗑️</button>
                         </div>
                     </div>
                     {% endfor %}
@@ -514,10 +612,14 @@
                 {% endif %}
                 
                 {% if day.booking_count > 0 %}
-                <div class="booking-indicator" 
-                     onmouseover="showTooltip(this, '{{ day.booking_count }} booking(s)')"
-                     onmouseout="hideTooltip()">
-                    <span style="text-align: left; display: block;">🐕 {{ day.booking_count }}</span>
+                <div class="booking-details">
+                    {% for booking in day.booking_details %}
+                    <div class="booking-item {{ booking.status }}" 
+                         onmouseover="showTooltip(this, '{{ booking.dog_name }} - {{ booking.owner_name }} ({{ booking.status }})')"
+                         onmouseout="hideTooltip()">
+                        🐕 {{ booking.dog_name }}
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
             </div>
@@ -572,6 +674,16 @@
         </div>
     </div>
     {% endif %}
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <strong>{{ message.tags|title }}:</strong> {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 
 <!-- Add Availability Modal -->
@@ -581,35 +693,39 @@
         <form method="post" action="{% url 'staff_calendar' %}?year={{ year }}&month={{ month }}">
             {% csrf_token %}
             <div class="form-section">
-                <label for="date">Date:</label>
+                <label for="date">📅 Date</label>
                 <div class="date-input-container">
-                    <input type="text" name="date" id="date" placeholder="mm/dd/yyyy" required>
+                    <input type="text" name="date" id="date" placeholder="mm/dd/yyyy" required readonly>
                     <button type="button" class="date-picker-btn" onclick="openDatePicker('date')">📅</button>
                 </div>
             </div>
             <div class="form-section">
-                <label for="type">Type:</label>
+                <label for="type">🏷️ Type</label>
                 <select name="type" id="type" required>
                     <option value="">Select Type</option>
-                    <option value="closed">Facility Closed</option>
-                    <option value="vacation">Staff Vacation</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="holiday">Holiday</option>
-                    <option value="limited">Limited Hours</option>
-                    <option value="other">Other</option>
+                    <option value="closed">🚫 Facility Closed</option>
+                    <option value="vacation">🏖️ Staff Vacation</option>
+                    <option value="maintenance">🔧 Maintenance</option>
+                    <option value="holiday">🎉 Holiday</option>
+                    <option value="limited">⏰ Limited Hours</option>
+                    <option value="other">📝 Other</option>
                 </select>
             </div>
             <div class="form-section">
-                <label for="title">Title:</label>
+                <label for="title">📝 Title</label>
                 <input type="text" name="title" id="title" placeholder="e.g., Christmas Holiday" required>
             </div>
             <div class="form-section">
-                <label for="description">Description:</label>
-                <textarea name="description" id="description" placeholder="Additional details..."></textarea>
+                <label for="description">📄 Description</label>
+                <textarea name="description" id="description" placeholder="Additional details about this availability entry..."></textarea>
             </div>
             <div class="modal-actions">
-                <button type="button" onclick="closeAddAvailability()" class="doggy-btn">Cancel</button>
-                <button type="submit" class="doggy-btn">Add Entry</button>
+                <button type="button" onclick="closeAddAvailability()" class="doggy-btn">
+                    <span>❌</span> Cancel
+                </button>
+                <button type="submit" class="doggy-btn">
+                    <span>✅</span> Add Entry
+                </button>
             </div>
         </form>
     </div>
@@ -623,37 +739,43 @@
             {% csrf_token %}
             <input type="hidden" name="entry_id" id="editEntryId">
             <div class="form-section">
-                <label for="editDate">Date:</label>
+                <label for="editDate">📅 Date</label>
                 <div class="date-input-container">
-                    <input type="text" name="date" id="editDate" placeholder="mm/dd/yyyy" required>
+                    <input type="text" name="date" id="editDate" placeholder="mm/dd/yyyy" required readonly>
                     <button type="button" class="date-picker-btn" onclick="openDatePicker('editDate')">📅</button>
                 </div>
             </div>
             <div class="form-section">
-                <label for="editType">Type:</label>
+                <label for="editType">🏷️ Type</label>
                 <select name="type" id="editType" required>
                     <option value="">Select Type</option>
-                    <option value="closed">Facility Closed</option>
-                    <option value="vacation">Staff Vacation</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="holiday">Holiday</option>
-                    <option value="limited">Limited Hours</option>
-                    <option value="other">Other</option>
+                    <option value="closed">🚫 Facility Closed</option>
+                    <option value="vacation">🏖️ Staff Vacation</option>
+                    <option value="maintenance">🔧 Maintenance</option>
+                    <option value="holiday">🎉 Holiday</option>
+                    <option value="limited">⏰ Limited Hours</option>
+                    <option value="other">📝 Other</option>
                 </select>
             </div>
             <div class="form-section">
-                <label for="editTitle">Title:</label>
+                <label for="editTitle">📝 Title</label>
                 <input type="text" name="title" id="editTitle" placeholder="e.g., Christmas Holiday" required>
             </div>
             <div class="form-section">
-                <label for="editDescription">Description:</label>
-                <textarea name="description" id="editDescription" placeholder="Additional details..."></textarea>
+                <label for="editDescription">📄 Description</label>
+                <textarea name="description" id="editDescription" placeholder="Additional details about this availability entry..."></textarea>
             </div>
-                    <div class="modal-actions">
-            <button type="button" onclick="closeEditAvailability()" class="doggy-btn">Cancel</button>
-            <button type="button" onclick="deleteFromEdit()" class="doggy-btn" style="background-color: #dc3545;">Delete</button>
-            <button type="submit" class="doggy-btn">Save Changes</button>
-        </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeEditAvailability()" class="doggy-btn">
+                    <span>❌</span> Cancel
+                </button>
+                <button type="button" onclick="deleteFromEdit()" class="doggy-btn" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
+                    <span>🗑️</span> Delete
+                </button>
+                <button type="submit" class="doggy-btn">
+                    <span>💾</span> Save Changes
+                </button>
+            </div>
         </form>
     </div>
 </div>
@@ -671,26 +793,7 @@
     </div>
 </div>
 
-<!-- Date Picker Modal -->
-<div id="datePickerModal" class="date-picker-modal">
-    <div class="date-picker-content">
-        <div class="date-picker-header">
-            <button type="button" onclick="previousMonth()">&lt;</button>
-            <span id="currentMonthYear"></span>
-            <button type="button" onclick="nextMonth()">&gt;</button>
-        </div>
-        <div class="date-picker-body">
-            <div class="date-picker-weekdays">
-                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-            </div>
-            <div id="datePickerDays" class="date-picker-days"></div>
-        </div>
-        <div class="date-picker-footer">
-            <button type="button" onclick="closeDatePicker()">Cancel</button>
-            <button type="button" onclick="selectDate()">Select</button>
-        </div>
-    </div>
-</div>
+{% include 'core/base_date_picker.html' %}
 
 <style>
 .calendar-navigation {
@@ -812,23 +915,24 @@
 }
 
 .availability-entry {
-    padding: 2px 3px;
-    border-radius: 2px;
+    padding: 4px 6px;
+    border-radius: 4px;
     color: white;
     font-weight: bold;
-    font-size: 0.6em;
+    font-size: 0.7em;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 16px;
+    min-height: 20px;
     word-wrap: break-word;
     overflow: hidden;
-    width: 70%;
-    max-width: 70%;
+    width: 85%;
+    max-width: 85%;
     margin-left: auto;
     cursor: pointer;
     transition: all 0.2s ease;
     align-self: flex-end;
+    gap: 6px;
 }
 
 .availability-entry:hover {
@@ -864,6 +968,53 @@
 
 .availability-entry.other {
     background: #6c757d;
+}
+
+.entry-text {
+    flex: 1;
+    font-weight: 500;
+}
+
+.entry-buttons {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.entry-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.65em;
+    color: white;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    min-width: 18px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.entry-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.entry-btn.edit-btn:hover {
+    background: rgba(23, 162, 184, 0.8);
+}
+
+.entry-btn.delete-btn:hover {
+    background: rgba(220, 53, 69, 0.8);
+}
+
+.entry-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .entry-actions {
@@ -1171,40 +1322,7 @@
     background-color: #f5c76c;
 }
 
-.date-input-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
 
-.date-input-container input {
-    flex: 1;
-    padding-right: 40px; /* Make room for the button */
-}
-
-.date-input-container .date-picker-btn {
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #f7d08a;
-    border: none;
-    padding: 6px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em;
-    color: #333;
-    z-index: 1;
-    height: 32px;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.date-input-container .date-picker-btn:hover {
-    background-color: #f5c76c;
-}
 </style>
 
 <script>
@@ -1224,83 +1342,7 @@ window.onclick = function(event) {
     }
 }
 
-// Date Picker Functions
-let currentMonth = parseInt('{{ month }}');
-let currentYear = parseInt('{{ year }}');
 
-function openDatePicker(inputId) {
-    document.getElementById('datePickerModal').style.display = 'flex';
-    document.getElementById('currentMonthYear').textContent = `${currentMonth}/${currentYear}`;
-    renderCalendar(currentMonth, currentYear);
-}
-
-function closeDatePicker() {
-    document.getElementById('datePickerModal').style.display = 'none';
-}
-
-function previousMonth() {
-    currentMonth--;
-    if (currentMonth < 1) {
-        currentMonth = 12;
-        currentYear--;
-    }
-    document.getElementById('currentMonthYear').textContent = `${currentMonth}/${currentYear}`;
-    renderCalendar(currentMonth, currentYear);
-}
-
-function nextMonth() {
-    currentMonth++;
-    if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
-    }
-    document.getElementById('currentMonthYear').textContent = `${currentMonth}/${currentYear}`;
-    renderCalendar(currentMonth, currentYear);
-}
-
-function renderCalendar(month, year) {
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const firstDayOfMonth = new Date(year, month - 1, 1);
-    const daysInPrevMonth = new Date(year, month - 2, 0).getDate();
-
-    const datePickerDays = document.getElementById('datePickerDays');
-    datePickerDays.innerHTML = ''; // Clear previous days
-
-    // Add days from previous month
-    for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
-        const day = daysInPrevMonth - i;
-        const dayElement = document.createElement('div');
-        dayElement.classList.add('date-picker-day', 'other-month');
-        dayElement.textContent = day;
-        dayElement.onclick = () => selectDate(day, month, year);
-        datePickerDays.appendChild(dayElement);
-    }
-
-    // Add days from current month
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dayElement = document.createElement('div');
-        dayElement.classList.add('date-picker-day');
-        dayElement.textContent = i;
-        dayElement.onclick = () => selectDate(i, month, year);
-        datePickerDays.appendChild(dayElement);
-    }
-
-    // Add days from next month
-    const remainingDays = 42 - (firstDayOfMonth.getDay() + daysInMonth); // 42 is the total number of days in a 6-week grid
-    for (let i = 1; i <= remainingDays; i++) {
-        const dayElement = document.createElement('div');
-        dayElement.classList.add('date-picker-day', 'other-month');
-        dayElement.textContent = i;
-        dayElement.onclick = () => selectDate(i, month, year);
-        datePickerDays.appendChild(dayElement);
-    }
-}
-
-function selectDate(day, month, year) {
-    const dateInput = document.getElementById('date');
-    dateInput.value = `${month}/${day}/${year}`;
-    closeDatePicker();
-}
 
 // Tooltip functionality
 let tooltip = null;
@@ -1359,6 +1401,7 @@ function hideTooltip() {
         
         // Edit Availability Function
         function editAvailability(entryId, date, type, title, description) {
+            console.log('Edit availability called:', {entryId, date, type, title, description});
             document.getElementById('editEntryId').value = entryId;
             document.getElementById('editDate').value = date;
             document.getElementById('editType').value = type;
@@ -1395,6 +1438,7 @@ function hideTooltip() {
         
         // Delete Availability Function
         function deleteAvailability(entryId, title) {
+            console.log('Delete availability called:', {entryId, title});
             if (confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
                 // Create a form and submit it
                 const form = document.createElement('form');
@@ -1438,25 +1482,39 @@ function hideTooltip() {
             closeDeleteAvailability();
         }
 
-// Add click event listeners to calendar days
-document.addEventListener('DOMContentLoaded', function() {
-    const calendarDays = document.querySelectorAll('.calendar-day');
-    calendarDays.forEach(day => {
-        day.addEventListener('click', function() {
-            handleDayClick(this);
-        });
-    });
-    
-    // Hide all entry actions on page load
-    hideAllEntryActions();
-    
-    // Add click handler to hide actions when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.closest('.availability-entry')) {
+        // Add click event listeners to calendar days
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Calendar page loaded');
+            
+            const calendarDays = document.querySelectorAll('.calendar-day');
+            calendarDays.forEach(day => {
+                day.addEventListener('click', function() {
+                    handleDayClick(this);
+                });
+            });
+            
+            // Debug: Log all availability entries
+            const availabilityEntries = document.querySelectorAll('.availability-entry');
+            console.log('Found availability entries:', availabilityEntries.length);
+            availabilityEntries.forEach((entry, index) => {
+                console.log(`Entry ${index}:`, {
+                    id: entry.dataset.entryId,
+                    title: entry.dataset.entryTitle,
+                    type: entry.dataset.entryType,
+                    onclick: entry.onclick
+                });
+            });
+            
+            // Hide all entry actions on page load
             hideAllEntryActions();
-        }
-    });
-});
+            
+            // Add click handler to hide actions when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.availability-entry')) {
+                    hideAllEntryActions();
+                }
+            });
+        });
 
 function hideAllEntryActions() {
     const allEntryActions = document.querySelectorAll('.entry-actions');

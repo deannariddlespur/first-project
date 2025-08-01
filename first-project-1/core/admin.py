@@ -170,7 +170,7 @@ class PaymentAdmin(admin.ModelAdmin):
     amount_display.short_description = "Amount"
     
     def created_date(self, obj):
-        return obj.created_at.strftime('%B %d, %Y')
+        return obj.created_at.strftime('%m/%d/%Y')
     created_date.short_description = "Created"
 
 class StaffNoteAdmin(admin.ModelAdmin):
@@ -204,7 +204,7 @@ class StaffNoteAdmin(admin.ModelAdmin):
     note_preview.short_description = "Note"
     
     def created_date(self, obj):
-        return obj.created_at.strftime('%B %d, %Y')
+        return obj.created_at.strftime('%m/%d/%Y')
     created_date.short_description = "Created"
 
 class FacilityAvailabilityAdmin(admin.ModelAdmin):
@@ -258,7 +258,7 @@ class OwnerAdmin(admin.ModelAdmin):
     dog_count.short_description = "Dogs"
     
     def created_date(self, obj):
-        return obj.user.date_joined.strftime('%B %d, %Y')
+        return obj.user.date_joined.strftime('%m/%d/%Y')
     created_date.short_description = "Joined"
 
 # Register models with custom admin site
