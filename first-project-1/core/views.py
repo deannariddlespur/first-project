@@ -729,7 +729,7 @@ def owner_dashboard(request):
         try:
             owner = request.user.owner
         except Owner.DoesNotExist:
-            return redirect('create_owner')
+            return redirect('register_owner')
         
         # Get dogs with safe field access
         try:
