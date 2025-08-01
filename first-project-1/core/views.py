@@ -10,6 +10,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
 from datetime import datetime, timedelta
 import time
 
