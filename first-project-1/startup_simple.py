@@ -26,4 +26,13 @@ try:
 except Exception as e:
     print(f"❌ Error fixing database schema: {e}")
 
+print("🔧 Fixing core_dailylog.photo column for PostgreSQL...")
+
+try:
+    # Run PostgreSQL fix for photo column
+    call_command('fix_daily_log_photo_postgresql')
+    print("✅ Photo column fix completed successfully!")
+except Exception as e:
+    print(f"❌ Error fixing photo column: {e}")
+
 print("🎯 Startup script completed!") 
