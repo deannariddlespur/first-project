@@ -35,4 +35,13 @@ try:
 except Exception as e:
     print(f"❌ Error fixing photo column: {e}")
 
+print("🔧 Fixing core_dog.photo_base64 column for PostgreSQL...")
+
+try:
+    # Run PostgreSQL fix for photo_base64 column
+    call_command('fix_dog_photo_base64_postgresql')
+    print("✅ Photo base64 column fix completed successfully!")
+except Exception as e:
+    print(f"❌ Error fixing photo base64 column: {e}")
+
 print("🎯 Startup script completed!") 
