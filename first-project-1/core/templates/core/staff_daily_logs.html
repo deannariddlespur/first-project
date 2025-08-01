@@ -485,9 +485,9 @@
                             </div>
                         </div>
                         <div class="summary-right">
-                            <div class="log-date">
+                        <div class="log-date">
                                 {% if log.date %}
-                                    {{ log.date|date:"m/d/Y" }}
+                            {{ log.date|date:"m/d/Y" }}
                                 {% else %}
                                     No Date
                                 {% endif %}
@@ -499,40 +499,40 @@
                     <!-- Expanded View (Full Details) -->
                     <div class="log-details content-{{ log.id }}" id="details-{{ log.id }}" style="display: none;">
                         <div class="details-content">
-                            {% if log.feeding %}
-                            <div class="log-section">
-                                <h4>🍽️ Feeding</h4>
-                                <p>{{ log.feeding }}</p>
-                            </div>
-                            {% endif %}
-                            
-                            {% if log.medication %}
-                            <div class="log-section">
-                                <h4>💊 Medication</h4>
-                                <p>{{ log.medication }}</p>
-                            </div>
-                            {% endif %}
-                            
-                            {% if log.exercise %}
-                            <div class="log-section">
-                                <h4>🏃 Exercise</h4>
-                                <p>{{ log.exercise }}</p>
-                            </div>
-                            {% endif %}
-                            
-                            {% if log.notes %}
-                            <div class="log-section">
-                                <h4>📝 Notes</h4>
-                                <p>{{ log.notes }}</p>
-                            </div>
-                            {% endif %}
-                            
-                            {% if not log.feeding and not log.medication and not log.exercise and not log.notes %}
-                            <div class="log-section">
-                                <h4>📝 No Details</h4>
-                                <p>No activities recorded for this day.</p>
-                            </div>
-                            {% endif %}
+                        {% if log.feeding %}
+                        <div class="log-section">
+                            <h4>🍽️ Feeding</h4>
+                            <p>{{ log.feeding }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.medication %}
+                        <div class="log-section">
+                            <h4>💊 Medication</h4>
+                            <p>{{ log.medication }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.exercise %}
+                        <div class="log-section">
+                            <h4>🏃 Exercise</h4>
+                            <p>{{ log.exercise }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.notes %}
+                        <div class="log-section">
+                            <h4>📝 Notes</h4>
+                            <p>{{ log.notes }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not log.feeding and not log.medication and not log.exercise and not log.notes %}
+                        <div class="log-section">
+                            <h4>📝 No Details</h4>
+                            <p>No activities recorded for this day.</p>
+                        </div>
+                        {% endif %}
                             
                             <!-- Always show this section for testing -->
                             <div class="log-section">
@@ -542,30 +542,30 @@
                                 <p><strong>Dog:</strong> {{ log.booking.dog.name }}</p>
                                 <p><strong>Owner:</strong> {{ log.booking.dog.owner.user.get_full_name|default:log.booking.dog.owner.user.username }}</p>
                             </div>
-                            
-                            {% if log.photo %}
-                            <div class="log-section">
-                                <h4>📸 Photo</h4>
-                                <div class="log-photo">
-                                    <img src="{{ log.photo.url }}" alt="Daily log photo">
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
                         
-                        <div class="log-actions">
-                            <a href="{% url 'daily_log_detail' log.id %}" class="action-btn view-btn">
+                        {% if log.photo %}
+                        <div class="log-section">
+                            <h4>📸 Photo</h4>
+                            <div class="log-photo">
+                                    <img src="{{ log.photo.url }}" alt="Daily log photo">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="log-actions">
+                        <a href="{% url 'daily_log_detail' log.id %}" class="action-btn view-btn">
                                 👁️ View Full
-                            </a>
-                            <a href="{% url 'edit_daily_log' log.id %}" class="action-btn edit-btn">
-                                ✏️ Edit
-                            </a>
-                            <form method="post" action="{% url 'delete_daily_log' log.id %}" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this daily log?')">
-                                    🗑️ Delete
-                                </button>
-                            </form>
+                        </a>
+                        <a href="{% url 'edit_daily_log' log.id %}" class="action-btn edit-btn">
+                            ✏️ Edit
+                        </a>
+                        <form method="post" action="{% url 'delete_daily_log' log.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this daily log?')">
+                                🗑️ Delete
+                            </button>
+                        </form>
                         </div>
                     </div>
                 </div>
