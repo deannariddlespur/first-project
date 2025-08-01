@@ -724,73 +724,42 @@ def owner_dashboard(request):
 
 @login_required
 def add_dog(request):
-    import logging
-    logger = logging.getLogger(__name__)
-    
+    """Add dog with error handling"""
     try:
-        logger.info(f"Add dog view accessed by user: {request.user.username}")
         owner = get_object_or_404(Owner, user=request.user)
-        logger.info(f"Found owner: {owner}")
         
         if request.method == 'POST':
-            logger.info("Processing POST request for add_dog")
             form = DogForm(request.POST, request.FILES)
-            logger.info(f"Form is valid: {form.is_valid()}")
-            
             if form.is_valid():
                 dog = form.save(commit=False)
                 dog.owner = owner
                 dog.save()
-                
-                # Save image as base64 if uploaded (temporarily disabled for production)
-                # if 'photo' in request.FILES:
-                #     dog.save_photo_as_base64(request.FILES['photo'])
-                
-                logger.info(f"Successfully saved dog: {dog.name}")
-                messages.success(request, f"✅ {dog.name} has been successfully added!")
                 return redirect('owner_dashboard')
-            else:
-                logger.error(f"Form errors: {form.errors}")
-                messages.error(request, "❌ Please correct the errors below.")
         else:
-            logger.info("Rendering add_dog form")
             form = DogForm()
         
-        logger.info("About to render template")
         return render(request, 'core/add_dog.html', {'form': form})
     except Exception as e:
-        logger.error(f"Error in add_dog view: {str(e)}", exc_info=True)
-        messages.error(request, f"❌ Error: {str(e)}")
-        # Return a simple error page instead of trying to render the template again
-        from django.http import HttpResponse
-        return HttpResponse(f"Error: {str(e)}", status=500)
+        return HttpResponse(f"Add dog error: {str(e)}")
 
 @login_required
 def edit_dog(request, dog_id):
-    import logging
-    logger = logging.getLogger(__name__)
-    
-    owner = get_object_or_404(Owner, user=request.user)
-    dog = get_object_or_404(Dog, id=dog_id, owner=owner)
-    
-    if request.method == 'POST':
-        logger.info(f"Edit dog POST request for {dog.name}")
-        form = DogForm(request.POST, request.FILES, instance=dog)
-        if form.is_valid():
-            logger.info("Form is valid, saving dog")
-            dog = form.save()
-            
-            # Save image as base64 if uploaded (temporarily disabled for production)
-            # if 'photo' in request.FILES:
-            #     dog.save_photo_as_base64(request.FILES['photo'])
-            
-            return redirect('owner_dashboard')
+    """Edit dog with error handling"""
+    try:
+        owner = get_object_or_404(Owner, user=request.user)
+        dog = get_object_or_404(Dog, id=dog_id, owner=owner)
+        
+        if request.method == 'POST':
+            form = DogForm(request.POST, request.FILES, instance=dog)
+            if form.is_valid():
+                dog = form.save()
+                return redirect('owner_dashboard')
         else:
-            logger.error(f"Form errors: {form.errors}")
-    else:
-        form = DogForm(instance=dog)
-    
-    return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})
+            form = DogForm(instance=dog)
+        
+        return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})
+    except Exception as e:
+        return HttpResponse(f"Edit dog error: {str(e)}")
 
 @login_required
 def delete_dog(request, dog_id):
