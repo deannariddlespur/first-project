@@ -724,21 +724,40 @@ def owner_dashboard(request):
 
 @login_required
 def add_dog(request):
-    """Add dog with error handling"""
+    """Add dog with improved error handling"""
     try:
-        owner = get_object_or_404(Owner, user=request.user)
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return redirect('login_owner')
+        
+        # Try to get owner, redirect to create owner if not found
+        try:
+            owner = get_object_or_404(Owner, user=request.user)
+        except:
+            return redirect('register_owner')
         
         if request.method == 'POST':
-            form = DogForm(request.POST, request.FILES)
-            if form.is_valid():
-                dog = form.save(commit=False)
-                dog.owner = owner
-                dog.save()
-                return redirect('owner_dashboard')
+            try:
+                form = DogForm(request.POST, request.FILES)
+                if form.is_valid():
+                    dog = form.save(commit=False)
+                    dog.owner = owner
+                    dog.save()
+                    # Comment out base64 saving for now to avoid errors
+                    # if request.FILES.get('photo'):
+                    #     dog.save_photo_as_base64(request.FILES['photo'])
+                    return redirect('owner_dashboard')
+                else:
+                    return render(request, 'core/add_dog.html', {'form': form})
+            except Exception as e:
+                return HttpResponse(f"Error saving dog: {str(e)}")
         else:
-            form = DogForm()
+            try:
+                form = DogForm()
+                return render(request, 'core/add_dog.html', {'form': form})
+            except Exception as e:
+                return HttpResponse(f"Error loading dog form: {str(e)}")
         
-        return render(request, 'core/add_dog.html', {'form': form})
     except Exception as e:
         return HttpResponse(f"Add dog error: {str(e)}")
 
