@@ -834,127 +834,141 @@ class BookingForm(forms.ModelForm):
 
 @login_required
 def booking_calendar(request):
-    # Get year and month from URL parameters, default to current month
-    year = int(request.GET.get('year', timezone.now().year))
-    month = int(request.GET.get('month', timezone.now().month))
-    
-    # Handle month/year transitions
-    if month == 0:
-        month = 12
-        year -= 1
-    elif month == 13:
-        month = 1
-        year += 1
-    
-    # Calculate previous and next month/year
-    prev_month = month - 1
-    prev_year = year
-    if prev_month == 0:
-        prev_month = 12
-        prev_year = year - 1
-    
-    next_month = month + 1
-    next_year = year
-    if next_month == 13:
-        next_month = 1
-        next_year = year + 1
-    
-    # Get the first day of the month and the last day
-    first_day = datetime(year, month, 1)
-    if month == 12:
-        last_day = datetime(year + 1, 1, 1) - timedelta(days=1)
-    else:
-        last_day = datetime(year, month + 1, 1) - timedelta(days=1)
-    
-    # Get the day of the week for the first day (0 = Monday, 6 = Sunday)
-    first_day_weekday = first_day.weekday()
-    
-    # Adjust for Sunday start (0 = Sunday, 6 = Saturday)
-    first_day_weekday = (first_day_weekday + 1) % 7
-    
-    # Calculate the start of the calendar (first Sunday)
-    calendar_start = first_day - timedelta(days=first_day_weekday)
-    
-    # Get all kennels for availability calculation
-    kennels = Kennel.objects.all()
-    
-    # Get all bookings for the current month
-    month_start = first_day.date()
-    month_end = last_day.date()
-    bookings = Booking.objects.filter(
-        start_date__lte=month_end,
-        end_date__gte=month_start
-    )
-    
-    # Create calendar weeks
-    calendar_weeks = []
-    current_date = calendar_start
-    
-    for week in range(6):  # 6 weeks to ensure we cover the entire month
-        week_days = []
-        for day in range(7):
-            if current_date.month == month:
-                # Check availability for this day
-                day_date = current_date.date()
-                available_kennels = []
-                total_kennels = kennels.count()
-                
-                for kennel in kennels:
-                    if kennel.is_available_for_dates(day_date, day_date):
-                        available_kennels.append(kennel)
-                
-                # Calculate availability percentage
-                availability_percentage = (len(available_kennels) / total_kennels * 100) if total_kennels > 0 else 0
-                
-                # Check if there are any bookings for this day
-                day_bookings = bookings.filter(
-                    start_date__lte=day_date,
-                    end_date__gte=day_date
-                )
-                
-                week_days.append({
-                    'date': current_date,
-                    'is_today': current_date.date() == timezone.now().date(),
-                    'is_other_month': False,
-                    'has_booking': day_bookings.exists(),
-                    'booking_count': day_bookings.count(),
-                    'available_kennels': len(available_kennels),
-                    'total_kennels': total_kennels,
-                    'availability_percentage': availability_percentage,
-                    'availability_status': 'high' if availability_percentage >= 70 else 'medium' if availability_percentage >= 30 else 'low'
-                })
-            else:
-                week_days.append({
-                    'date': current_date,
-                    'is_today': False,
-                    'is_other_month': True,
-                    'has_booking': False,
-                    'booking_count': 0,
-                    'available_kennels': 0,
-                    'total_kennels': 0,
-                    'availability_percentage': 0,
-                    'availability_status': 'none'
-                })
-            current_date += timedelta(days=1)
-        calendar_weeks.append(week_days)
-    
-    context = {
-        'year': year,
-        'month': month,
-        'calendar_weeks': calendar_weeks,
-        'prev_year': prev_year,
-        'prev_month': prev_month,
-        'next_year': next_year,
-        'next_month': next_month,
-        'total_kennels': kennels.count(),
-    }
-    return render(request, 'core/booking_calendar.html', context)
+    """Booking calendar with error handling"""
+    try:
+        # Get year and month from URL parameters, default to current month
+        year = int(request.GET.get('year', timezone.now().year))
+        month = int(request.GET.get('month', timezone.now().month))
+        
+        # Handle month/year transitions
+        if month == 0:
+            month = 12
+            year -= 1
+        elif month == 13:
+            month = 1
+            year += 1
+        
+        # Calculate previous and next month/year
+        prev_month = month - 1
+        prev_year = year
+        if prev_month == 0:
+            prev_month = 12
+            prev_year = year - 1
+        
+        next_month = month + 1
+        next_year = year
+        if next_month == 13:
+            next_month = 1
+            next_year = year + 1
+        
+        # Get the first day of the month and the last day
+        first_day = datetime(year, month, 1)
+        if month == 12:
+            last_day = datetime(year + 1, 1, 1) - timedelta(days=1)
+        else:
+            last_day = datetime(year, month + 1, 1) - timedelta(days=1)
+        
+        # Get the day of the week for the first day (0 = Monday, 6 = Sunday)
+        first_day_weekday = first_day.weekday()
+        
+        # Adjust for Sunday start (0 = Sunday, 6 = Saturday)
+        first_day_weekday = (first_day_weekday + 1) % 7
+        
+        # Calculate the start of the calendar (first Sunday)
+        calendar_start = first_day - timedelta(days=first_day_weekday)
+        
+        # Get all kennels for availability calculation
+        kennels = Kennel.objects.all()
+        
+        # Get all bookings for the current month
+        month_start = first_day.date()
+        month_end = last_day.date()
+        bookings = Booking.objects.filter(
+            start_date__lte=month_end,
+            end_date__gte=month_start
+        )
+        
+        # Create calendar weeks
+        calendar_weeks = []
+        current_date = calendar_start
+        
+        for week in range(6):  # 6 weeks to ensure we cover the entire month
+            week_days = []
+            for day in range(7):
+                if current_date.month == month:
+                    # Check availability for this day
+                    day_date = current_date.date()
+                    available_kennels = []
+                    total_kennels = kennels.count()
+                    
+                    for kennel in kennels:
+                        if kennel.is_available_for_dates(day_date, day_date):
+                            available_kennels.append(kennel)
+                    
+                    # Calculate availability percentage
+                    availability_percentage = (len(available_kennels) / total_kennels * 100) if total_kennels > 0 else 0
+                    
+                    # Check if there are any bookings for this day
+                    day_bookings = bookings.filter(
+                        start_date__lte=day_date,
+                        end_date__gte=day_date
+                    )
+                    
+                    week_days.append({
+                        'date': current_date,
+                        'is_today': current_date.date() == timezone.now().date(),
+                        'is_other_month': False,
+                        'has_booking': day_bookings.exists(),
+                        'booking_count': day_bookings.count(),
+                        'available_kennels': len(available_kennels),
+                        'total_kennels': total_kennels,
+                        'availability_percentage': availability_percentage,
+                        'availability_status': 'high' if availability_percentage >= 70 else 'medium' if availability_percentage >= 30 else 'low'
+                    })
+                else:
+                    week_days.append({
+                        'date': current_date,
+                        'is_today': False,
+                        'is_other_month': True,
+                        'has_booking': False,
+                        'booking_count': 0,
+                        'available_kennels': 0,
+                        'total_kennels': 0,
+                        'availability_percentage': 0,
+                        'availability_status': 'none'
+                    })
+                current_date += timedelta(days=1)
+            calendar_weeks.append(week_days)
+        
+        context = {
+            'calendar_weeks': calendar_weeks,
+            'year': year,
+            'month': month,
+            'prev_month': prev_month,
+            'prev_year': prev_year,
+            'next_month': next_month,
+            'next_year': next_year,
+            'month_name': first_day.strftime('%B'),
+            'year_name': first_day.strftime('%Y'),
+        }
+        
+        return render(request, 'core/booking_calendar.html', context)
+    except Exception as e:
+        return HttpResponse(f"Booking calendar error: {str(e)}")
 
 @login_required
 def create_booking(request):
-    """Create booking with error handling"""
+    """Create booking with improved error handling"""
     try:
-        owner = get_object_or_404(Owner, user=request.user)
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return redirect('login_owner')
+        
+        # Try to get owner, redirect to create owner if not found
+        try:
+            owner = get_object_or_404(Owner, user=request.user)
+        except:
+            return redirect('register_owner')
         
         if request.method == 'POST':
             form = BookingForm(owner, request.POST)
