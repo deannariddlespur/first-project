@@ -231,6 +231,29 @@ def create_admin_user(request):
         'existing_users': existing_users
     })
 
+def create_admin_user_simple(request):
+    """Create a simple admin user for testing"""
+    try:
+        from django.contrib.auth.models import User
+        
+        # Create admin user if it doesn't exist
+        if not User.objects.filter(username='admin').exists():
+            admin_user = User.objects.create_user(
+                username='admin',
+                email='admin@dogboarding.com',
+                password='admin123456',
+                first_name='Admin',
+                last_name='User',
+                is_staff=True,
+                is_superuser=True
+            )
+            return HttpResponse(f"✅ Admin user created!<br>Username: admin<br>Password: admin123456<br><br><a href='/staff/login/'>Go to Staff Login</a>")
+        else:
+            return HttpResponse(f"✅ Admin user already exists!<br>Username: admin<br>Password: admin123456<br><br><a href='/staff/login/'>Go to Staff Login</a>")
+            
+    except Exception as e:
+        return HttpResponse(f"❌ Error creating admin user: {str(e)}")
+
 def setup_database(request):
     """Simple view to run database setup"""
     from django.db import connection
@@ -1117,80 +1140,100 @@ def cancel_booking(request, booking_id):
 def is_staff(user):
     return user.is_staff or user.is_superuser
 
+def test_staff_status(request):
+    """Test view to check if user is staff"""
+    try:
+        if request.user.is_authenticated:
+            is_staff_user = is_staff(request.user)
+            return HttpResponse(f"""
+            <h2>Staff Status Test</h2>
+            <p>Username: {request.user.username}</p>
+            <p>Is Staff: {request.user.is_staff}</p>
+            <p>Is Superuser: {request.user.is_superuser}</p>
+            <p>Is Staff (function): {is_staff_user}</p>
+            <p>Is Authenticated: {request.user.is_authenticated}</p>
+            <br>
+            <a href="/staff/dashboard/">Try Staff Dashboard</a>
+            """)
+        else:
+            return HttpResponse("Not authenticated. Please <a href='/staff/login/'>login</a> first.")
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
+
 @user_passes_test(is_staff)
 def staff_dashboard(request):
-    # Get filter parameters
-    filter_month = request.GET.get('month', timezone.now().month)
-    filter_year = request.GET.get('year', timezone.now().year)
-    
+    """Staff dashboard with error handling"""
     try:
-        filter_month = int(filter_month)
-        filter_year = int(filter_year)
-    except (ValueError, TypeError):
-        filter_month = timezone.now().month
-        filter_year = timezone.now().year
-    
-    # Calculate date range for filtering
-    if filter_month == 12:
-        next_month = 1
-        next_year = filter_year + 1
-    else:
-        next_month = filter_month + 1
-        next_year = filter_year
-    
-    start_date = datetime(filter_year, filter_month, 1).date()
-    end_date = datetime(next_year, next_month, 1).date() - timedelta(days=1)
-    
-    # Get all bookings for the filtered period
-    # Filter by booking dates (when the stay occurs), not when booking was created
-    bookings = Booking.objects.filter(
-        start_date__lte=end_date,
-        end_date__gte=start_date
-    ).order_by('start_date')
-    
-    # Get upcoming bookings (next 7 days) - only confirmed bookings
-    # Pending bookings should only appear in the "Pending Bookings" section
-    today = timezone.now().date()
-    upcoming_bookings = Booking.objects.filter(
-        start_date__gte=today,
-        status='confirmed'
-    ).order_by('start_date')[:10]
-    
-    # Get pending bookings for the filtered period
-    # These are bookings that need staff attention/confirmation
-    pending_bookings = bookings.filter(status='pending')
-    
-    # Get kennel assignments
-    kennels = Kennel.objects.all()
-    
-    # Calculate payment statistics for the filtered period
-    # Get payments for bookings that occur during the filtered period
-    payments = Payment.objects.filter(
-        booking__start_date__lte=end_date,
-        booking__end_date__gte=start_date
-    )
-    total_revenue = sum(payment.amount for payment in payments.filter(status='paid'))
-    pending_payments = sum(payment.amount for payment in payments.filter(status='pending'))
-    
-    # Get all bookings for total count (not filtered by period)
-    all_bookings = Booking.objects.all()
-    
-    context = {
-        'upcoming_bookings': upcoming_bookings,
-        'pending_bookings': pending_bookings,
-        'kennels': kennels,
-        'total_bookings': all_bookings.count(),
-        'filtered_bookings': bookings.count(),
-        'total_pending': pending_bookings.count(),
-        'total_revenue': total_revenue,
-        'pending_payments': pending_payments,
-        'filter_month': filter_month,
-        'filter_year': filter_year,
-        'start_date': start_date,
-        'end_date': end_date,
-        'month_name': datetime(filter_year, filter_month, 1).strftime('%B %Y'),
-    }
-    return render(request, 'core/staff_dashboard.html', context)
+        # Get filter parameters
+        filter_month = request.GET.get('month', timezone.now().month)
+        filter_year = request.GET.get('year', timezone.now().year)
+        
+        try:
+            filter_month = int(filter_month)
+            filter_year = int(filter_year)
+        except (ValueError, TypeError):
+            filter_month = timezone.now().month
+            filter_year = timezone.now().year
+        
+        # Calculate date range for filtering
+        if filter_month == 12:
+            next_month = 1
+            next_year = filter_year + 1
+        else:
+            next_month = filter_month + 1
+            next_year = filter_year
+        
+        start_date = datetime(filter_year, filter_month, 1).date()
+        end_date = datetime(next_year, next_month, 1).date() - timedelta(days=1)
+        
+        # Get all bookings for the filtered period
+        bookings = Booking.objects.filter(
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        ).order_by('start_date')
+        
+        # Get upcoming bookings (next 7 days)
+        today = timezone.now().date()
+        upcoming_bookings = Booking.objects.filter(
+            start_date__gte=today,
+            status='confirmed'
+        ).order_by('start_date')[:10]
+        
+        # Get pending bookings for the filtered period
+        pending_bookings = bookings.filter(status='pending')
+        
+        # Get kennel assignments
+        kennels = Kennel.objects.all()
+        
+        # Calculate payment statistics for the filtered period
+        payments = Payment.objects.filter(
+            booking__start_date__lte=end_date,
+            booking__end_date__gte=start_date
+        )
+        total_revenue = sum(payment.amount for payment in payments.filter(status='paid'))
+        pending_payments = sum(payment.amount for payment in payments.filter(status='pending'))
+        
+        # Get all bookings for total count (not filtered by period)
+        all_bookings = Booking.objects.all()
+        
+        context = {
+            'upcoming_bookings': upcoming_bookings,
+            'pending_bookings': pending_bookings,
+            'kennels': kennels,
+            'total_bookings': all_bookings.count(),
+            'filtered_bookings': bookings.count(),
+            'total_pending': pending_bookings.count(),
+            'total_revenue': total_revenue,
+            'pending_payments': pending_payments,
+            'filter_month': filter_month,
+            'filter_year': filter_year,
+            'start_date': start_date,
+            'end_date': end_date,
+            'month_name': datetime(filter_year, filter_month, 1).strftime('%B %Y'),
+        }
+        return render(request, 'core/staff_dashboard.html', context)
+    except Exception as e:
+        return HttpResponse(f"Staff dashboard error: {str(e)}")
 
 @user_passes_test(is_staff)
 def staff_booking_list(request):
@@ -1362,7 +1405,7 @@ def edit_kennel(request, kennel_id):
     return redirect('staff_kennel_management')
 
 def staff_login(request):
-    """Staff login with error handling"""
+    """Staff login with improved error handling"""
     try:
         if request.method == 'POST':
             form = AuthenticationForm(request, data=request.POST)
@@ -1373,6 +1416,8 @@ def staff_login(request):
                     return redirect('staff_dashboard')
                 else:
                     form.add_error(None, "This login is for staff only. Dog owners should use the main login page.")
+            else:
+                form.add_error(None, "Invalid username or password.")
         else:
             form = AuthenticationForm()
         return render(request, 'core/staff_login.html', {'form': form})
