@@ -1272,18 +1272,22 @@ def edit_kennel(request, kennel_id):
     return redirect('staff_kennel_management')
 
 def staff_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            if user.is_staff or user.is_superuser:
-                login(request, user)
-                return redirect('staff_dashboard')
-            else:
-                form.add_error(None, "This login is for staff only. Dog owners should use the main login page.")
-    else:
-        form = AuthenticationForm()
-    return render(request, 'core/staff_login.html', {'form': form})
+    """Staff login with error handling"""
+    try:
+        if request.method == 'POST':
+            form = AuthenticationForm(request, data=request.POST)
+            if form.is_valid():
+                user = form.get_user()
+                if user.is_staff or user.is_superuser:
+                    login(request, user)
+                    return redirect('staff_dashboard')
+                else:
+                    form.add_error(None, "This login is for staff only. Dog owners should use the main login page.")
+        else:
+            form = AuthenticationForm()
+        return render(request, 'core/staff_login.html', {'form': form})
+    except Exception as e:
+        return HttpResponse(f"Staff login error: {str(e)}")
 
 @user_passes_test(is_staff)
 def staff_payment_list(request):
