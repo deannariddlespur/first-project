@@ -27,6 +27,7 @@ except Exception as e:
     print(f"❌ Error fixing database schema: {e}")
 
 print("🔧 Adding missing columns with simple SQL...")
+print("🔍 DEBUG: About to call fix_columns_simple command...")
 
 try:
     # Add missing columns with simple SQL
@@ -34,5 +35,6 @@ try:
     print("✅ Missing columns added successfully!")
 except Exception as e:
     print(f"❌ Error adding missing columns: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
 print("🎯 Startup script completed!") 
