@@ -26,13 +26,13 @@ try:
 except Exception as e:
     print(f"❌ Error fixing database schema: {e}")
 
-print("🔧 Adding missing database columns...")
+print("🔧 Force adding missing database columns...")
 
 try:
-    # Add missing columns
-    call_command('add_missing_columns')
-    print("✅ Missing columns added successfully!")
+    # Force add missing columns
+    call_command('force_add_columns')
+    print("✅ Missing columns force added successfully!")
 except Exception as e:
-    print(f"❌ Error adding missing columns: {e}")
+    print(f"❌ Error force adding missing columns: {e}")
 
 print("🎯 Startup script completed!") 
