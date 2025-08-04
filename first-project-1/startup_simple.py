@@ -48,4 +48,14 @@ except Exception as e:
     print(f"❌ Error force adding columns: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Adding photo_url column to core_dog table...")
+
+try:
+    # Add photo_url column
+    call_command('add_photo_url_column')
+    print("✅ photo_url column added successfully!")
+except Exception as e:
+    print(f"❌ Error adding photo_url column: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
