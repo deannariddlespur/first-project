@@ -26,7 +26,6 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_base64 = models.TextField(blank=True, null=True)  # Store image as base64
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
@@ -39,29 +38,6 @@ class Dog(models.Model):
         except:
             pass
         return None
-    
-    def save_photo_as_base64(self, image_file):
-        """Convert uploaded image to base64 and save"""
-        try:
-            # Check if photo_base64 field exists
-            if not hasattr(self, 'photo_base64'):
-                print("photo_base64 field not available")
-                return False
-                
-            # Read the image file
-            image_data = image_file.read()
-            image_file.seek(0)  # Reset file pointer
-            
-            # Convert to base64
-            img_str = base64.b64encode(image_data).decode()
-            
-            # Store in database
-            self.photo_base64 = img_str
-            self.save()
-            return True
-        except Exception as e:
-            print(f"Error converting image to base64: {e}")
-            return False
 
 class Kennel(models.Model):
     SIZE_CHOICES = [

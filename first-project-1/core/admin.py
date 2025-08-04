@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
-# Custom admin classes to handle missing fields
+# Custom admin classes
 class DogAdmin(admin.ModelAdmin):
     list_display = ('name', 'breed', 'age', 'size', 'get_owner_info')
     list_filter = ('size',)
@@ -9,11 +9,11 @@ class DogAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     
     def get_queryset(self, request):
-        """Override to avoid accessing photo_base64 field"""
+        """Optimized queryset for admin display"""
         return Dog.objects.only('id', 'name', 'breed', 'age', 'size', 'owner_id', 'notes', 'photo')
     
     def get_owner_info(self, obj):
-        """Custom method to display owner info without deep JOINs"""
+        """Custom method to display owner info"""
         try:
             return f"Owner {obj.owner_id}"
         except:
@@ -27,11 +27,11 @@ class DailyLogAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     
     def get_queryset(self, request):
-        """Override to avoid any JOINs with Dog table"""
+        """Optimized queryset for admin display"""
         return DailyLog.objects.only('id', 'booking_id', 'date', 'feeding', 'medication', 'exercise', 'notes')
     
     def get_booking_info(self, obj):
-        """Custom method to display booking info without JOIN"""
+        """Custom method to display booking info"""
         try:
             return f"Booking {obj.booking_id}"
         except:
@@ -45,11 +45,11 @@ class StaffNoteAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'created_at')
     
     def get_queryset(self, request):
-        """Override to avoid any JOINs with other tables"""
+        """Optimized queryset for admin display"""
         return StaffNote.objects.only('id', 'booking_id', 'staff_member_id', 'note', 'picture', 'created_at')
     
     def get_booking_info(self, obj):
-        """Custom method to display booking info without JOIN"""
+        """Custom method to display booking info"""
         try:
             return f"Booking {obj.booking_id}"
         except:
@@ -57,7 +57,7 @@ class StaffNoteAdmin(admin.ModelAdmin):
     get_booking_info.short_description = 'Booking'
     
     def get_staff_info(self, obj):
-        """Custom method to display staff info without JOIN"""
+        """Custom method to display staff info"""
         try:
             return f"Staff {obj.staff_member_id}"
         except:
@@ -71,11 +71,11 @@ class PaymentAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'created_at')
     
     def get_queryset(self, request):
-        """Override to avoid JOIN with Dog table that has missing photo_base64 column"""
+        """Optimized queryset for admin display"""
         return Payment.objects.only('id', 'booking_id', 'amount', 'status', 'payment_method', 'paid_date', 'notes', 'created_at')
     
     def get_booking_info(self, obj):
-        """Custom method to display booking info without JOIN"""
+        """Custom method to display booking info"""
         try:
             return f"Booking {obj.booking_id}"
         except:
