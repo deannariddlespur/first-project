@@ -1,9 +1,8 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
 # Standard Django admin registrations - no custom styling
-admin.site.register(User)
+# Note: User model is already registered by Django's auth admin
 admin.site.register(Owner)
 admin.site.register(Dog)
 admin.site.register(Kennel)
