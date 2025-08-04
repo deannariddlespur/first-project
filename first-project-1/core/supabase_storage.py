@@ -13,6 +13,11 @@ class SupabaseStorage:
         self.supabase_service_key = os.environ.get('SUPABASE_SERVICE_KEY')
         self.bucket_name = 'dog-photos'
         
+        # Debug: Print what we found
+        print(f"🔍 DEBUG: SUPABASE_URL = {self.supabase_url}")
+        print(f"🔍 DEBUG: SUPABASE_ANON_KEY = {'Set' if self.supabase_anon_key else 'Not set'}")
+        print(f"🔍 DEBUG: SUPABASE_SERVICE_KEY = {'Set' if self.supabase_service_key else 'Not set'}")
+        
         if self.supabase_url and self.supabase_service_key:
             # Use service key for uploads (has admin privileges)
             self.client: Client = create_client(self.supabase_url, self.supabase_service_key)
