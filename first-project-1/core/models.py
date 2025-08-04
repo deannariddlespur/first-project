@@ -1,6 +1,7 @@
 import base64
 from django.db import models
 from django.contrib.auth.models import User
+from .supabase_storage import supabase_storage
 
 # Create your models here.
 
@@ -26,13 +27,22 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
+    photo_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # For now, just use local photo to get things working
+        # First, try to access photo_url field (Supabase URL)
+        try:
+            if hasattr(self, 'photo_url') and self.photo_url:
+                print(f"✅ Using Supabase URL for {self.name}: {self.photo_url}")
+                return self.photo_url
+        except Exception as e:
+            print(f"⚠️ photo_url field not available for {self.name}: {e}")
+        
+        # Fallback to local photo
         try:
             if self.photo:
                 local_url = self.photo.url
@@ -49,11 +59,27 @@ class Dog(models.Model):
         try:
             print(f"🔄 Uploading photo for {self.name} to Supabase...")
             
-            # For now, just save the local photo
-            # TODO: Implement actual Supabase upload
-            print(f"⚠️ Supabase upload not implemented yet, using local storage")
+            # Upload to Supabase
+            public_url = supabase_storage.upload_file(image_file)
             
-            return True
+            if public_url:
+                print(f"✅ Photo uploaded successfully: {public_url}")
+                
+                # Try to save photo_url if field exists
+                try:
+                    if hasattr(self, 'photo_url'):
+                        self.photo_url = public_url
+                        self.save()
+                        print(f"✅ Supabase URL saved to database for {self.name}")
+                    else:
+                        print(f"⚠️ photo_url field not available, URL not saved to database")
+                except Exception as e:
+                    print(f"⚠️ Could not save photo_url to database: {e}")
+                
+                return True
+            else:
+                print(f"❌ Supabase upload failed for {self.name}")
+                return False
                 
         except Exception as e:
             print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
