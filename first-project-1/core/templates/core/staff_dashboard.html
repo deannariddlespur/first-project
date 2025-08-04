@@ -152,9 +152,24 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
         margin-bottom: 30px;
+    }
+    
+    .booking-status-card {
+        grid-column: span 1;
+    }
+    
+    @media (min-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        }
+        .booking-status-card:nth-child(3),
+        .booking-status-card:nth-child(4),
+        .booking-status-card:nth-child(5) {
+            grid-row: 2;
+        }
     }
 
     .stat-card {
@@ -485,24 +500,24 @@
             <div class="stat-label">All time</div>
         </div>
         <div class="stat-card">
-            <span class="stat-icon">⏳</span>
-            <div class="stat-title">Pending Bookings</div>
-            <div class="stat-value">{{ total_pending }}</div>
-            <div class="stat-label">{{ month_name }}</div>
-        </div>
-        <div class="stat-card">
             <span class="stat-icon">💰</span>
             <div class="stat-title">Total Revenue</div>
             <div class="stat-value">${{ total_revenue|default:"0.00" }}</div>
             <div class="stat-label">{{ month_name }}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card booking-status-card">
+            <span class="stat-icon">⏳</span>
+            <div class="stat-title">Pending Bookings</div>
+            <div class="stat-value">{{ total_pending }}</div>
+            <div class="stat-label">{{ month_name }}</div>
+        </div>
+        <div class="stat-card booking-status-card">
             <span class="stat-icon">💳</span>
             <div class="stat-title">Pending Payments</div>
             <div class="stat-value">${{ pending_payments|default:"0.00" }}</div>
             <div class="stat-label">Awaiting payment</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card booking-status-card">
             <span class="stat-icon">❌</span>
             <div class="stat-title">Cancelled Bookings</div>
             <div class="stat-value">{{ total_cancelled }}</div>
