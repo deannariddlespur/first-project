@@ -2725,7 +2725,7 @@ def debug_supabase_config(request):
     
     # Check existing dogs and their photos
     from .models import Dog
-    dogs = Dog.objects.all()[:5]  # First 5 dogs
+    dogs = Dog.objects.all()  # Show all dogs instead of just first 5
     dog_info = []
     
     for dog in dogs:
