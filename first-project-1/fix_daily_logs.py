@@ -16,16 +16,12 @@ def check_and_fix_daily_logs():
     
     try:
         with connection.cursor() as cursor:
-            # Check if photo column exists in core_dailylog table
-            cursor.execute("""
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'core_dailylog' 
-                AND column_name = 'photo'
-            """)
+            # Check if photo column exists in core_dailylog table (SQLite compatible)
+            cursor.execute("PRAGMA table_info(core_dailylog)")
+            columns = cursor.fetchall()
+            column_names = [col[1] for col in columns]
             
-            result = cursor.fetchone()
-            if result:
+            if 'photo' in column_names:
                 print("✅ photo column exists in core_dailylog table")
             else:
                 print("❌ photo column missing from core_dailylog table")
@@ -38,16 +34,12 @@ def check_and_fix_daily_logs():
                 """)
                 print("✅ photo column added successfully")
             
-            # Check if photo_base64 column exists in core_dog table
-            cursor.execute("""
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'core_dog' 
-                AND column_name = 'photo_base64'
-            """)
+            # Check if photo_base64 column exists in core_dog table (SQLite compatible)
+            cursor.execute("PRAGMA table_info(core_dog)")
+            columns = cursor.fetchall()
+            column_names = [col[1] for col in columns]
             
-            result = cursor.fetchone()
-            if result:
+            if 'photo_base64' in column_names:
                 print("✅ photo_base64 column exists in core_dog table")
             else:
                 print("❌ photo_base64 column missing from core_dog table")
