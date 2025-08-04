@@ -2058,38 +2058,65 @@ def delete_availability_entry(request, entry_id):
 
 def debug_app(request):
     """Debug endpoint to check app status"""
-    import logging
-    logger = logging.getLogger(__name__)
-    
     try:
-        # Test database connection
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-        db_status = "connected"
+        # Get basic stats
+        user_count = User.objects.count()
+        owner_count = Owner.objects.count()
+        dog_count = Dog.objects.count()
+        
+        # Get sample data
+        users = list(User.objects.all()[:5].values('username', 'email', 'is_staff'))
+        owners = list(Owner.objects.all()[:5].values('user_id', 'phone', 'address'))
+        dogs = list(Dog.objects.all()[:5].values('id', 'name', 'owner_id', 'breed'))
+        
+        # Check for orphaned dogs (dogs without owners)
+        orphaned_dogs = Dog.objects.filter(owner__isnull=True).count()
+        
+        context = {
+            'status': 'healthy',
+            'user_count': user_count,
+            'owner_count': owner_count,
+            'dog_count': dog_count,
+            'orphaned_dogs': orphaned_dogs,
+            'users': users,
+            'owners': owners,
+            'dogs': dogs,
+        }
+        
+        return JsonResponse(context)
+        
     except Exception as e:
-        db_status = f"error: {str(e)}"
-    
-    # Check user authentication
-    if request.user.is_authenticated:
-        user_status = f"authenticated as {request.user.username}"
-        try:
-            owner = Owner.objects.get(user=request.user)
-            owner_status = f"owner found: {owner}"
-        except Owner.DoesNotExist:
-            owner_status = "no owner record"
-    else:
-        user_status = "not authenticated"
-        owner_status = "not found"
-    
-    import time
-    return JsonResponse({
-        'status': 'running',
-        'database': db_status,
-        'user': user_status,
-        'owner': owner_status,
-        'timestamp': time.time()
-    })
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        })
+
+def fix_dog_ownership(request):
+    """Fix dog ownership issues"""
+    try:
+        # Get the first owner (or create one if none exists)
+        owner = Owner.objects.first()
+        if not owner:
+            # Create a default owner if none exists
+            user = User.objects.first()
+            if user:
+                owner = Owner.objects.create(user=user)
+            else:
+                return HttpResponse("No users found. Please create a user first.")
+        
+        # Fix orphaned dogs
+        orphaned_dogs = Dog.objects.filter(owner__isnull=True)
+        fixed_count = 0
+        
+        for dog in orphaned_dogs:
+            dog.owner = owner
+            dog.save()
+            fixed_count += 1
+        
+        return HttpResponse(f"Fixed {fixed_count} orphaned dogs. They are now owned by {owner.user.username}")
+        
+    except Exception as e:
+        return HttpResponse(f"Error fixing dog ownership: {str(e)}")
 
 def create_test_user_simple(request):
     """Create a simple test user for debugging"""
