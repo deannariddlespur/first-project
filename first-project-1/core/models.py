@@ -42,19 +42,7 @@ class Dog(models.Model):
         except Exception as e:
             print(f"⚠️ photo_url field not available for {self.name}: {e}")
         
-        # If no photo_url, try to get Supabase URL for local photo
-        try:
-            if self.photo and supabase_storage.client:
-                # Try to get Supabase URL for the local photo
-                file_path = str(self.photo)
-                supabase_url = supabase_storage.get_file_url(file_path)
-                if supabase_url and 'supabase' in supabase_url:
-                    print(f"✅ Using Supabase URL for local photo of {self.name}: {supabase_url}")
-                    return supabase_url
-        except Exception as e:
-            print(f"⚠️ Could not get Supabase URL for {self.name}: {e}")
-        
-        # Fallback to local photo (only if Supabase not available)
+        # Fallback to local photo
         try:
             if self.photo:
                 local_url = self.photo.url
