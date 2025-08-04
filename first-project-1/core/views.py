@@ -859,12 +859,38 @@ def edit_dog(request, dog_id):
 @login_required
 @user_passes_test(is_owner)
 def delete_dog(request, dog_id):
-    owner = get_object_or_404(Owner, user=request.user)
-    dog = get_object_or_404(Dog, id=dog_id, owner=owner)
-    if request.method == 'POST':
-        dog.delete()
-        return redirect('owner_dashboard')
-    return render(request, 'core/delete_dog.html', {'dog': dog})
+    """Delete dog with improved error handling"""
+    try:
+        # Check if user is authenticated
+        if not request.user.is_authenticated:
+            return redirect('login_owner')
+        
+        # Try to get owner, redirect to create owner if not found
+        try:
+            owner = get_object_or_404(Owner, user=request.user)
+        except:
+            return redirect('register_owner')
+        
+        # Try to get dog, handle 404 gracefully
+        try:
+            dog = get_object_or_404(Dog, id=dog_id, owner=owner)
+        except:
+            return HttpResponse(f"Dog with ID {dog_id} not found or you don't have permission to delete it.")
+        
+        if request.method == 'POST':
+            try:
+                dog.delete()
+                return redirect('owner_dashboard')
+            except Exception as e:
+                return HttpResponse(f"Error deleting dog: {str(e)}")
+        else:
+            try:
+                return render(request, 'core/delete_dog.html', {'dog': dog})
+            except Exception as e:
+                return HttpResponse(f"Error loading delete dog form: {str(e)}")
+        
+    except Exception as e:
+        return HttpResponse(f"Delete dog error: {str(e)}")
 
 class BookingForm(forms.ModelForm):
     class Meta:
