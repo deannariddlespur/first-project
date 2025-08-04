@@ -167,6 +167,12 @@
         display: block;
     }
 
+    .dog-photo-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+    }
+
     .placeholder-photo {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border: 2px dashed #dee2e6;
@@ -364,13 +370,15 @@
                 <div class="dog-card">
                     <div class="dog-header">
                         {% if dog.photo %}
-                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" 
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
-                                 onload="this.nextElementSibling.style.display='none';">
-                            <div class="dog-photo placeholder-photo" style="display: none;">
-                                <div class="placeholder-content">
-                                    <span class="placeholder-icon">🐕</span>
-                                    <span class="placeholder-text">{{ dog.name }}</span>
+                            <div class="dog-photo-container">
+                                <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Image failed to load for {{ dog.name }}');" 
+                                     onload="this.nextElementSibling.style.display='none'; console.log('Image loaded successfully for {{ dog.name }}');">
+                                <div class="dog-photo placeholder-photo" style="display: none;">
+                                    <div class="placeholder-content">
+                                        <span class="placeholder-icon">🐕</span>
+                                        <span class="placeholder-text">{{ dog.name }}</span>
+                                    </div>
                                 </div>
                             </div>
                         {% else %}
