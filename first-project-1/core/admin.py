@@ -3,10 +3,22 @@ from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, F
 
 # Custom admin classes to handle missing fields
 class DogAdmin(admin.ModelAdmin):
-    list_display = ('name', 'breed', 'age', 'size', 'owner')
-    list_filter = ('size', 'owner')
-    search_fields = ('name', 'breed', 'owner__user__username')
+    list_display = ('name', 'breed', 'age', 'size', 'get_owner_info')
+    list_filter = ('size',)
+    search_fields = ('name', 'breed')
     readonly_fields = ('id',)
+    
+    def get_queryset(self, request):
+        """Override to avoid accessing photo_base64 field"""
+        return Dog.objects.only('id', 'name', 'breed', 'age', 'size', 'owner_id', 'notes')
+    
+    def get_owner_info(self, obj):
+        """Custom method to display owner info without deep JOINs"""
+        try:
+            return f"Owner {obj.owner_id}"
+        except:
+            return "Unknown Owner"
+    get_owner_info.short_description = 'Owner'
 
 class DailyLogAdmin(admin.ModelAdmin):
     list_display = ('get_booking_info', 'date', 'feeding', 'medication', 'exercise')
