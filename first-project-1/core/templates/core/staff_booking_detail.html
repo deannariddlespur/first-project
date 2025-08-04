@@ -345,8 +345,8 @@
     
     <div class="booking-info">
         <div class="dog-header">
-            {% if booking.dog.photo %}
-            <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}" class="dog-photo">
+            {% if booking.dog.get_photo_url %}
+            <img src="{{ booking.dog.get_photo_url }}" alt="{{ booking.dog.name }}" class="dog-photo">
             {% else %}
             <div class="dog-photo-placeholder">
                 <span class="placeholder-icon">🐕</span>
