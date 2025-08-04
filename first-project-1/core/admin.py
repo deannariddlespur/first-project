@@ -1,12 +1,15 @@
 from django.contrib import admin
 from django.contrib.admin import AdminSite
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
-# Prevent Django's default auth admin from registering with the default admin site
-# This eliminates duplication
-admin.site.unregister(User) if admin.site.is_registered(User) else None
+# Custom UserAdmin that doesn't register with default admin
+class UserAdmin(BaseUserAdmin):
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined']
+    list_filter = ['is_staff', 'is_superuser', 'is_active', 'date_joined']
+    search_fields = ['username', 'first_name', 'last_name', 'email']
+    ordering = ['username']
 
 # Custom Admin Site
 class DogBoardingAdminSite(AdminSite):
