@@ -14,12 +14,24 @@ class DailyLogAdmin(admin.ModelAdmin):
     search_fields = ('booking__dog__name', 'notes')
     readonly_fields = ('id',)
 
+class StaffNoteAdmin(admin.ModelAdmin):
+    list_display = ('booking', 'staff_member', 'created_at', 'note')
+    list_filter = ('created_at', 'staff_member')
+    search_fields = ('note', 'booking__dog__name', 'staff_member__username')
+    readonly_fields = ('id', 'created_at')
+
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('booking', 'amount', 'status', 'payment_method', 'paid_date')
+    list_filter = ('status', 'payment_method', 'paid_date')
+    search_fields = ('booking__dog__name', 'notes')
+    readonly_fields = ('id', 'created_at')
+
 # Standard Django admin registrations with custom admin classes
 admin.site.register(Owner)
 admin.site.register(Dog, DogAdmin)
 admin.site.register(Kennel)
 admin.site.register(Booking)
 admin.site.register(DailyLog, DailyLogAdmin)
-admin.site.register(Payment)
-admin.site.register(StaffNote)
+admin.site.register(Payment, PaymentAdmin)
+admin.site.register(StaffNote, StaffNoteAdmin)
 admin.site.register(FacilityAvailability)
