@@ -36,7 +36,7 @@ A comprehensive web application for managing dog boarding operations, built with
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Deployment**: Railway/Render/Heroku ready
-- **File Storage**: Local/Cloud storage for photos
+- **File Storage**: Supabase Storage (persistent) / Local storage (fallback)
 
 ## 📋 Quick Start
 
@@ -80,6 +80,58 @@ python manage.py runserver
 - **Main App**: http://127.0.0.1:8000/
 - **Staff Dashboard**: http://127.0.0.1:8000/staff/
 - **Admin Panel**: http://127.0.0.1:8000/admin/
+
+## 🚀 Supabase Storage Setup (Recommended)
+
+For persistent image storage that survives Railway container restarts, set up Supabase Storage:
+
+### 1. Create Supabase Project
+1. Go to [supabase.com](https://supabase.com)
+2. Sign in with GitHub
+3. Create a new project named "dog-boarding-storage"
+4. Set a database password and choose a region
+
+### 2. Create Storage Bucket
+1. In Supabase dashboard, go to **Storage**
+2. Click **Create a new bucket**
+3. Name it `dog-photos`
+4. Set it as **Public**
+5. Click **Create bucket**
+
+### 3. Configure Bucket Policies
+Go to **Storage** → **Policies** and add:
+
+**For INSERT (upload):**
+```sql
+CREATE POLICY "Allow authenticated uploads" ON storage.objects
+FOR INSERT WITH CHECK (bucket_id = 'dog-photos' AND auth.role() = 'authenticated');
+```
+
+**For SELECT (download):**
+```sql
+CREATE POLICY "Allow public downloads" ON storage.objects
+FOR SELECT USING (bucket_id = 'dog-photos');
+```
+
+### 4. Get Credentials
+1. Go to **Settings** → **API**
+2. Copy your **Project URL** and **anon public** key
+
+### 5. Add Environment Variables
+Add to your Railway project or `.env` file:
+```
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+### Benefits of Supabase Storage
+- ✅ **Persistent images** that survive Railway restarts
+- ✅ **Fast global CDN** for image delivery
+- ✅ **Free tier** (2GB storage, 1GB bandwidth/month)
+- ✅ **Professional reliability** managed by Supabase
+- ✅ **Graceful fallback** to local storage if not configured
+
+*For detailed setup instructions, see [SUPABASE_SETUP.md](SUPABASE_SETUP.md)*
 
 ## 🐾 Business Rules
 

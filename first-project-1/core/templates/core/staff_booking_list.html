@@ -213,7 +213,7 @@
         object-fit: cover;
     }
 
-    .dog-emoji {
+    .dog-photo-placeholder {
         width: 100%;
         height: 100%;
         display: flex;
@@ -600,10 +600,10 @@
                     <div class="card-header">
                         <div class="dog-info">
                             <div class="dog-avatar">
-                                {% if booking.dog.photo %}
-                                    <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}">
+                                {% if booking.dog.get_photo_url %}
+                                    <img src="{{ booking.dog.get_photo_url }}" alt="{{ booking.dog.name }}">
                                 {% else %}
-                                    <span class="dog-emoji">🐕</span>
+                                    <div class="dog-photo-placeholder">🐕</div>
                                 {% endif %}
                             </div>
                             <div class="dog-details">

@@ -472,10 +472,10 @@
                     <div class="log-summary" data-card-number="{{ log.id }}" onclick="handleCardClick(this)">
                         <div class="summary-left">
                             <div class="dog-avatar">
-                                {% if log.booking.dog.photo %}
-                                    <img src="{{ log.booking.dog.photo.url }}" alt="{{ log.booking.dog.name }}">
+                                {% if log.booking.dog.get_photo_url %}
+                                    <img src="{{ log.booking.dog.get_photo_url }}" alt="{{ log.booking.dog.name }}">
                                 {% else %}
-                                    <span class="dog-emoji">🐕</span>
+                                    <div class="dog-photo-placeholder">🐕</div>
                                 {% endif %}
                             </div>
                             <div class="summary-info">
