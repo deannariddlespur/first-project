@@ -572,38 +572,7 @@
             {% endif %}
         </div>
 
-        <div class="content-section">
-            <div class="section-header">
-                ❌ Cancelled Bookings
-            </div>
-            {% if cancelled_bookings %}
-                <div class="booking-list">
-                    {% for booking in cancelled_bookings %}
-                        <div class="booking-item">
-                            <div class="booking-dog">{{ booking.dog.name }}</div>
-                            <div class="booking-owner">Owner: {{ booking.dog.owner }}</div>
-                            <div class="booking-dates">{{ booking.start_date|date:"m/d/Y" }} to {{ booking.end_date|date:"m/d/Y" }}</div>
-                            {% if booking.kennel %}
-                                <div class="booking-kennel">Kennel: {{ booking.kennel.name }} ({{ booking.kennel.get_size_display }})</div>
-                            {% else %}
-                                <div class="booking-kennel">Kennel: <em>Not assigned</em></div>
-                            {% endif %}
-                            {% if booking.total_amount %}
-                                <div class="booking-amount">${{ booking.total_amount }}</div>
-                            {% endif %}
-                            <span class="status-badge status-cancelled">{{ booking.get_status_display }}</span>
-                            <br>
-                            <a href="{% url 'staff_booking_detail' booking.id %}" class="manage-btn">View Details</a>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">✅</div>
-                    <p>No cancelled bookings for this period!</p>
-                </div>
-            {% endif %}
-        </div>
+
     </div>
 
     <div class="actions-grid">
