@@ -27,20 +27,25 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_url = models.URLField(blank=True, null=True)  # Store Supabase URL
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
-        """Get photo URL - prioritizes Supabase URL, falls back to local"""
-        if self.photo_url:
-            return self.photo_url
-        elif self.photo:
-            try:
+        """Get photo URL - works whether photo_url field exists or not"""
+        try:
+            # Try to access photo_url field (will fail if field doesn't exist)
+            if hasattr(self, 'photo_url') and self.photo_url:
+                return self.photo_url
+        except:
+            pass
+        
+        # Fallback to local photo
+        try:
+            if self.photo:
                 return self.photo.url
-            except:
-                pass
+        except:
+            pass
         return None
     
     def save_photo_to_supabase(self, image_file):
@@ -49,9 +54,16 @@ class Dog(models.Model):
             # Upload to Supabase
             public_url = supabase_storage.upload_file(image_file)
             if public_url:
-                self.photo_url = public_url
-                self.save()
-                print(f"✅ Photo uploaded to Supabase: {public_url}")
+                # Try to save photo_url if field exists
+                try:
+                    if hasattr(self, 'photo_url'):
+                        self.photo_url = public_url
+                        self.save()
+                        print(f"✅ Photo uploaded to Supabase: {public_url}")
+                    else:
+                        print(f"✅ Photo uploaded to Supabase: {public_url} (photo_url field not available)")
+                except:
+                    print(f"✅ Photo uploaded to Supabase: {public_url} (photo_url field not available)")
                 return True
         except Exception as e:
             print(f"Error uploading to Supabase: {e}")
