@@ -10,7 +10,7 @@ class DogAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         """Override to avoid accessing photo_base64 field"""
-        return Dog.objects.only('id', 'name', 'breed', 'age', 'size', 'owner_id', 'notes')
+        return Dog.objects.only('id', 'name', 'breed', 'age', 'size', 'owner_id', 'notes', 'photo')
     
     def get_owner_info(self, obj):
         """Custom method to display owner info without deep JOINs"""
