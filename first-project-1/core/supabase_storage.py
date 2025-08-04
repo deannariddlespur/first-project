@@ -9,11 +9,18 @@ import base64
 class SupabaseStorage:
     def __init__(self):
         self.supabase_url = os.environ.get('SUPABASE_URL')
-        self.supabase_key = os.environ.get('SUPABASE_ANON_KEY')
+        self.supabase_anon_key = os.environ.get('SUPABASE_ANON_KEY')
+        self.supabase_service_key = os.environ.get('SUPABASE_SERVICE_KEY')
         self.bucket_name = 'dog-photos'
         
-        if self.supabase_url and self.supabase_key:
-            self.client: Client = create_client(self.supabase_url, self.supabase_key)
+        if self.supabase_url and self.supabase_service_key:
+            # Use service key for uploads (has admin privileges)
+            self.client: Client = create_client(self.supabase_url, self.supabase_service_key)
+            print("✅ Using Supabase service key for uploads")
+        elif self.supabase_url and self.supabase_anon_key:
+            # Fallback to anon key
+            self.client: Client = create_client(self.supabase_url, self.supabase_anon_key)
+            print("⚠️ Using Supabase anon key (may have limited permissions)")
         else:
             self.client = None
             print("⚠️ Supabase credentials not found. Using local storage fallback.")
