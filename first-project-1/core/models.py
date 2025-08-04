@@ -26,22 +26,13 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # First, try to access photo_url field (Supabase URL)
-        try:
-            if hasattr(self, 'photo_url') and self.photo_url:
-                print(f"✅ Using Supabase URL for {self.name}: {self.photo_url}")
-                return self.photo_url
-        except Exception as e:
-            print(f"⚠️ photo_url field not available for {self.name}: {e}")
-        
-        # Fallback to local photo
+        # For now, just use local photo to get things working
         try:
             if self.photo:
                 local_url = self.photo.url
