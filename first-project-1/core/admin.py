@@ -9,17 +9,22 @@ class DogAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
 
 class DailyLogAdmin(admin.ModelAdmin):
-    list_display = ('booking', 'date', 'feeding', 'medication', 'exercise')
+    list_display = ('get_booking_info', 'date', 'feeding', 'medication', 'exercise')
     list_filter = ('date',)
     search_fields = ('notes',)
     readonly_fields = ('id',)
     
     def get_queryset(self, request):
-        """Override to avoid JOIN with Dog table that has missing photo_base64 column"""
-        from django.db.models import Prefetch
-        return DailyLog.objects.select_related('booking').prefetch_related(
-            Prefetch('booking__dog', queryset=Dog.objects.only('id', 'name'))
-        )
+        """Override to avoid any JOINs with Dog table"""
+        return DailyLog.objects.only('id', 'booking_id', 'date', 'feeding', 'medication', 'exercise', 'notes')
+    
+    def get_booking_info(self, obj):
+        """Custom method to display booking info without JOIN"""
+        try:
+            return f"Booking {obj.booking_id}"
+        except:
+            return "Unknown Booking"
+    get_booking_info.short_description = 'Booking'
 
 class StaffNoteAdmin(admin.ModelAdmin):
     list_display = ('booking', 'staff_member', 'created_at', 'note')
