@@ -4,6 +4,10 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
+# Prevent Django's default auth admin from registering with the default admin site
+# This eliminates duplication
+admin.site.unregister(User) if admin.site.is_registered(User) else None
+
 # Custom Admin Site
 class DogBoardingAdminSite(AdminSite):
     site_header = "🐕 Dog Boarding Management"
