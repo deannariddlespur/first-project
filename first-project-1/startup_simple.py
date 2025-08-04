@@ -37,4 +37,15 @@ except Exception as e:
     print(f"❌ Error adding missing columns directly: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Fixing daily logs database columns...")
+
+try:
+    # Import and run the daily logs fix
+    from fix_daily_logs import check_and_fix_daily_logs
+    check_and_fix_daily_logs()
+    print("✅ Daily logs database fix completed!")
+except Exception as e:
+    print(f"❌ Error fixing daily logs database: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
