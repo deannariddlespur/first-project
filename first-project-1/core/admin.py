@@ -39,13 +39,13 @@ class DailyLogAdmin(admin.ModelAdmin):
     get_booking_info.short_description = 'Booking'
 
 class StaffNoteAdmin(admin.ModelAdmin):
-    list_display = ('get_booking_info', 'staff_member', 'created_at', 'note')
-    list_filter = ('created_at', 'staff_member')
-    search_fields = ('note', 'staff_member__username')
+    list_display = ('get_booking_info', 'get_staff_info', 'created_at', 'note')
+    list_filter = ('created_at',)
+    search_fields = ('note',)
     readonly_fields = ('id', 'created_at')
     
     def get_queryset(self, request):
-        """Override to avoid JOIN with Dog table that has missing photo_base64 column"""
+        """Override to avoid any JOINs with other tables"""
         return StaffNote.objects.only('id', 'booking_id', 'staff_member_id', 'note', 'picture', 'created_at')
     
     def get_booking_info(self, obj):
@@ -55,6 +55,14 @@ class StaffNoteAdmin(admin.ModelAdmin):
         except:
             return "Unknown Booking"
     get_booking_info.short_description = 'Booking'
+    
+    def get_staff_info(self, obj):
+        """Custom method to display staff info without JOIN"""
+        try:
+            return f"Staff {obj.staff_member_id}"
+        except:
+            return "Unknown Staff"
+    get_staff_info.short_description = 'Staff Member'
 
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('get_booking_info', 'amount', 'status', 'payment_method', 'paid_date')
