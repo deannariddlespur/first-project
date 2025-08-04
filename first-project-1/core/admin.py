@@ -3,11 +3,17 @@ from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
-# Prevent Django's default admin from loading and registering models
-# This eliminates duplication by ensuring only our custom admin site is used
+# Completely disable Django's default admin site to prevent duplication
+# This ensures only our custom admin site is used
 admin.site._registry = {}  # Clear any existing registrations
 admin.site.unregister = lambda *args, **kwargs: None  # Disable unregister
 admin.site.register = lambda *args, **kwargs: None  # Disable register
+
+# Override Django's autodiscover to prevent default admin registration
+def _disable_autodiscover():
+    return []
+import django.contrib.admin
+django.contrib.admin.autodiscover = _disable_autodiscover
 
 # Custom UserAdmin that doesn't register with default admin
 class UserAdmin(admin.ModelAdmin):
