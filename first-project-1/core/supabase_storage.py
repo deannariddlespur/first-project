@@ -8,6 +8,7 @@ import base64
 
 class SupabaseStorage:
     def __init__(self):
+        # Trigger deployment with updated service key
         self.supabase_url = os.environ.get('SUPABASE_URL')
         self.supabase_anon_key = os.environ.get('SUPABASE_ANON_KEY')
         self.supabase_service_key = os.environ.get('SUPABASE_SERVICE_KEY')
