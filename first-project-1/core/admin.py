@@ -13,6 +13,12 @@ class DailyLogAdmin(admin.ModelAdmin):
     list_filter = ('date', 'booking__dog__name')
     search_fields = ('booking__dog__name', 'notes')
     readonly_fields = ('id',)
+    
+    def get_queryset(self, request):
+        """Override to exclude photo field from queries"""
+        return super().get_queryset(request).only(
+            'id', 'booking_id', 'date', 'feeding', 'medication', 'exercise', 'notes'
+        )
 
 class StaffNoteAdmin(admin.ModelAdmin):
     list_display = ('booking', 'staff_member', 'created_at', 'note')
