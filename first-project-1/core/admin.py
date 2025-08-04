@@ -261,7 +261,7 @@ class OwnerAdmin(admin.ModelAdmin):
         return obj.user.date_joined.strftime('%m/%d/%Y')
     created_date.short_description = "Joined"
 
-# Register models with custom admin site
+# Register models with custom admin site only
 dogboarding_admin.register(User, UserAdmin)
 dogboarding_admin.register(Owner, OwnerAdmin)
 dogboarding_admin.register(Dog, DogAdmin)
@@ -271,13 +271,3 @@ dogboarding_admin.register(DailyLog)
 dogboarding_admin.register(Payment, PaymentAdmin)
 dogboarding_admin.register(StaffNote, StaffNoteAdmin)
 dogboarding_admin.register(FacilityAvailability, FacilityAvailabilityAdmin)
-
-# Also register with default admin site for compatibility
-admin.site.register(Owner, OwnerAdmin)
-admin.site.register(Dog, DogAdmin)
-admin.site.register(Kennel, KennelAdmin)
-admin.site.register(Booking, BookingAdmin)
-admin.site.register(DailyLog)
-admin.site.register(Payment, PaymentAdmin)
-admin.site.register(StaffNote, StaffNoteAdmin)
-admin.site.register(FacilityAvailability, FacilityAvailabilityAdmin)
