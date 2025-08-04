@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Debug Info</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Supabase Configuration Debug</h1>
+    
+    <div class="section info">
+        <h2>📋 Environment Variables</h2>
+        <p><strong>SUPABASE_URL:</strong> {{ debug_info.supabase_url }}</p>
+        <p><strong>SUPABASE_ANON_KEY:</strong> 
+            {% if debug_info.supabase_key != 'Not set' %}
+                ✅ Set (hidden for security)
+            {% else %}
+                ❌ Not set
+            {% endif %}
+        </p>
+    </div>
+    
+    <div class="section {% if debug_info.supabase_client_available %}success{% else %}error{% endif %}">
+        <h2>🔌 Supabase Client</h2>
+        <p><strong>Client Available:</strong> 
+            {% if debug_info.supabase_client_available %}✅ Yes{% else %}❌ No{% endif %}
+        </p>
+        <p><strong>Bucket Name:</strong> {{ debug_info.bucket_name }}</p>
+    </div>
+    
+    <div class="section {% if debug_info.bucket_accessible %}success{% else %}error{% endif %}">
+        <h2>🪣 Bucket Access</h2>
+        <p><strong>Bucket Accessible:</strong> 
+            {% if debug_info.bucket_accessible %}✅ Yes{% else %}❌ No{% endif %}
+        </p>
+        {% if debug_info.bucket_accessible %}
+            <p><strong>Files in Bucket:</strong> {{ debug_info.bucket_files }}</p>
+        {% else %}
+            <p><strong>Error:</strong> {{ debug_info.bucket_error }}</p>
+        {% endif %}
+    </div>
+    
+    <div class="section info">
+        <h2>🐕 Dog Photo Status</h2>
+        {% for dog in debug_info.dogs %}
+            <div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 3px;">
+                <h3>{{ dog.name }}</h3>
+                <p><strong>Has Local Photo:</strong> {% if dog.has_photo %}✅ Yes{% else %}❌ No{% endif %}</p>
+                <p><strong>Photo URL Field:</strong> {% if dog.photo_url %}✅ {{ dog.photo_url }}{% else %}❌ None{% endif %}</p>
+                <p><strong>get_photo_url() Result:</strong> {% if dog.get_photo_url_result %}✅ {{ dog.get_photo_url_result }}{% else %}❌ None{% endif %}</p>
+            </div>
+        {% empty %}
+            <p>No dogs found in database.</p>
+        {% endfor %}
+    </div>
+    
+    <div class="section warning">
+        <h2>🔧 Next Steps</h2>
+        <ol>
+            <li>Check if Supabase environment variables are set in Railway</li>
+            <li>Verify Supabase bucket exists and is accessible</li>
+            <li>Test uploading a new dog photo</li>
+            <li>Check if images display properly on dashboard</li>
+        </ol>
+    </div>
+    
+    <p><a href="/">← Back to Home</a></p>
+</body>
+</html> 

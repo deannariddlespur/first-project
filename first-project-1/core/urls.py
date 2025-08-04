@@ -60,6 +60,7 @@ urlpatterns = [
     
     # Debug URLs
     path('debug-images/', views.debug_images, name='debug_images'),
+    path('debug-supabase/', views.debug_supabase_config, name='debug_supabase_config'),
     path('test-images/', views.test_images_simple, name='test_images_simple'),
     path('test-basic/', views.test_basic, name='test_basic'),
     path('test-deployment/', views.test_deployment, name='test_deployment'),

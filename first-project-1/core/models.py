@@ -32,41 +32,56 @@ class Dog(models.Model):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
-        """Get photo URL - works whether photo_url field exists or not"""
+        """Get photo URL with comprehensive fallback system"""
+        # Try to access photo_url field safely
         try:
-            # Try to access photo_url field (will fail if field doesn't exist)
             if hasattr(self, 'photo_url') and self.photo_url:
+                print(f"✅ Using Supabase URL for {self.name}: {self.photo_url}")
                 return self.photo_url
-        except:
-            pass
+        except Exception as e:
+            print(f"⚠️ photo_url field not available for {self.name}: {e}")
         
         # Fallback to local photo
         try:
             if self.photo:
-                return self.photo.url
-        except:
-            pass
+                local_url = self.photo.url
+                print(f"✅ Using local photo for {self.name}: {local_url}")
+                return local_url
+        except Exception as e:
+            print(f"⚠️ Local photo not available for {self.name}: {e}")
+        
+        print(f"❌ No photo available for {self.name}")
         return None
     
     def save_photo_to_supabase(self, image_file):
-        """Upload photo to Supabase and save URL"""
+        """Upload photo to Supabase with comprehensive error handling"""
         try:
+            print(f"🔄 Uploading photo for {self.name} to Supabase...")
+            
             # Upload to Supabase
             public_url = supabase_storage.upload_file(image_file)
+            
             if public_url:
+                print(f"✅ Photo uploaded successfully: {public_url}")
+                
                 # Try to save photo_url if field exists
                 try:
                     if hasattr(self, 'photo_url'):
                         self.photo_url = public_url
                         self.save()
-                        print(f"✅ Photo uploaded to Supabase: {public_url}")
+                        print(f"✅ Supabase URL saved to database for {self.name}")
                     else:
-                        print(f"✅ Photo uploaded to Supabase: {public_url} (photo_url field not available)")
-                except:
-                    print(f"✅ Photo uploaded to Supabase: {public_url} (photo_url field not available)")
+                        print(f"⚠️ photo_url field not available, URL not saved to database")
+                except Exception as e:
+                    print(f"⚠️ Could not save photo_url to database: {e}")
+                
                 return True
+            else:
+                print(f"❌ Supabase upload failed for {self.name}")
+                return False
+                
         except Exception as e:
-            print(f"Error uploading to Supabase: {e}")
+            print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
             return False
 
 class Kennel(models.Model):
