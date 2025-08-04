@@ -181,6 +181,10 @@
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s ease;
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
     .placeholder-photo:hover {
@@ -193,20 +197,21 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
+        text-align: center;
     }
 
     .placeholder-icon {
-        font-size: 1.2em;
+        font-size: 1.8em;
         color: #6c757d;
     }
 
     .placeholder-text {
-        font-size: 0.6em;
+        font-size: 0.7em;
         color: #6c757d;
-        font-weight: 500;
-        text-align: center;
-        line-height: 1;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .dog-info {
@@ -369,26 +374,12 @@
             {% for dog in dogs %}
                 <div class="dog-card">
                     <div class="dog-header">
-                        {% if dog.photo %}
-                            <div class="dog-photo-container">
-                                <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" 
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Image failed to load for {{ dog.name }}');" 
-                                     onload="this.nextElementSibling.style.display='none'; console.log('Image loaded successfully for {{ dog.name }}');">
-                                <div class="dog-photo placeholder-photo" style="display: none;">
-                                    <div class="placeholder-content">
-                                        <span class="placeholder-icon">🐕</span>
-                                        <span class="placeholder-text">{{ dog.name }}</span>
-                                    </div>
-                                </div>
+                        <div class="dog-photo placeholder-photo">
+                            <div class="placeholder-content">
+                                <span class="placeholder-icon">🐕</span>
+                                <span class="placeholder-text">{{ dog.name }}</span>
                             </div>
-                        {% else %}
-                            <div class="dog-photo placeholder-photo">
-                                <div class="placeholder-content">
-                                    <span class="placeholder-icon">📷</span>
-                                    <span class="placeholder-text">Add Photo</span>
-                                </div>
-                            </div>
-                        {% endif %}
+                        </div>
                         <div class="dog-info">
                             <h4>{{ dog.name }}</h4>
                             <div class="dog-breed">{{ dog.breed|default:"Mixed breed" }}</div>
