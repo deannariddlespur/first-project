@@ -10,14 +10,15 @@ class DogAdmin(admin.ModelAdmin):
 
 class DailyLogAdmin(admin.ModelAdmin):
     list_display = ('booking', 'date', 'feeding', 'medication', 'exercise')
-    list_filter = ('date', 'booking__dog__name')
-    search_fields = ('booking__dog__name', 'notes')
+    list_filter = ('date',)
+    search_fields = ('notes',)
     readonly_fields = ('id',)
     
     def get_queryset(self, request):
-        """Override to exclude photo field from queries"""
-        return super().get_queryset(request).only(
-            'id', 'booking_id', 'date', 'feeding', 'medication', 'exercise', 'notes'
+        """Override to avoid JOIN with Dog table that has missing photo_base64 column"""
+        from django.db.models import Prefetch
+        return DailyLog.objects.select_related('booking').prefetch_related(
+            Prefetch('booking__dog', queryset=Dog.objects.only('id', 'name'))
         )
 
 class StaffNoteAdmin(admin.ModelAdmin):
