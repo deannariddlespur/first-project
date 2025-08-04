@@ -600,10 +600,13 @@
                     <div class="card-header">
                         <div class="dog-info">
                             <div class="dog-avatar">
-                                {% if booking.dog.photo %}
-                                    <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}">
+                                {% if booking.dog.get_photo_url %}
+                                <img src="{{ booking.dog.get_photo_url }}" alt="{{ booking.dog.name }}" class="dog-photo">
                                 {% else %}
-                                    <div class="dog-photo-placeholder">🐕</div>
+                                <div class="dog-photo-placeholder">
+                                    <span class="placeholder-icon">🐕</span>
+                                    <span class="placeholder-text">No Photo</span>
+                                </div>
                                 {% endif %}
                             </div>
                             <div class="dog-details">

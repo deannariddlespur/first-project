@@ -467,15 +467,18 @@
     {% if logs %}
         <div class="logs-grid">
             {% for log in logs %}
-                <div class="log-card collapsed card-{{ log.id }} unique-card-{{ log.id }} isolated-card-{{ log.id }} nuclear-card-{{ log.id }}" data-card-id="{{ log.id }}" style="--card-id: {{ log.id }};">
+                <div class="log-card collapsed card-{{ log.id }} unique-card-{{ log.id }} isolated-card-{{ log.id }}" data-card-id="{{ log.id }}" style="--card-id: {{ log.id }};">
                     <!-- Collapsed View (Summary) -->
                     <div class="log-summary" data-card-number="{{ log.id }}" onclick="handleCardClick(this)">
                         <div class="summary-left">
                             <div class="dog-avatar">
-                                {% if log.booking.dog.photo %}
-                                    <img src="{{ log.booking.dog.photo.url }}" alt="{{ log.booking.dog.name }}">
+                                {% if log.booking.dog.get_photo_url %}
+                                <img src="{{ log.booking.dog.get_photo_url }}" alt="{{ log.booking.dog.name }}" class="dog-photo">
                                 {% else %}
-                                    <div class="dog-photo-placeholder">🐕</div>
+                                <div class="dog-photo-placeholder">
+                                    <span class="placeholder-icon">🐕</span>
+                                    <span class="placeholder-text">No Photo</span>
+                                </div>
                                 {% endif %}
                             </div>
                             <div class="summary-info">
