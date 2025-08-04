@@ -26,15 +26,15 @@ try:
 except Exception as e:
     print(f"❌ Error fixing database schema: {e}")
 
-print("🔧 Force adding missing columns with verification...")
-print("🔍 DEBUG: About to call force_add_columns_final command...")
+print("🔧 Adding missing columns directly with SQL...")
+print("🔍 DEBUG: About to call add_columns_direct command...")
 
 try:
-    # Force add missing columns with verification
-    call_command('force_add_columns_final')
-    print("✅ Missing columns force added and verified successfully!")
+    # Add missing columns directly with SQL
+    call_command('add_columns_direct')
+    print("✅ Missing columns added directly successfully!")
 except Exception as e:
-    print(f"❌ Error force adding missing columns: {e}")
+    print(f"❌ Error adding missing columns directly: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
 print("🎯 Startup script completed!") 
