@@ -785,13 +785,7 @@ def add_dog(request):
                     dog.owner = owner
                     dog.save()
                     
-                    # Upload photo to Supabase if provided
-                    if request.FILES.get('photo'):
-                        success = dog.save_photo_to_supabase(request.FILES['photo'])
-                        if success:
-                            print(f"✅ Photo uploaded to Supabase for {dog.name}")
-                        else:
-                            print(f"⚠️ Photo upload failed for {dog.name}, using local storage")
+                    # Photo will be saved automatically by the form
                     
                     return redirect('owner_dashboard')
                 else:
@@ -835,13 +829,7 @@ def edit_dog(request, dog_id):
                 if form.is_valid():
                     dog = form.save()
                     
-                    # Upload photo to Supabase if provided
-                    if request.FILES.get('photo'):
-                        success = dog.save_photo_to_supabase(request.FILES['photo'])
-                        if success:
-                            print(f"✅ Photo uploaded to Supabase for {dog.name}")
-                        else:
-                            print(f"⚠️ Photo upload failed for {dog.name}, using local storage")
+                    # Photo will be saved automatically by the form
                     
                     return redirect('owner_dashboard')
                 else:
