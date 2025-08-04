@@ -37,14 +37,15 @@ except Exception as e:
     print(f"❌ Error adding missing columns directly: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
-print("🔧 Fixing daily logs database columns...")
+print("🔧 Force adding photo column to DailyLog...")
 
 try:
-    # Run the Django management command to fix daily log columns
-    call_command('fix_daily_log_columns')
-    print("✅ Daily logs database fix completed!")
+    # Import and run the force add script
+    from force_add_photo_column import force_add_photo_column
+    force_add_photo_column()
+    print("✅ Force column addition completed!")
 except Exception as e:
-    print(f"❌ Error fixing daily logs database: {e}")
+    print(f"❌ Error force adding columns: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
 print("🎯 Startup script completed!") 
