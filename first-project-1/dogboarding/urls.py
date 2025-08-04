@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from core.admin import dogboarding_admin
 
+# Only use custom admin site - no default admin
 urlpatterns = [
     path('admin/', dogboarding_admin.urls),
     path('', include('core.urls')),
