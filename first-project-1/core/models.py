@@ -33,12 +33,11 @@ class Dog(models.Model):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
-        """Get photo URL - simplified version to avoid database errors"""
-        try:
-            if self.photo:
-                return self.photo.url
-        except:
-            pass
+        """Get photo URL - prioritizes Supabase URL, falls back to local"""
+        if self.photo_url:
+            return self.photo_url
+        elif self.photo:
+            return self.photo.url
         return None
     
     def save_photo_to_supabase(self, image_file):
@@ -47,8 +46,8 @@ class Dog(models.Model):
             # Upload to Supabase
             public_url = supabase_storage.upload_file(image_file)
             if public_url:
-                # For now, just save the photo normally
-                # We'll add photo_url field back after migration is applied
+                self.photo_url = public_url
+                self.save()
                 print(f"✅ Photo uploaded to Supabase: {public_url}")
                 return True
         except Exception as e:
