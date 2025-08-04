@@ -763,7 +763,7 @@ def owner_dashboard(request):
 @login_required
 @user_passes_test(is_owner)
 def add_dog(request):
-    """Add dog with improved error handling"""
+    """Add dog with improved error handling and Supabase storage"""
     try:
         # Check if user is authenticated
         if not request.user.is_authenticated:
@@ -782,9 +782,15 @@ def add_dog(request):
                     dog = form.save(commit=False)
                     dog.owner = owner
                     dog.save()
-                    # Comment out base64 saving for now to avoid errors
-                    # if request.FILES.get('photo'):
-                    #     dog.save_photo_as_base64(request.FILES['photo'])
+                    
+                    # Upload photo to Supabase if provided
+                    if request.FILES.get('photo'):
+                        success = dog.save_photo_to_supabase(request.FILES['photo'])
+                        if success:
+                            print(f"✅ Photo uploaded to Supabase for {dog.name}")
+                        else:
+                            print(f"⚠️ Photo upload failed for {dog.name}, using local storage")
+                    
                     return redirect('owner_dashboard')
                 else:
                     return render(request, 'core/add_dog.html', {'form': form})
@@ -803,7 +809,7 @@ def add_dog(request):
 @login_required
 @user_passes_test(is_owner)
 def edit_dog(request, dog_id):
-    """Edit dog with improved error handling"""
+    """Edit dog with improved error handling and Supabase storage"""
     try:
         # Check if user is authenticated
         if not request.user.is_authenticated:
@@ -826,8 +832,15 @@ def edit_dog(request, dog_id):
                 form = DogForm(request.POST, request.FILES, instance=dog)
                 if form.is_valid():
                     dog = form.save()
-                    # Comment out base64 saving for now to avoid errors
-                    # dog.save_photo_as_base64()
+                    
+                    # Upload photo to Supabase if provided
+                    if request.FILES.get('photo'):
+                        success = dog.save_photo_to_supabase(request.FILES['photo'])
+                        if success:
+                            print(f"✅ Photo uploaded to Supabase for {dog.name}")
+                        else:
+                            print(f"⚠️ Photo upload failed for {dog.name}, using local storage")
+                    
                     return redirect('owner_dashboard')
                 else:
                     return render(request, 'core/edit_dog.html', {'form': form, 'dog': dog})

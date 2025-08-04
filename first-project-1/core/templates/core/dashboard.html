@@ -374,12 +374,26 @@
             {% for dog in dogs %}
                 <div class="dog-card">
                     <div class="dog-header">
-                        <div class="dog-photo placeholder-photo">
-                            <div class="placeholder-content">
-                                <span class="placeholder-icon">🐕</span>
-                                <span class="placeholder-text">{{ dog.name }}</span>
+                        {% if dog.get_photo_url %}
+                            <div class="dog-photo-container">
+                                <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}" class="dog-photo" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Image failed to load for {{ dog.name }}');" 
+                                     onload="this.nextElementSibling.style.display='none'; console.log('Image loaded successfully for {{ dog.name }}');">
+                                <div class="dog-photo placeholder-photo" style="display: none;">
+                                    <div class="placeholder-content">
+                                        <span class="placeholder-icon">🐕</span>
+                                        <span class="placeholder-text">{{ dog.name }}</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        {% else %}
+                            <div class="dog-photo placeholder-photo">
+                                <div class="placeholder-content">
+                                    <span class="placeholder-icon">📷</span>
+                                    <span class="placeholder-text">Add Photo</span>
+                                </div>
+                            </div>
+                        {% endif %}
                         <div class="dog-info">
                             <h4>{{ dog.name }}</h4>
                             <div class="dog-breed">{{ dog.breed|default:"Mixed breed" }}</div>

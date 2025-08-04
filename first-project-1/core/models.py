@@ -1,6 +1,7 @@
 import base64
 from django.db import models
 from django.contrib.auth.models import User
+from .supabase_storage import supabase_storage
 
 # Create your models here.
 
@@ -26,18 +27,31 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
+    photo_url = models.URLField(blank=True, null=True)  # Store Supabase URL
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
-        """Get photo URL - simplified version to avoid errors"""
-        try:
-            if self.photo:
-                return self.photo.url
-        except:
-            pass
+        """Get photo URL - prioritizes Supabase URL, falls back to local"""
+        if self.photo_url:
+            return self.photo_url
+        elif self.photo:
+            return self.photo.url
         return None
+    
+    def save_photo_to_supabase(self, image_file):
+        """Upload photo to Supabase and save URL"""
+        try:
+            # Upload to Supabase
+            public_url = supabase_storage.upload_file(image_file)
+            if public_url:
+                self.photo_url = public_url
+                self.save()
+                return True
+        except Exception as e:
+            print(f"Error uploading to Supabase: {e}")
+            return False
 
 class Kennel(models.Model):
     SIZE_CHOICES = [
