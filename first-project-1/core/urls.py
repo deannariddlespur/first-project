@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
 from core import views
-from .admin import dogboarding_admin
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -58,8 +57,7 @@ urlpatterns = [
     path('bookings/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
     path('profile/', views.user_profile, name='user_profile'),
     
-    # Admin and debug URLs
-    path('admin-dashboard/', dogboarding_admin.urls),
+    # Debug URLs
     path('debug-images/', views.debug_images, name='debug_images'),
     path('test-images/', views.test_images_simple, name='test_images_simple'),
     path('test-basic/', views.test_basic, name='test_basic'),
