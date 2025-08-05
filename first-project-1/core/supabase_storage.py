@@ -54,9 +54,9 @@ class SupabaseStorage:
             elif file_extension in ['.webp']:
                 content_type = "image/webp"
             
-            # Read file content and reset pointer
+            # Create a copy of the file content (Django files can only be read once)
             file_content = file.read()
-            file.seek(0)  # Reset file pointer to beginning
+            file.seek(0)  # Reset file pointer for potential future use
             
             # Upload to Supabase
             result = self.client.storage.from_(self.bucket_name).upload(
