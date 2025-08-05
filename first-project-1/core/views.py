@@ -2153,6 +2153,34 @@ def test_photo_urls(request):
         'results': results
     })
 
+def test_supabase_upload(request):
+    """Test Supabase upload directly"""
+    from django.core.files.base import ContentFile
+    import os
+    
+    try:
+        # Create a simple test file
+        test_content = b"test image content"
+        test_file = ContentFile(test_content, name="test_image.jpg")
+        
+        # Test Supabase upload
+        from .supabase_storage import supabase_storage
+        result = supabase_storage.upload_file(test_file)
+        
+        return JsonResponse({
+            'status': 'success',
+            'supabase_upload_result': result,
+            'supabase_url': supabase_storage.supabase_url,
+            'bucket_name': supabase_storage.bucket_name,
+            'client_available': supabase_storage.client is not None
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        })
+
 def fix_dog_ownership(request):
     """Fix dog ownership issues"""
     try:
