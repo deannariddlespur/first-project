@@ -2157,6 +2157,7 @@ def test_supabase_upload(request):
     """Test Supabase upload directly"""
     from django.core.files.base import ContentFile
     import os
+    import uuid
     
     try:
         # Create a simple test file
@@ -2192,6 +2193,32 @@ def test_supabase_upload(request):
             upload_error = str(e)
             result = None
         
+        # Test direct Supabase upload without fallback
+        try:
+            file_extension = os.path.splitext(test_file.name)[1]
+            unique_filename = f"{uuid.uuid4()}{file_extension}"
+            file_path = f"dog_photos/{unique_filename}"
+            
+            # Reset file pointer
+            test_file.seek(0)
+            
+            # Direct Supabase upload
+            direct_result = supabase_storage.client.storage.from_(supabase_storage.bucket_name).upload(
+                path=file_path,
+                file=test_file.read(),
+                file_options={"content-type": test_file.content_type}
+            )
+            
+            # Get public URL
+            public_url = supabase_storage.client.storage.from_(supabase_storage.bucket_name).get_public_url(file_path)
+            direct_upload_success = True
+            direct_public_url = public_url
+            
+        except Exception as e:
+            direct_upload_success = False
+            direct_upload_error = str(e)
+            direct_public_url = None
+        
         return JsonResponse({
             'status': 'success',
             'supabase_upload_result': result,
@@ -2201,7 +2228,10 @@ def test_supabase_upload(request):
             'bucket_accessible': bucket_accessible,
             'upload_success': upload_success,
             'bucket_error': bucket_error if not bucket_accessible else None,
-            'upload_error': upload_error if not upload_success else None
+            'upload_error': upload_error if not upload_success else None,
+            'direct_upload_success': direct_upload_success,
+            'direct_public_url': direct_public_url,
+            'direct_upload_error': direct_upload_error if not direct_upload_success else None
         })
         
     except Exception as e:
