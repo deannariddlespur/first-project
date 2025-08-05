@@ -2491,9 +2491,12 @@ def staff_daily_logs(request):
         return render(request, 'core/staff_daily_logs.html', context)
     except Exception as e:
         print(f"❌ Error in staff_daily_logs: {e}")
+        print(f"🔍 Error type: {type(e)}")
+        import traceback
+        print(f"🔍 Traceback: {traceback.format_exc()}")
         # Return a simple error page instead of 500
         return render(request, 'core/error.html', {
-            'error_message': 'There was an issue loading the daily logs. Please try again.',
+            'error_message': f'There was an issue loading the daily logs: {str(e)}',
             'back_url': '/staff/dashboard/'
         })
 
