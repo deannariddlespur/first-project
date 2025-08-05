@@ -88,6 +88,51 @@ SUPABASE_BUCKET=dog-photos
 pip install supabase
 ```
 
+### 3.2 Database Schema Considerations
+**CRITICAL: Plan your database schema carefully to avoid migration issues!**
+
+#### Field Length Requirements
+- Supabase URLs are typically 100-200 characters long
+- Always set `max_length` to at least 500 for URL fields
+- Example: `models.URLField(max_length=1000, blank=True, null=True)`
+
+#### Migration Best Practices
+1. **Test migrations locally first**
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+   python manage.py runserver
+   ```
+
+2. **Use descriptive migration names**
+   ```bash
+   python manage.py makemigrations core --name=add_supabase_url_field
+   ```
+
+3. **Include direct SQL commands as backup**
+   ```python
+   # In management/commands/fix_schema.py
+   class Command(BaseCommand):
+       def handle(self, *args, **options):
+           with connection.cursor() as cursor:
+               cursor.execute("ALTER TABLE core_dog ADD COLUMN supabase_url VARCHAR(1000)")
+   ```
+
+4. **Add to startup script**
+   ```python
+   # In startup_simple.py
+   try:
+       call_command('migrate')
+       call_command('fix_schema')  # Direct SQL backup
+   except Exception as e:
+       print(f"Migration error: {e}")
+   ```
+
+#### Common Migration Issues
+- **"value too long" error**: Increase field `max_length`
+- **"column does not exist" error**: Use direct SQL commands
+- **Migration not applied**: Check Railway logs, add backup commands
+
 ### 3.2 Create Supabase Storage Module
 Create `core/supabase_storage.py`:
 
