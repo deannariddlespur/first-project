@@ -2450,247 +2450,55 @@ def create_test_dog(request):
 
 @user_passes_test(is_staff)
 def staff_daily_logs(request):
-    """Staff view to manage daily logs"""
-    try:
-        # Get filter parameters
-        date_filter = request.GET.get('date', '')
-        booking_filter = request.GET.get('booking', '')
-        dog_filter = request.GET.get('dog', '')
-        
-        # Get all logs
-        logs = DailyLog.objects.all().order_by('-date', '-id')
-        
-        # Apply filters
-        if date_filter:
-            try:
-                filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
-                logs = logs.filter(date=filter_date)
-            except ValueError:
-                pass
-        
-        if booking_filter:
-            logs = logs.filter(booking_id=booking_filter)
-        
-        if dog_filter:
-            logs = logs.filter(booking__dog__name__icontains=dog_filter)
-        
-        # Get all bookings for filter dropdown
-        bookings = Booking.objects.filter(status='confirmed').order_by('-start_date')
-        
-        # Get unique dogs for filter dropdown
-        dogs = Dog.objects.filter(bookings__status='confirmed').distinct().order_by('name')
-        
-        context = {
-            'logs': logs,
-            'bookings': bookings,
-            'dogs': dogs,
-            'date_filter': date_filter,
-            'booking_filter': booking_filter,
-            'dog_filter': dog_filter,
-        }
-        return render(request, 'core/staff_daily_logs.html', context)
-    except Exception as e:
-        print(f"❌ Error in staff_daily_logs: {e}")
-        print(f"🔍 Error type: {type(e)}")
-        import traceback
-        print(f"🔍 Traceback: {traceback.format_exc()}")
-        # Return a simple error page instead of 500
-        return render(request, 'core/error.html', {
-            'error_message': f'There was an issue loading the daily logs: {str(e)}',
-            'back_url': '/staff/dashboard/'
-        })
+    """Staff view to manage daily logs - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @user_passes_test(is_staff)
 def create_daily_log(request):
-    """Create a new daily log"""
-    if request.method == 'POST':
-        booking_id = request.POST.get('booking')
-        date_str = request.POST.get('date')
-        feeding = request.POST.get('feeding', '')
-        medication = request.POST.get('medication', '')
-        exercise = request.POST.get('exercise', '')
-        notes = request.POST.get('notes', '')
-        
-        try:
-            # Parse the date string (mm/dd/yyyy format)
-            from datetime import datetime
-            date_obj = datetime.strptime(date_str, '%m/%d/%Y').date()
-            
-            booking = Booking.objects.get(id=booking_id)
-            log = DailyLog.objects.create(
-                booking=booking,
-                date=date_obj,
-                feeding=feeding,
-                medication=medication,
-                exercise=exercise,
-                notes=notes
-            )
-            
-            # Handle photo upload
-            if 'photo' in request.FILES:
-                log.photo = request.FILES['photo']
-                log.save()
-            
-            # Send notification to owner
-            send_log_notification_to_owner(log)
-            
-            messages.success(request, f"Daily log created for {booking.dog.name} on {date_str}")
-            return redirect('staff_daily_logs')
-        except Booking.DoesNotExist:
-            messages.error(request, "Invalid booking selected")
-        except ValueError:
-            messages.error(request, "Invalid date format. Please use mm/dd/yyyy format.")
-        except Exception as e:
-            messages.error(request, f"Error creating log: {str(e)}")
-    
-    # Get active bookings for dropdown
-    active_bookings = Booking.objects.filter(
-        status='confirmed',
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
-    ).order_by('dog__name')
-    
-    context = {
-        'active_bookings': active_bookings,
-        'today': timezone.now().date(),
-    }
-    return render(request, 'core/create_daily_log.html', context)
+    """Create a new daily log - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @user_passes_test(is_staff)
 def edit_daily_log(request, log_id):
-    """Edit an existing daily log"""
-    log = get_object_or_404(DailyLog, id=log_id)
-    
-    if request.method == 'POST':
-        date_str = request.POST.get('date')
-        
-        try:
-            # Parse the date string (mm/dd/yyyy format)
-            from datetime import datetime
-            date_obj = datetime.strptime(date_str, '%m/%d/%Y').date()
-            
-            log.date = date_obj
-            log.feeding = request.POST.get('feeding', '')
-            log.medication = request.POST.get('medication', '')
-            log.exercise = request.POST.get('exercise', '')
-            log.notes = request.POST.get('notes', '')
-            
-            # Handle photo upload
-            if 'photo' in request.FILES:
-                log.photo = request.FILES['photo']
-            
-            log.save()
-            
-            messages.success(request, f"Daily log updated for {log.booking.dog.name} on {date_str}")
-            return redirect('staff_daily_logs')
-        except ValueError:
-            messages.error(request, "Invalid date format. Please use mm/dd/yyyy format.")
-        except Exception as e:
-            messages.error(request, f"Error updating log: {str(e)}")
-    
-    context = {
-        'log': log,
-    }
-    return render(request, 'core/edit_daily_log.html', context)
+    """Edit an existing daily log - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @user_passes_test(is_staff)
 def delete_daily_log(request, log_id):
-    """Delete a daily log"""
-    if request.method == 'POST':
-        log = get_object_or_404(DailyLog, id=log_id)
-        dog_name = log.booking.dog.name
-        log.delete()
-        messages.success(request, f"Daily log deleted for {dog_name}")
-        return redirect('staff_daily_logs')
-    
-    return redirect('staff_daily_logs')
+    """Delete a daily log - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @user_passes_test(is_staff)
 def booking_daily_logs(request, booking_id):
-    """View all daily logs for a specific booking"""
-    booking = get_object_or_404(Booking, id=booking_id)
-    logs = DailyLog.objects.filter(booking=booking).order_by('date')
-    
-    context = {
-        'booking': booking,
-        'logs': logs,
-    }
-    return render(request, 'core/booking_daily_logs.html', context)
+    """View all daily logs for a specific booking - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @user_passes_test(is_staff)
 def daily_log_detail(request, log_id):
-    """View detailed information for a specific daily log"""
-    log = get_object_or_404(DailyLog, id=log_id)
-    
-    context = {
-        'log': log,
-    }
-    return render(request, 'core/daily_log_detail.html', context)
+    """View detailed information for a specific daily log - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 # Add this new view after the existing views
 
 @login_required
 @user_passes_test(is_owner)
 def owner_daily_logs(request):
-    """Owner view to see their dog's daily logs"""
-    # Get the owner
-    try:
-        owner = Owner.objects.get(user=request.user)
-    except Owner.DoesNotExist:
-        messages.error(request, "Owner profile not found.")
-        return redirect('dashboard')
-    
-    # Get filter parameters
-    dog_filter = request.GET.get('dog', '')
-    date_filter = request.GET.get('date', '')
-    
-    # Get all bookings for this owner's dogs
-    bookings = Booking.objects.filter(dog__owner=owner).order_by('-start_date')
-    
-    # Get all logs for these bookings
-    logs = DailyLog.objects.filter(booking__in=bookings).order_by('-date', '-id')
-    
-    # Apply filters
-    if dog_filter:
-        logs = logs.filter(booking__dog_id=dog_filter)
-    
-    if date_filter:
-        try:
-            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
-            logs = logs.filter(date=filter_date)
-        except ValueError:
-            pass
-    
-    # Get unique dogs for filter dropdown
-    dogs = Dog.objects.filter(owner=owner).order_by('name')
-    
-    context = {
-        'logs': logs,
-        'dogs': dogs,
-        'dog_filter': dog_filter,
-        'date_filter': date_filter,
-        'owner': owner,
-    }
-    return render(request, 'core/owner_daily_logs.html', context)
+    """Owner view to see their dog's daily logs - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @login_required
 @user_passes_test(is_owner)
 def owner_dog_logs(request, dog_id):
-    """Owner view to see logs for a specific dog"""
-    try:
-        dog = Dog.objects.get(id=dog_id, owner__user=request.user)
-    except Dog.DoesNotExist:
-        messages.error(request, "Dog not found or you don't have permission to view it.")
-        return redirect('owner_daily_logs')
-    
-    # Get all logs for this dog's bookings
-    logs = DailyLog.objects.filter(booking__dog=dog).order_by('-date', '-id')
-    
-    context = {
-        'dog': dog,
-        'logs': logs,
-    }
-    return render(request, 'core/owner_dog_logs.html', context)
+    """Owner view to see logs for a specific dog - temporarily showing under construction"""
+    # Temporarily show under construction page
+    return render(request, 'core/under_construction.html')
 
 @user_passes_test(is_staff)
 def export_daily_logs(request):
