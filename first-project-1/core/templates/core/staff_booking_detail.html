@@ -452,9 +452,13 @@
                     <p class="note-text">{{ note.note }}</p>
                 {% endif %}
                 {% if note.picture %}
-                    <div class="note-picture">
-                        <img src="{{ note.get_photo_url }}" alt="Staff picture" class="staff-picture">
-                    </div>
+                    {% with photo_url=note.get_photo_url %}
+                        {% if photo_url %}
+                            <div class="note-picture">
+                                <img src="{{ photo_url }}" alt="Staff picture" class="staff-picture">
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 {% endif %}
             </div>
         {% endfor %}
