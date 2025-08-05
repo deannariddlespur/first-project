@@ -23,74 +23,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        today = timezone.now().date()
-        dry_run = options['dry_run']
-        send_email = options['email']
-        
+        # Temporarily disabled due to database column issues
         self.stdout.write(
-            self.style.SUCCESS(f'🔔 Starting daily log reminders for {today.strftime("%m/%d/%Y")}')
+            self.style.WARNING('⚠️ Daily log reminders temporarily disabled due to database maintenance')
         )
-        
-        # Get active bookings (confirmed bookings that are currently ongoing)
-        active_bookings = Booking.objects.filter(
-            status='confirmed',
-            start_date__lte=today,
-            end_date__gte=today
+        self.stdout.write(
+            self.style.SUCCESS('✅ This feature will be re-enabled once database issues are resolved')
         )
-        
-        if not active_bookings.exists():
-            self.stdout.write(
-                self.style.WARNING('⚠️ No active bookings found for today')
-            )
-            return
-        
-        self.stdout.write(f'📋 Found {active_bookings.count()} active bookings')
-        
-        reminders_sent = 0
-        logs_missing = 0
-        
-        for booking in active_bookings:
-            # Check if a log already exists for today
-            existing_log = DailyLog.objects.filter(
-                booking=booking,
-                date=today
-            ).first()
-            
-            if existing_log:
-                self.stdout.write(
-                    f'✅ Log already exists for {booking.dog.name} on {today}'
-                )
-                continue
-            
-            # Log is missing - create reminder
-            logs_missing += 1
-            
-            if dry_run:
-                self.stdout.write(
-                    f'🔔 [DRY RUN] Would send reminder for {booking.dog.name} '
-                    f'(Owner: {booking.dog.owner.user.get_full_name() or booking.dog.owner.user.username})'
-                )
-            else:
-                # In a real implementation, you would send an email or notification here
-                self.stdout.write(
-                    f'🔔 Reminder: Create daily log for {booking.dog.name} '
-                    f'(Owner: {booking.dog.owner.user.get_full_name() or booking.dog.owner.user.username})'
-                )
-                
-                if send_email:
-                    self.send_email_reminder(booking)
-                
-                reminders_sent += 1
-        
-        # Summary
-        if dry_run:
-            self.stdout.write(
-                self.style.SUCCESS(f'📊 [DRY RUN] Would send {logs_missing} reminders')
-            )
-        else:
-            self.stdout.write(
-                self.style.SUCCESS(f'📊 Sent {reminders_sent} reminders for missing logs')
-            )
+        return
     
     def send_email_reminder(self, booking):
         """
