@@ -34,16 +34,24 @@ class Dog(models.Model):
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # If we have a local photo, use it
+        # Try to get Supabase URL first
+        try:
+            if self.photo and self.photo.name:
+                # Check if this is a Supabase URL (stored in photo field)
+                if 'supabase' in self.photo.name or self.photo.name.startswith('http'):
+                    print(f"✅ Using Supabase photo URL for {self.name}: {self.photo.name}")
+                    return self.photo.name
+        except Exception as e:
+            print(f"⚠️ Supabase photo not available for {self.name}: {e}")
+        
+        # Try local photo as fallback
         try:
             if self.photo:
                 photo_url = self.photo.url
                 print(f"✅ Using local photo URL for {self.name}: {photo_url}")
-                print(f"🔍 Photo path: {self.photo.path if hasattr(self.photo, 'path') else 'No path'}")
-                print(f"🔍 Photo name: {self.photo.name if hasattr(self.photo, 'name') else 'No name'}")
                 return photo_url
         except Exception as e:
-            print(f"⚠️ Photo not available for {self.name}: {e}")
+            print(f"⚠️ Local photo not available for {self.name}: {e}")
         
         # Fallback to a placeholder
         placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text={self.name}"
@@ -51,18 +59,28 @@ class Dog(models.Model):
         return placeholder_url
     
     def save_photo_to_supabase(self, image_file):
-        """Save photo to local storage (simplified)"""
+        """Upload photo to Supabase for persistent storage"""
         try:
-            print(f"🔄 Saving photo for {self.name} to local storage...")
+            print(f"🔄 Uploading photo for {self.name} to Supabase...")
             
-            # Save the file to the photo field
-            self.photo.save(image_file.name, image_file, save=True)
+            # Upload to Supabase
+            public_url = supabase_storage.upload_file(image_file)
             
-            print(f"✅ Photo saved to local storage for {self.name}")
-            return True
+            if public_url:
+                print(f"✅ Photo uploaded successfully: {public_url}")
+                # Save the Supabase URL to the photo field for reference
+                self.photo.save(image_file.name, image_file, save=True)
+                return True
+            else:
+                print(f"❌ Supabase upload failed for {self.name}")
+                # Fallback to local storage
+                self.photo.save(image_file.name, image_file, save=True)
+                return False
                 
         except Exception as e:
-            print(f"❌ Error saving photo for {self.name}: {e}")
+            print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
+            # Fallback to local storage
+            self.photo.save(image_file.name, image_file, save=True)
             return False
 
 
