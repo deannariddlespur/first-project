@@ -58,4 +58,14 @@ except Exception as e:
     print(f"❌ Error adding photo_url column: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Force applying photo field length migration...")
+
+try:
+    # Force apply photo field length migration
+    call_command('force_apply_photo_migration')
+    print("✅ Photo field length migration applied successfully!")
+except Exception as e:
+    print(f"❌ Error applying photo field length migration: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
