@@ -54,10 +54,14 @@ class SupabaseStorage:
             elif file_extension in ['.webp']:
                 content_type = "image/webp"
             
+            # Read file content and reset pointer
+            file_content = file.read()
+            file.seek(0)  # Reset file pointer to beginning
+            
             # Upload to Supabase
             result = self.client.storage.from_(self.bucket_name).upload(
                 path=file_path,
-                file=file.read(),
+                file=file_content,
                 file_options={"content-type": content_type}
             )
             
