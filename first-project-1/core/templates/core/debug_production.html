@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Production Image Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { 
+            border: 1px solid #ccc; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .test-image { 
+            width: 100px; 
+            height: 100px; 
+            border: 2px solid red; 
+            margin: 10px; 
+        }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Production Image Debug</h1>
+    
+    <div class="debug-section">
+        <h2>📁 Media Configuration</h2>
+        <p><strong>MEDIA_ROOT:</strong> {{ debug_info.media_root }}</p>
+        <p><strong>MEDIA_URL:</strong> {{ debug_info.media_url }}</p>
+        <p><strong>DEBUG Mode:</strong> {{ debug_info.debug_mode|yesno:"Yes,No" }}</p>
+        <p><strong>Media Directory Exists:</strong> 
+            <span class="{% if debug_info.media_files_exist %}success{% else %}error{% endif %}">
+                {{ debug_info.media_files_exist|yesno:"✅ Yes,❌ No" }}
+            </span>
+        </p>
+        <p><strong>Dog Photos Directory Exists:</strong> 
+            <span class="{% if debug_info.dog_photos_exist %}success{% else %}error{% endif %}">
+                {{ debug_info.dog_photos_exist|yesno:"✅ Yes,❌ No" }}
+            </span>
+        </p>
+    </div>
+
+    {% if debug_info.media_files_exist %}
+    <div class="debug-section">
+        <h2>📂 Media Files</h2>
+        {% if debug_info.media_files %}
+            <p><strong>Files in media directory:</strong></p>
+            <ul>
+            {% for file in debug_info.media_files %}
+                <li>{{ file }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="error">❌ No files found in media directory</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if debug_info.dog_photos_exist %}
+    <div class="debug-section">
+        <h2>🐕 Dog Photos</h2>
+        {% if debug_info.dog_photos %}
+            <p><strong>Dog photo files:</strong></p>
+            <ul>
+            {% for file in debug_info.dog_photos %}
+                <li>{{ file }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="error">❌ No dog photo files found</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="debug-section">
+        <h2>☁️ Supabase Configuration</h2>
+        <p><strong>SUPABASE_URL:</strong> 
+            <span class="{% if debug_info.supabase_url %}success{% else %}warning{% endif %}">
+                {{ debug_info.supabase_url|yesno:"✅ Set,⚠️ Not Set" }}
+            </span>
+        </p>
+        <p><strong>SUPABASE_BUCKET:</strong> {{ debug_info.supabase_bucket }}</p>
+    </div>
+
+    {% if debug_info.dogs %}
+    <div class="debug-section">
+        <h2>🐕 Dog Photo Tests</h2>
+        {% for dog in debug_info.dogs %}
+        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+            <h3>{{ dog.name }}</h3>
+            <p><strong>Photo Field:</strong> {{ dog.photo_field }}</p>
+            <p><strong>Photo Exists:</strong> {{ dog.photo_exists|yesno:"Yes,No" }}</p>
+            <p><strong>Photo URL:</strong> {{ dog.photo_url }}</p>
+            
+            {% if dog.photo_url %}
+            <div style="margin-top: 10px;">
+                <p><strong>Image Test:</strong></p>
+                <img src="{{ dog.photo_url }}" alt="{{ dog.name }}" class="test-image"
+                     onerror="this.style.display='none'; this.nextSibling.style.display='block';"
+                     onload="this.nextSibling.style.display='none';">
+                <div style="display: none; color: red; font-weight: bold;">
+                    ❌ Image failed to load
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if debug_info.dogs_error %}
+    <div class="debug-section error">
+        <h2>❌ Database Error</h2>
+        <p>{{ debug_info.dogs_error }}</p>
+    </div>
+    {% endif %}
+
+    <div class="debug-section">
+        <h2>🔗 Test URLs</h2>
+        <p>Try these URLs directly:</p>
+        <ul>
+            <li><a href="/debug-images/" target="_blank">Debug Images</a></li>
+            <li><a href="/test-images/" target="_blank">Test Images</a></li>
+            <li><a href="/dashboard/" target="_blank">Dashboard</a></li>
+        </ul>
+    </div>
+</body>
+</html> 

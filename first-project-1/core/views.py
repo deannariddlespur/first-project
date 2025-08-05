@@ -3163,3 +3163,51 @@ def test_supabase_upload_simple(request):
             'error': str(e),
             'error_type': str(type(e))
         })
+
+def debug_production_images(request):
+    """Debug view specifically for production image issues"""
+    import os
+    from django.conf import settings
+    
+    debug_info = {
+        'media_root': settings.MEDIA_ROOT,
+        'media_url': settings.MEDIA_URL,
+        'debug_mode': settings.DEBUG,
+        'media_files_exist': os.path.exists(settings.MEDIA_ROOT),
+        'dog_photos_exist': os.path.exists(os.path.join(settings.MEDIA_ROOT, 'dog_photos')),
+        'supabase_url': settings.SUPABASE_URL,
+        'supabase_bucket': settings.SUPABASE_BUCKET,
+    }
+    
+    # Check if media files exist
+    if debug_info['media_files_exist']:
+        try:
+            media_files = os.listdir(settings.MEDIA_ROOT)
+            debug_info['media_files'] = media_files
+        except Exception as e:
+            debug_info['media_files_error'] = str(e)
+    
+    # Check dog photos specifically
+    if debug_info['dog_photos_exist']:
+        try:
+            dog_photos = os.listdir(os.path.join(settings.MEDIA_ROOT, 'dog_photos'))
+            debug_info['dog_photos'] = dog_photos[:5]  # Show first 5 files
+        except Exception as e:
+            debug_info['dog_photos_error'] = str(e)
+    
+    # Get some dogs for testing
+    try:
+        dogs = Dog.objects.all()[:3]  # Get first 3 dogs
+        debug_info['dogs'] = []
+        for dog in dogs:
+            dog_info = {
+                'name': dog.name,
+                'photo_field': str(dog.photo),
+                'photo_url': dog.get_photo_url(),
+                'photo_exists': bool(dog.photo),
+            }
+            debug_info['dogs'].append(dog_info)
+    except Exception as e:
+        debug_info['dogs_error'] = str(e)
+    
+    return render(request, 'core/debug_production.html', {'debug_info': debug_info})
