@@ -3095,3 +3095,31 @@ def debug_production_images(request):
         debug_info['dogs_error'] = str(e)
     
     return render(request, 'core/debug_production.html', {'debug_info': debug_info})
+
+@user_passes_test(is_staff)
+def debug_payments(request):
+    """Debug view to check payment records"""
+    try:
+        payments = Payment.objects.all().order_by('-created_at')
+        
+        debug_info = {
+            'total_payments': payments.count(),
+            'payments': []
+        }
+        
+        for payment in payments:
+            debug_info['payments'].append({
+                'id': payment.id,
+                'booking_id': payment.booking.id,
+                'dog_name': payment.booking.dog.name,
+                'amount': float(payment.amount),
+                'status': payment.status,
+                'created_at': payment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'booking_start': payment.booking.start_date.strftime('%Y-%m-%d'),
+                'booking_end': payment.booking.end_date.strftime('%Y-%m-%d'),
+            })
+        
+        return JsonResponse(debug_info)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
