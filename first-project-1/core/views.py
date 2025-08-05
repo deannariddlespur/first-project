@@ -786,6 +786,9 @@ def add_dog(request):
                     dog.save()
                     
                     # Upload photo to Supabase if provided
+                    print(f"🔍 DEBUG: request.FILES keys: {list(request.FILES.keys())}")
+                    print(f"🔍 DEBUG: request.FILES.get('photo'): {request.FILES.get('photo')}")
+                    
                     if request.FILES.get('photo'):
                         print(f"🔄 Starting photo upload for {dog.name}...")
                         success = dog.save_photo_to_supabase(request.FILES['photo'])
