@@ -781,9 +781,12 @@ def add_dog(request):
             print(f"🔄 POST request received for add_dog")
             print(f"🔍 DEBUG: request.POST keys: {list(request.POST.keys())}")
             print(f"🔍 DEBUG: request.FILES keys: {list(request.FILES.keys())}")
+            print(f"🔍 DEBUG: request.FILES content: {dict(request.FILES)}")
             try:
                 form = DogForm(request.POST, request.FILES)
+                print(f"🔍 DEBUG: Form is valid: {form.is_valid()}")
                 if form.is_valid():
+                    print(f"🔍 DEBUG: Form data: {form.cleaned_data}")
                     dog = form.save(commit=False)
                     dog.owner = owner
                     dog.save()
@@ -804,6 +807,7 @@ def add_dog(request):
                     
                     return redirect('owner_dashboard')
                 else:
+                    print(f"🔍 DEBUG: Form errors: {form.errors}")
                     return render(request, 'core/add_dog.html', {'form': form})
             except Exception as e:
                 return HttpResponse(f"Error saving dog: {str(e)}")
