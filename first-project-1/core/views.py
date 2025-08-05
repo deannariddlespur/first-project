@@ -789,6 +789,14 @@ def add_dog(request):
             }
             
             try:
+                # Create a copy of the photo file content before form validation
+                photo_file = None
+                if request.FILES.get('photo'):
+                    from django.core.files.base import ContentFile
+                    photo_content = request.FILES['photo'].read()
+                    request.FILES['photo'].seek(0)  # Reset pointer for form processing
+                    photo_file = ContentFile(photo_content, name=request.FILES['photo'].name)
+                
                 form = DogForm(request.POST, request.FILES)
                 debug_info['form_valid'] = form.is_valid()
                 
@@ -803,10 +811,10 @@ def add_dog(request):
                     debug_info['dog_saved'] = True
                     debug_info['dog_name'] = dog.name
                     
-                    if request.FILES.get('photo'):
+                    if photo_file:
                         debug_info['photo_upload_attempt'] = True
-                        debug_info['photo_file_name'] = request.FILES['photo'].name
-                        success, upload_debug = dog.save_photo_to_supabase(request.FILES['photo'])
+                        debug_info['photo_file_name'] = photo_file.name
+                        success, upload_debug = dog.save_photo_to_supabase(photo_file)
                         debug_info['photo_upload_success'] = success
                         debug_info['photo_url_after_upload'] = dog.photo.name if dog.photo else None
                         debug_info['upload_debug'] = upload_debug
