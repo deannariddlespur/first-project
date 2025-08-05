@@ -67,6 +67,9 @@ class SupabaseStorage:
             
             # Return the public URL
             public_url = self.client.storage.from_(self.bucket_name).get_public_url(file_path)
+            # Remove trailing ? if present (can cause browser issues)
+            if public_url.endswith('?'):
+                public_url = public_url[:-1]
             return public_url
             
         except Exception as e:
