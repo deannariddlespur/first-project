@@ -23,5 +23,16 @@
         }
       ]
     }
+  ],
+  "volumes": [
+    {
+      "name": "media-storage",
+      "mounts": [
+        {
+          "source": "/app/media",
+          "target": "/app/media"
+        }
+      ]
+    }
   ]
 } 
