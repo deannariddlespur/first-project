@@ -265,7 +265,7 @@
                 <div class="photo-section">
                     {% if dog.photo %}
                         <div class="current-photo">
-                            <strong>Currently:</strong> <a href="{{ dog.photo.url }}" target="_blank">{{ dog.photo.name }}</a>
+                            <strong>Currently:</strong> <a href="{{ dog.get_photo_url }}" target="_blank">{{ dog.photo.name }}</a>
                         </div>
                         <div class="clear-checkbox">
                             <label>

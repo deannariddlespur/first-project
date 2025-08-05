@@ -271,7 +271,7 @@
     <div class="booking-info-card">
         <div class="dog-avatar">
             {% if booking.dog.photo %}
-                <img src="{{ booking.dog.photo.url }}" alt="{{ booking.dog.name }}">
+                                        <img src="{{ booking.dog.get_photo_url }}" alt="{{ booking.dog.name }}">
             {% else %}
                 <span class="dog-emoji">🐕</span>
             {% endif %}

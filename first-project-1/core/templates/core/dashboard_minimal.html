@@ -298,7 +298,7 @@
                 <div class="dog-card">
                     <div class="dog-header">
                         {% if dog.photo %}
-                            <img src="{{ dog.photo.url }}" alt="{{ dog.name }}" class="dog-photo" 
+                                                            <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}" class="dog-photo" 
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                                  onload="this.nextElementSibling.style.display='none';">
                             <div class="dog-photo-placeholder" style="display: none;">

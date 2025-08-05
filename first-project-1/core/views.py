@@ -2958,7 +2958,7 @@ def debug_dog_photos(request):
                 'id': dog.id,
                 'name': dog.name,
                 'photo_name': dog.photo.name if dog.photo else None,
-                'photo_url': dog.photo.url if dog.photo else None,
+                'photo_url': dog.get_photo_url() if dog.photo else None,
                 'get_photo_url_result': dog.get_photo_url(),
                 'has_photo': bool(dog.photo),
                 'photo_starts_with_http': dog.photo.name.startswith('http') if dog.photo and dog.photo.name else False,

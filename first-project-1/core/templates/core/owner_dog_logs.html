@@ -270,7 +270,7 @@
     <div class="dog-info-card">
         <div class="dog-avatar">
             {% if dog.photo %}
-                <img src="{{ dog.photo.url }}" alt="{{ dog.name }}">
+                                        <img src="{{ dog.get_photo_url }}" alt="{{ dog.name }}">
             {% else %}
                 <span class="dog-emoji">🐕</span>
             {% endif %}

@@ -398,7 +398,7 @@
                         <div class="dog-info">
                             <div class="dog-avatar">
                                 {% if log.booking.dog.photo %}
-                                    <img src="{{ log.booking.dog.photo.url }}" alt="{{ log.booking.dog.name }}">
+                                    <img src="{{ log.booking.dog.get_photo_url }}" alt="{{ log.booking.dog.name }}">
                                 {% else %}
                                     <span class="dog-emoji">🐕</span>
                                 {% endif %}
