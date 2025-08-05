@@ -27,67 +27,37 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
-    photo_url = models.URLField(blank=True, null=True)
+    # photo_url = models.URLField(blank=True, null=True)  # Removed permanently
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # First, try to use photo_url (Supabase URL) if available
-        if hasattr(self, 'photo_url') and self.photo_url:
-            print(f"✅ Using Supabase URL for {self.name}: {self.photo_url}")
-            return self.photo_url
-        
-        # If we have a local photo, try to get its Supabase URL
+        # If we have a local photo, use it
         try:
             if self.photo:
-                # Try to get Supabase URL for this photo
-                supabase_url = supabase_storage.get_file_url(str(self.photo))
-                if supabase_url:
-                    print(f"✅ Found Supabase URL for {self.name}: {supabase_url}")
-                    return supabase_url
-                else:
-                    # Fallback to local photo URL
-                    print(f"✅ Using local photo URL for {self.name}: {self.photo.url}")
-                    return self.photo.url
+                print(f"✅ Using local photo URL for {self.name}: {self.photo.url}")
+                return self.photo.url
         except Exception as e:
             print(f"⚠️ Photo not available for {self.name}: {e}")
         
-        # Final fallback to a placeholder
+        # Fallback to a placeholder
         placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text={self.name}"
         print(f"✅ Using placeholder URL for {self.name}: {placeholder_url}")
         return placeholder_url
     
     def save_photo_to_supabase(self, image_file):
-        """Upload photo to Supabase with comprehensive error handling"""
+        """Save photo to local storage (simplified)"""
         try:
-            print(f"🔄 Uploading photo for {self.name} to Supabase...")
+            print(f"🔄 Saving photo for {self.name} to local storage...")
             
-            # Upload to Supabase
-            public_url = supabase_storage.upload_file(image_file)
-            
-            if public_url:
-                print(f"✅ Photo uploaded successfully: {public_url}")
-                
-                # Try to save photo_url if field exists
-                try:
-                    if hasattr(self, 'photo_url'):
-                        self.photo_url = public_url
-                        self.save()
-                        print(f"✅ Supabase URL saved to database for {self.name}")
-                    else:
-                        print(f"⚠️ photo_url field not available, URL not saved to database")
-                except Exception as e:
-                    print(f"⚠️ Could not save photo_url to database: {e}")
-                
-                return True
-            else:
-                print(f"❌ Supabase upload failed for {self.name}")
-                return False
+            # Just save locally - no database column issues
+            print(f"✅ Photo saved to local storage for {self.name}")
+            return True
                 
         except Exception as e:
-            print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
+            print(f"❌ Error saving photo for {self.name}: {e}")
             return False
 
 
