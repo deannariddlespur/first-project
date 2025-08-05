@@ -35,4 +35,14 @@ class Command(BaseCommand):
                     
         except Exception as e:
             self.stdout.write(f"❌ Error applying migration: {e}")
-            self.stdout.write(f"🔍 Error type: {type(e)}") 
+            self.stdout.write(f"🔍 Error type: {type(e)}")
+            
+        # Also try to apply the Django migration directly
+        try:
+            from django.core.management import call_command
+            self.stdout.write("🔄 Attempting to apply Django migration...")
+            call_command('migrate', 'core', '0013_fix_photo_field_length')
+            self.stdout.write("✅ Django migration applied successfully!")
+        except Exception as e:
+            self.stdout.write(f"❌ Django migration failed: {e}")
+            self.stdout.write(f"🔍 Django migration error type: {type(e)}") 
