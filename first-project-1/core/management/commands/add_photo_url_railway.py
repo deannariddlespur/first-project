@@ -9,19 +9,16 @@ class Command(BaseCommand):
         
         try:
             with connection.cursor() as cursor:
-                # Check if column exists
-                cursor.execute("""
-                    SELECT column_name 
-                    FROM information_schema.columns 
-                    WHERE table_name = 'core_dog' AND column_name = 'photo_url'
-                """)
-                exists = cursor.fetchone()
+                # Check if column exists (SQLite compatible)
+                cursor.execute("PRAGMA table_info(core_dog)")
+                columns = cursor.fetchall()
+                column_names = [column[1] for column in columns]
                 
-                if not exists:
+                if 'photo_url' not in column_names:
                     self.stdout.write("📝 Adding photo_url column...")
                     cursor.execute("""
                         ALTER TABLE core_dog 
-                        ADD COLUMN photo_url VARCHAR(500) NULL
+                        ADD COLUMN photo_url TEXT
                     """)
                     self.stdout.write(self.style.SUCCESS("✅ photo_url column added successfully!"))
                 else:
