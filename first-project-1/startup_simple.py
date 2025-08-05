@@ -118,4 +118,14 @@ except Exception as e:
     print(f"❌ Error creating missing payment records: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Creating test payment for debugging...")
+
+try:
+    # Create a test payment for debugging
+    call_command('create_test_payment')
+    print("✅ Test payment created successfully!")
+except Exception as e:
+    print(f"❌ Error creating test payment: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
