@@ -68,4 +68,14 @@ except Exception as e:
     print(f"❌ Error applying photo field length migration: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Force fixing photo field length with direct SQL...")
+
+try:
+    # Force fix photo field length with direct SQL
+    call_command('force_fix_photo_length')
+    print("✅ Photo field length fixed with direct SQL!")
+except Exception as e:
+    print(f"❌ Error fixing photo field length with direct SQL: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 

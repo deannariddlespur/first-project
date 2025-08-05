@@ -813,8 +813,9 @@ def add_dog(request):
                     else:
                         debug_info['photo_upload_attempt'] = False
                     
-                    # Return debug info instead of redirect for now
-                    return JsonResponse(debug_info)
+                    # Redirect to dashboard after successful save
+                    messages.success(request, f"✅ Dog '{dog.name}' added successfully!")
+                    return redirect('owner_dashboard')
                 else:
                     return render(request, 'core/add_dog.html', {'form': form})
             except Exception as e:
