@@ -27,23 +27,8 @@ class Command(BaseCommand):
         
         for booking in bookings_without_payments:
             try:
-                # Calculate the amount based on kennel size and length of stay
-                nights = (booking.end_date - booking.start_date).days
-                
-                # Default pricing if no kennel is assigned
-                if booking.kennel:
-                    # Use kennel-based pricing
-                    if booking.kennel.size == 'small':
-                        price_per_night = Decimal('25.00')
-                    elif booking.kennel.size == 'medium':
-                        price_per_night = Decimal('35.00')
-                    else:  # large
-                        price_per_night = Decimal('50.00')
-                else:
-                    # Default to medium kennel pricing
-                    price_per_night = Decimal('35.00')
-                
-                total_amount = price_per_night * nights
+                # Use the model's calculate_total method for correct pricing
+                total_amount = booking.calculate_total()
                 
                 # Create payment record
                 Payment.objects.create(
@@ -52,9 +37,7 @@ class Command(BaseCommand):
                     status='pending'
                 )
                 
-                # Update booking with pricing info
-                booking.price_per_night = price_per_night
-                booking.total_amount = total_amount
+                # Save the booking with updated pricing info
                 booking.save()
                 
                 created_count += 1

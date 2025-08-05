@@ -1174,21 +1174,8 @@ def create_booking(request):
                     
                     # Create payment record for confirmed bookings
                     if booking.status == 'confirmed':
-                        from decimal import Decimal
-                        nights = (booking.end_date - booking.start_date).days
-                        
-                        # Calculate price based on kennel size (default to medium if no kennel)
-                        if booking.kennel:
-                            if booking.kennel.size == 'small':
-                                price_per_night = Decimal('25.00')
-                            elif booking.kennel.size == 'medium':
-                                price_per_night = Decimal('35.00')
-                            else:  # large
-                                price_per_night = Decimal('50.00')
-                        else:
-                            price_per_night = Decimal('35.00')
-                        
-                        total_amount = price_per_night * nights
+                        # Use the model's calculate_total method for correct pricing
+                        total_amount = booking.calculate_total()
                         
                         # Create payment record
                         from core.models import Payment
@@ -1198,9 +1185,7 @@ def create_booking(request):
                             status='pending'
                         )
                         
-                        # Update booking with pricing info
-                        booking.price_per_night = price_per_night
-                        booking.total_amount = total_amount
+                        # Save the booking with updated pricing info
                         booking.save()
                     
                     return redirect('booking_list')
@@ -1594,21 +1579,8 @@ def staff_booking_detail(request, booking_id):
                 if new_status == 'confirmed' and old_status != 'confirmed':
                     # Check if payment record already exists
                     if not hasattr(booking, 'payment'):
-                        from decimal import Decimal
-                        nights = (booking.end_date - booking.start_date).days
-                        
-                        # Calculate price based on kennel size (default to medium if no kennel)
-                        if booking.kennel:
-                            if booking.kennel.size == 'small':
-                                price_per_night = Decimal('25.00')
-                            elif booking.kennel.size == 'medium':
-                                price_per_night = Decimal('35.00')
-                            else:  # large
-                                price_per_night = Decimal('50.00')
-                        else:
-                            price_per_night = Decimal('35.00')
-                        
-                        total_amount = price_per_night * nights
+                        # Use the model's calculate_total method for correct pricing
+                        total_amount = booking.calculate_total()
                         
                         # Create payment record
                         from core.models import Payment
@@ -1618,9 +1590,8 @@ def staff_booking_detail(request, booking_id):
                             status='pending'
                         )
                         
-                        # Update booking with pricing info
-                        booking.price_per_night = price_per_night
-                        booking.total_amount = total_amount
+                        # Save the booking with updated pricing info
+                        booking.save()
             
             # Assign kennel with availability check
             kennel_id = request.POST.get('kennel')

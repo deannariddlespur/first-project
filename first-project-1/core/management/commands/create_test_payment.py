@@ -20,20 +20,8 @@ class Command(BaseCommand):
             
             self.stdout.write(f'📋 Found booking: {booking.dog.name} ({booking.start_date} to {booking.end_date})')
             
-            # Calculate amount
-            nights = (booking.end_date - booking.start_date).days
-            
-            if booking.kennel:
-                if booking.kennel.size == 'small':
-                    price_per_night = Decimal('25.00')
-                elif booking.kennel.size == 'medium':
-                    price_per_night = Decimal('35.00')
-                else:  # large
-                    price_per_night = Decimal('50.00')
-            else:
-                price_per_night = Decimal('35.00')
-            
-            total_amount = price_per_night * nights
+            # Use the model's calculate_total method for correct pricing
+            total_amount = booking.calculate_total()
             
             # Create payment record
             payment = Payment.objects.create(
@@ -42,9 +30,7 @@ class Command(BaseCommand):
                 status='pending'
             )
             
-            # Update booking with pricing info
-            booking.price_per_night = price_per_night
-            booking.total_amount = total_amount
+            # Save the booking with updated pricing info
             booking.save()
             
             self.stdout.write(
