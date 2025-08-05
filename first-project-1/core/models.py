@@ -26,7 +26,7 @@ class Dog(models.Model):
     age = models.PositiveIntegerField(null=True, blank=True)
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
-    photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
+    photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True, max_length=500)
     # photo_url = models.URLField(blank=True, null=True)  # Removed permanently
 
     def __str__(self):
