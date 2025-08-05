@@ -10,7 +10,7 @@ class DogAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         """Optimized queryset for admin display"""
-        return Dog.objects.only('id', 'name', 'breed', 'age', 'size', 'owner_id', 'notes', 'photo')
+        return Dog.objects.only('id', 'name', 'breed', 'age', 'size', 'owner_id', 'notes')
     
     def get_owner_info(self, obj):
         """Custom method to display owner info"""
