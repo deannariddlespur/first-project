@@ -3127,3 +3127,31 @@ def fix_photo_length_manual(request):
             'message': str(e),
             'error_type': str(type(e))
         })
+
+def test_supabase_upload_simple(request):
+    """Test Supabase upload with a simple file"""
+    try:
+        from django.core.files.base import ContentFile
+        import io
+        
+        # Create a simple test image
+        test_image_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xff\xff?\x00\x05\xfe\x02\xfe\xdc\xccY\xe7\x00\x00\x00\x00IEND\xaeB`\x82'
+        test_file = ContentFile(test_image_data, name='test.png')
+        
+        # Test upload
+        from core.supabase_storage import supabase_storage
+        result = supabase_storage.upload_file(test_file)
+        
+        return JsonResponse({
+            'status': 'success',
+            'upload_result': result,
+            'file_size': len(test_image_data),
+            'file_name': test_file.name
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e),
+            'error_type': str(type(e))
+        })

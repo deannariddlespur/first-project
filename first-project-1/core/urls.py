@@ -72,4 +72,5 @@ urlpatterns = [
     path('test-supabase-upload-debug/', views.test_supabase_upload_debug, name='test_supabase_upload_debug'),
     path('test-dog-upload-process/', views.test_dog_upload_process, name='test_dog_upload_process'),
     path('fix-photo-length-manual/', views.fix_photo_length_manual, name='fix_photo_length_manual'),
+    path('test-supabase-upload-simple/', views.test_supabase_upload_simple, name='test_supabase_upload_simple'),
 ] 
