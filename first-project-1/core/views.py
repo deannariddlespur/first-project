@@ -788,6 +788,7 @@ def add_dog(request):
                 print(f"🔍 DEBUG: Form is valid: {form.is_valid()}")
                 if form.is_valid():
                     print(f"🔍 DEBUG: Form data: {form.cleaned_data}")
+                    print(f"🔍 DEBUG: Photo field in cleaned_data: {form.cleaned_data.get('photo')}")
                     dog = form.save(commit=False)
                     dog.owner = owner
                     dog.save()
@@ -813,10 +814,14 @@ def add_dog(request):
             except Exception as e:
                 return HttpResponse(f"Error saving dog: {str(e)}")
         else:
+            print(f"🎯 add_dog GET request - loading form")
             try:
                 form = DogForm()
+                print(f"🔍 Form fields: {list(form.fields.keys())}")
+                print(f"🔍 Photo field: {form.fields.get('photo')}")
                 return render(request, 'core/add_dog.html', {'form': form})
             except Exception as e:
+                print(f"❌ Error loading dog form: {str(e)}")
                 return HttpResponse(f"Error loading dog form: {str(e)}")
         
     except Exception as e:
