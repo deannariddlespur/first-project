@@ -810,11 +810,9 @@ def add_dog(request):
                     else:
                         debug_info['photo_upload_attempt'] = False
                     
-                    # Return debug info instead of redirect for now
-                    return JsonResponse(debug_info)
+                    return redirect('owner_dashboard')
                 else:
-                    debug_info['form_errors'] = form.errors
-                    return JsonResponse(debug_info)
+                    return render(request, 'core/add_dog.html', {'form': form})
             except Exception as e:
                 return HttpResponse(f"Error saving dog: {str(e)}")
         else:
