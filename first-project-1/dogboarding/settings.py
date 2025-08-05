@@ -29,6 +29,12 @@ DEBUG = True
 # Site URL for email notifications
 SITE_URL = 'http://localhost:8000'
 
+# Supabase Configuration
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
+SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
+SUPABASE_BUCKET = "dog-photos"  # Your bucket name
+
 ALLOWED_HOSTS = [
     'first-project-production-6e00.up.railway.app',
     'localhost',
