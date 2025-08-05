@@ -28,22 +28,14 @@ class Dog(models.Model):
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True, max_length=500)
     # photo_url = models.URLField(blank=True, null=True)  # Removed permanently
-    supabase_url = models.URLField(blank=True, null=True, max_length=1000)  # Temporary field for Supabase URLs
+    # supabase_url = models.URLField(blank=True, null=True, max_length=1000)  # Temporarily commented out
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # Try to get Supabase URL first (from dedicated field)
-        try:
-            if self.supabase_url:
-                print(f"✅ Using Supabase photo URL for {self.name}: {self.supabase_url}")
-                return self.supabase_url
-        except Exception as e:
-            print(f"⚠️ Supabase photo not available for {self.name}: {e}")
-        
-        # Try to get Supabase URL from photo field (legacy)
+        # Try to get Supabase URL from photo field
         try:
             if self.photo and self.photo.name:
                 # Check if this is a Supabase URL (stored in photo field)
@@ -91,8 +83,9 @@ class Dog(models.Model):
                 print(f"✅ Photo uploaded successfully: {public_url}")
                 # Store the Supabase URL in the photo field
                 try:
-                    # Store Supabase URL in the dedicated field
-                    self.supabase_url = public_url
+                    # Store Supabase URL in the photo field name (truncated if needed)
+                    # The photo field now has max_length=500, so this should work
+                    self.photo.name = public_url
                     self.save()
                     return True, debug_info
                 except Exception as save_error:
