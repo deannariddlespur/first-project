@@ -2202,11 +2202,20 @@ def test_supabase_upload(request):
             # Reset file pointer
             test_file.seek(0)
             
+            # Set content type based on file extension
+            content_type = "image/jpeg"  # Default for .jpg files
+            if file_extension.lower() in ['.png']:
+                content_type = "image/png"
+            elif file_extension.lower() in ['.gif']:
+                content_type = "image/gif"
+            elif file_extension.lower() in ['.webp']:
+                content_type = "image/webp"
+            
             # Direct Supabase upload
             direct_result = supabase_storage.client.storage.from_(supabase_storage.bucket_name).upload(
                 path=file_path,
                 file=test_file.read(),
-                file_options={"content-type": test_file.content_type}
+                file_options={"content-type": content_type}
             )
             
             # Get public URL

@@ -44,11 +44,21 @@ class SupabaseStorage:
             unique_filename = f"{uuid.uuid4()}{file_extension}"
             file_path = f"{folder_path}/{unique_filename}"
             
+            # Set content type based on file extension
+            content_type = "image/jpeg"  # Default for .jpg files
+            file_extension = os.path.splitext(file.name)[1].lower()
+            if file_extension in ['.png']:
+                content_type = "image/png"
+            elif file_extension in ['.gif']:
+                content_type = "image/gif"
+            elif file_extension in ['.webp']:
+                content_type = "image/webp"
+            
             # Upload to Supabase
             result = self.client.storage.from_(self.bucket_name).upload(
                 path=file_path,
                 file=file.read(),
-                file_options={"content-type": file.content_type}
+                file_options={"content-type": content_type}
             )
             
             # Return the public URL
