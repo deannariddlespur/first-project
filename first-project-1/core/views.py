@@ -2451,43 +2451,51 @@ def create_test_dog(request):
 @user_passes_test(is_staff)
 def staff_daily_logs(request):
     """Staff view to manage daily logs"""
-    # Get filter parameters
-    date_filter = request.GET.get('date', '')
-    booking_filter = request.GET.get('booking', '')
-    dog_filter = request.GET.get('dog', '')
-    
-    # Get all logs
-    logs = DailyLog.objects.all().order_by('-date', '-id')
-    
-    # Apply filters
-    if date_filter:
-        try:
-            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
-            logs = logs.filter(date=filter_date)
-        except ValueError:
-            pass
-    
-    if booking_filter:
-        logs = logs.filter(booking_id=booking_filter)
-    
-    if dog_filter:
-        logs = logs.filter(booking__dog__name__icontains=dog_filter)
-    
-    # Get all bookings for filter dropdown
-    bookings = Booking.objects.filter(status='confirmed').order_by('-start_date')
-    
-    # Get unique dogs for filter dropdown
-    dogs = Dog.objects.filter(bookings__status='confirmed').distinct().order_by('name')
-    
-    context = {
-        'logs': logs,
-        'bookings': bookings,
-        'dogs': dogs,
-        'date_filter': date_filter,
-        'booking_filter': booking_filter,
-        'dog_filter': dog_filter,
-    }
-    return render(request, 'core/staff_daily_logs.html', context)
+    try:
+        # Get filter parameters
+        date_filter = request.GET.get('date', '')
+        booking_filter = request.GET.get('booking', '')
+        dog_filter = request.GET.get('dog', '')
+        
+        # Get all logs
+        logs = DailyLog.objects.all().order_by('-date', '-id')
+        
+        # Apply filters
+        if date_filter:
+            try:
+                filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+                logs = logs.filter(date=filter_date)
+            except ValueError:
+                pass
+        
+        if booking_filter:
+            logs = logs.filter(booking_id=booking_filter)
+        
+        if dog_filter:
+            logs = logs.filter(booking__dog__name__icontains=dog_filter)
+        
+        # Get all bookings for filter dropdown
+        bookings = Booking.objects.filter(status='confirmed').order_by('-start_date')
+        
+        # Get unique dogs for filter dropdown
+        dogs = Dog.objects.filter(bookings__status='confirmed').distinct().order_by('name')
+        
+        context = {
+            'logs': logs,
+            'bookings': bookings,
+            'dogs': dogs,
+            'date_filter': date_filter,
+            'booking_filter': booking_filter,
+            'dog_filter': dog_filter,
+        }
+        return render(request, 'core/staff_daily_logs.html', context)
+    except Exception as e:
+        print(f"❌ Error in staff_daily_logs: {e}")
+        # Return a simple error page instead of 500
+        return render(request, 'core/error.html', {
+            'error_message': 'There was an issue loading the daily logs. Please try again.',
+            'back_url': '/staff/dashboard/'
+        })
 
 @user_passes_test(is_staff)
 def create_daily_log(request):
