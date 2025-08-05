@@ -2107,6 +2107,17 @@ def debug_app(request):
             'error': str(e)
         })
 
+def test_debug_logs(request):
+    """Simple test to see if our debug messages are working"""
+    print("🎯 test_debug_logs called")
+    print("🔍 This is a test debug message")
+    print("✅ If you see this in logs, debug messages are working")
+    
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Debug test completed - check logs for debug messages'
+    })
+
 def fix_dog_ownership(request):
     """Fix dog ownership issues"""
     try:

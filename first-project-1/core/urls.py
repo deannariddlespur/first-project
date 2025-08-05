@@ -64,5 +64,6 @@ urlpatterns = [
     path('test-images/', views.test_images_simple, name='test_images_simple'),
     path('test-basic/', views.test_basic, name='test_basic'),
     path('test-deployment/', views.test_deployment, name='test_deployment'),
+    path('test-debug-logs/', views.test_debug_logs, name='test_debug_logs'),
 
 ] 
