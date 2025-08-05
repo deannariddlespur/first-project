@@ -88,4 +88,14 @@ except Exception as e:
     print(f"❌ Error adding supabase_url column: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Immediately fixing photo field length...")
+
+try:
+    # Immediately fix photo field length
+    call_command('fix_photo_length_immediate')
+    print("✅ Photo field length fixed immediately!")
+except Exception as e:
+    print(f"❌ Error fixing photo field length: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
