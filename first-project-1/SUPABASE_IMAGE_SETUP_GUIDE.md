@@ -389,4 +389,53 @@ def test_supabase_upload(request):
 - Local storage fallback is important for development
 - Railway's ephemeral filesystem requires external storage
 
-This guide should prevent the circular debugging we experienced and provide a clear path to working image uploads. 
+This guide should prevent the circular debugging we experienced and provide a clear path to working image uploads.
+
+## **🔍 Debugging Image Issues**
+
+### **When Images Show as Placeholders:**
+
+1. **Check Database Storage**
+   ```python
+   # Debug endpoint to inspect photo data
+   def debug_dog_photos(request):
+       dogs = Dog.objects.all()
+       for dog in dogs:
+           print(f"Dog: {dog.name}")
+           print(f"Photo name: {dog.photo.name}")
+           print(f"Starts with http: {dog.photo.name.startswith('http')}")
+           print(f"Contains supabase: {'supabase' in dog.photo.name}")
+   ```
+
+2. **Test Supabase Upload**
+   ```python
+   # Test endpoint to debug Supabase upload
+   def test_supabase_upload_debug(request):
+       result = supabase_storage.upload_file(test_file)
+       return JsonResponse({
+           'upload_result': result,
+           'upload_success': result and result.startswith('http')
+       })
+   ```
+
+3. **Expected vs Actual Results**
+   - **Expected**: `https://tcnjduwxthistsdxajrs.supabase.co/storage/v1/object/public/dog-photos/...`
+   - **Actual (if failing)**: `dog_photos/Screenshot_2025-08-05_at_6_Yw7waW6.28.49a.m..png`
+
+### **Debugging Checklist:**
+- [ ] Check if photos are stored as local paths or Supabase URLs
+- [ ] Test Supabase upload functionality directly
+- [ ] Verify Supabase credentials and bucket access
+- [ ] Check RLS policies are configured correctly
+- [ ] Ensure photo field length can accommodate Supabase URLs
+
+### **Key Debug Endpoints:**
+- `/debug-dog-photos/` - Shows what's stored in database
+- `/test-supabase-upload-debug/` - Tests Supabase upload directly
+- `/test-photo-field-length/` - Checks database schema
+
+### **Common Debug Patterns:**
+1. **Photos stored locally**: Supabase upload is failing
+2. **Photos stored as Supabase URLs but not displaying**: RLS policy or bucket access issue
+3. **"value too long" errors**: Increase field max_length
+4. **"column does not exist" errors**: Use direct SQL commands in startup script 

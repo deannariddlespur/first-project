@@ -246,6 +246,33 @@ Before deploying:
    print(f"🔍 Current photo column: {column_name}, type: {data_type}, max_length: {max_length}")
    ```
 
+### **Image Upload Debugging Process:**
+
+1. **First, check what's stored in database**
+   ```python
+   # Visit: /debug-dog-photos/
+   # Look for: photo_starts_with_http: true/false
+   ```
+
+2. **If photos are stored locally (not as URLs)**
+   - Supabase upload is failing
+   - Test with: `/test-supabase-upload-debug/`
+   - Check Supabase credentials and RLS policies
+
+3. **If photos are stored as URLs but not displaying**
+   - Check if URLs are accessible
+   - Verify bucket permissions
+   - Test direct URL access
+
+4. **Common patterns from our experience:**
+   - **Local paths**: `dog_photos/Screenshot_2025-08-05_at_6_Yw7waW6.28.49a.m..png` ❌
+   - **Supabase URLs**: `https://tcnjduwxthistsdxajrs.supabase.co/storage/v1/object/public/dog-photos/...` ✅
+
+### **Key Debug Endpoints to Always Include:**
+- `/debug-dog-photos/` - Database inspection
+- `/test-supabase-upload-debug/` - Upload testing
+- `/test-photo-field-length/` - Schema verification
+
 ## **📚 Key Commands Reference**
 
 ```bash
