@@ -62,9 +62,12 @@ class Dog(models.Model):
         """Upload photo to Supabase for persistent storage"""
         try:
             print(f"🔄 Uploading photo for {self.name} to Supabase...")
+            print(f"🔍 Image file name: {image_file.name}")
+            print(f"🔍 Image file size: {image_file.size}")
             
             # Upload to Supabase
             public_url = supabase_storage.upload_file(image_file)
+            print(f"🔍 Supabase upload result: {public_url}")
             
             if public_url and public_url.startswith('http'):
                 print(f"✅ Photo uploaded successfully: {public_url}")
@@ -74,12 +77,15 @@ class Dog(models.Model):
                 return True
             else:
                 print(f"❌ Supabase upload failed for {self.name}, falling back to local storage")
+                print(f"🔍 Public URL was: {public_url}")
                 # Fallback to local storage
                 self.photo.save(image_file.name, image_file, save=True)
                 return False
                 
         except Exception as e:
             print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
+            print(f"🔍 Error type: {type(e)}")
+            print(f"🔍 Error details: {str(e)}")
             # Fallback to local storage
             self.photo.save(image_file.name, image_file, save=True)
             return False
