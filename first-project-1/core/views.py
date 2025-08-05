@@ -2969,3 +2969,42 @@ def debug_dog_photos(request):
             'message': str(e),
             'error_type': str(type(e))
         })
+
+def test_supabase_upload_debug(request):
+    """Test Supabase upload with detailed debugging"""
+    try:
+        from core.supabase_storage import supabase_storage
+        from django.core.files.base import ContentFile
+        
+        # Create a test file
+        test_content = b"test image content"
+        test_file = ContentFile(test_content, name="test.jpg")
+        
+        debug_info = {
+            'supabase_storage_available': supabase_storage is not None,
+            'client_available': hasattr(supabase_storage, 'client') and supabase_storage.client is not None,
+            'bucket_name': getattr(supabase_storage, 'bucket_name', None),
+            'upload_result': None,
+            'error': None
+        }
+        
+        if supabase_storage and supabase_storage.client:
+            try:
+                # Test upload
+                result = supabase_storage.upload_file(test_file)
+                debug_info['upload_result'] = result
+                debug_info['upload_success'] = result and result.startswith('http')
+            except Exception as e:
+                debug_info['error'] = str(e)
+                debug_info['error_type'] = str(type(e))
+        else:
+            debug_info['error'] = "Supabase storage not available"
+        
+        return JsonResponse(debug_info)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e),
+            'error_type': str(type(e))
+        })
