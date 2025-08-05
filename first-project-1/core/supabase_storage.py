@@ -57,6 +57,8 @@ class SupabaseStorage:
             
         except Exception as e:
             print(f"❌ Supabase upload failed: {e}")
+            print(f"🔍 Error type: {type(e)}")
+            print(f"🔍 Error details: {str(e)}")
             # Fallback to local storage
             return self._upload_to_local(file, folder_path)
     
