@@ -3123,3 +3123,33 @@ def debug_payments(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
+@user_passes_test(is_staff)
+def debug_bookings(request):
+    """Debug view to check booking records"""
+    try:
+        bookings = Booking.objects.all().order_by('-created_at')
+        
+        debug_info = {
+            'total_bookings': bookings.count(),
+            'confirmed_bookings': bookings.filter(status='confirmed').count(),
+            'bookings': []
+        }
+        
+        for booking in bookings:
+            debug_info['bookings'].append({
+                'id': booking.id,
+                'dog_name': booking.dog.name,
+                'status': booking.status,
+                'start_date': booking.start_date.strftime('%Y-%m-%d'),
+                'end_date': booking.end_date.strftime('%Y-%m-%d'),
+                'kennel': booking.kennel.name if booking.kennel else 'None',
+                'total_amount': float(booking.total_amount) if booking.total_amount else None,
+                'price_per_night': float(booking.price_per_night) if booking.price_per_night else None,
+                'has_payment': hasattr(booking, 'payment'),
+            })
+        
+        return JsonResponse(debug_info)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)})

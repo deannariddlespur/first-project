@@ -75,4 +75,5 @@ urlpatterns = [
     path('test-supabase-upload-simple/', views.test_supabase_upload_simple, name='test_supabase_upload_simple'),
     path('debug-production/', views.debug_production_images, name='debug_production_images'),
     path('debug-payments/', views.debug_payments, name='debug_payments'),
+    path('debug-bookings/', views.debug_bookings, name='debug_bookings'),
 ] 
