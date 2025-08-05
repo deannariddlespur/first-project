@@ -2163,16 +2163,45 @@ def test_supabase_upload(request):
         test_content = b"test image content"
         test_file = ContentFile(test_content, name="test_image.jpg")
         
-        # Test Supabase upload
+        # Test Supabase upload with detailed error reporting
         from .supabase_storage import supabase_storage
-        result = supabase_storage.upload_file(test_file)
+        
+        # Test the upload step by step
+        if not supabase_storage.client:
+            return JsonResponse({
+                'status': 'error',
+                'error': 'Supabase client not available',
+                'supabase_url': supabase_storage.supabase_url,
+                'service_key_set': bool(supabase_storage.supabase_service_key)
+            })
+        
+        try:
+            # Test bucket access
+            bucket_info = supabase_storage.client.storage.get_bucket(supabase_storage.bucket_name)
+            bucket_accessible = True
+        except Exception as e:
+            bucket_accessible = False
+            bucket_error = str(e)
+        
+        # Try the actual upload
+        try:
+            result = supabase_storage.upload_file(test_file)
+            upload_success = True
+        except Exception as e:
+            upload_success = False
+            upload_error = str(e)
+            result = None
         
         return JsonResponse({
             'status': 'success',
             'supabase_upload_result': result,
             'supabase_url': supabase_storage.supabase_url,
             'bucket_name': supabase_storage.bucket_name,
-            'client_available': supabase_storage.client is not None
+            'client_available': supabase_storage.client is not None,
+            'bucket_accessible': bucket_accessible,
+            'upload_success': upload_success,
+            'bucket_error': bucket_error if not bucket_accessible else None,
+            'upload_error': upload_error if not upload_success else None
         })
         
     except Exception as e:
