@@ -31,13 +31,13 @@ class Command(BaseCommand):
                         self.style.WARNING(f'⚠️ photo column might already exist: {e}')
                     )
                 
-                # Test the exact query that's failing
+                # Test the exact query that's failing (without photo field for now)
                 try:
                     cursor.execute("""
                         SELECT "core_dailylog"."id", "core_dailylog"."booking_id", 
                                "core_dailylog"."date", "core_dailylog"."feeding", 
                                "core_dailylog"."medication", "core_dailylog"."exercise", 
-                               "core_dailylog"."notes", "core_dailylog"."photo" 
+                               "core_dailylog"."notes"
                         FROM "core_dailylog" ORDER BY "core_dailylog"."id" DESC
                     """)
                     self.stdout.write(
