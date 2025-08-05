@@ -1171,6 +1171,38 @@ def create_booking(request):
                     booking = form.save(commit=False)
                     booking.dog = form.cleaned_data['dog']
                     booking.save()
+                    
+                    # Create payment record for confirmed bookings
+                    if booking.status == 'confirmed':
+                        from decimal import Decimal
+                        nights = (booking.end_date - booking.start_date).days
+                        
+                        # Calculate price based on kennel size (default to medium if no kennel)
+                        if booking.kennel:
+                            if booking.kennel.size == 'small':
+                                price_per_night = Decimal('25.00')
+                            elif booking.kennel.size == 'medium':
+                                price_per_night = Decimal('35.00')
+                            else:  # large
+                                price_per_night = Decimal('50.00')
+                        else:
+                            price_per_night = Decimal('35.00')
+                        
+                        total_amount = price_per_night * nights
+                        
+                        # Create payment record
+                        from core.models import Payment
+                        Payment.objects.create(
+                            booking=booking,
+                            amount=total_amount,
+                            status='pending'
+                        )
+                        
+                        # Update booking with pricing info
+                        booking.price_per_night = price_per_night
+                        booking.total_amount = total_amount
+                        booking.save()
+                    
                     return redirect('booking_list')
                 except Exception as e:
                     return HttpResponse(f"Booking creation error: {str(e)}")
@@ -1552,10 +1584,43 @@ def staff_booking_detail(request, booking_id):
             # Update booking status
             new_status = request.POST.get('status')
             if new_status in dict(Booking.STATUS_CHOICES):
+                old_status = booking.status
                 booking.status = new_status
                 # Clear kennel assignment when status is changed to pending
                 if new_status == 'pending':
                     booking.kennel = None
+                
+                # Create payment record when booking is confirmed
+                if new_status == 'confirmed' and old_status != 'confirmed':
+                    # Check if payment record already exists
+                    if not hasattr(booking, 'payment'):
+                        from decimal import Decimal
+                        nights = (booking.end_date - booking.start_date).days
+                        
+                        # Calculate price based on kennel size (default to medium if no kennel)
+                        if booking.kennel:
+                            if booking.kennel.size == 'small':
+                                price_per_night = Decimal('25.00')
+                            elif booking.kennel.size == 'medium':
+                                price_per_night = Decimal('35.00')
+                            else:  # large
+                                price_per_night = Decimal('50.00')
+                        else:
+                            price_per_night = Decimal('35.00')
+                        
+                        total_amount = price_per_night * nights
+                        
+                        # Create payment record
+                        from core.models import Payment
+                        Payment.objects.create(
+                            booking=booking,
+                            amount=total_amount,
+                            status='pending'
+                        )
+                        
+                        # Update booking with pricing info
+                        booking.price_per_night = price_per_night
+                        booking.total_amount = total_amount
             
             # Assign kennel with availability check
             kennel_id = request.POST.get('kennel')

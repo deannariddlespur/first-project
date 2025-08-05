@@ -108,4 +108,14 @@ except Exception as e:
     print(f"❌ Error fixing DailyLog photo column: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Creating missing payment records...")
+
+try:
+    # Create missing payment records for existing bookings
+    call_command('create_missing_payments')
+    print("✅ Missing payment records created successfully!")
+except Exception as e:
+    print(f"❌ Error creating missing payment records: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
