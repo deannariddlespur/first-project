@@ -2702,8 +2702,8 @@ def export_daily_logs(request):
     start_date = request.GET.get('start_date', '')
     end_date = request.GET.get('end_date', '')
     
-    # Get all logs
-    logs = DailyLog.objects.all().order_by('-date', '-id')
+    # Get all logs (excluding photo field for now to avoid database error)
+    logs = DailyLog.objects.only('id', 'booking', 'date', 'feeding', 'medication', 'exercise', 'notes').order_by('-date', '-id')
     
     # Apply filters
     if date_filter:
