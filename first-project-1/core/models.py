@@ -37,8 +37,11 @@ class Dog(models.Model):
         # If we have a local photo, use it
         try:
             if self.photo:
-                print(f"✅ Using local photo URL for {self.name}: {self.photo.url}")
-                return self.photo.url
+                photo_url = self.photo.url
+                print(f"✅ Using local photo URL for {self.name}: {photo_url}")
+                print(f"🔍 Photo path: {self.photo.path if hasattr(self.photo, 'path') else 'No path'}")
+                print(f"🔍 Photo name: {self.photo.name if hasattr(self.photo, 'name') else 'No name'}")
+                return photo_url
         except Exception as e:
             print(f"⚠️ Photo not available for {self.name}: {e}")
         
