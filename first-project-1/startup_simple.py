@@ -78,4 +78,14 @@ except Exception as e:
     print(f"❌ Error fixing photo field length with direct SQL: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Adding supabase_url column directly with SQL...")
+
+try:
+    # Add supabase_url column directly with SQL
+    call_command('add_supabase_url_column')
+    print("✅ supabase_url column added successfully!")
+except Exception as e:
+    print(f"❌ Error adding supabase_url column: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
