@@ -3058,3 +3058,72 @@ def test_dog_upload_process(request):
             'message': str(e),
             'error_type': str(type(e))
         })
+
+def fix_photo_length_manual(request):
+    """Manually fix photo field length"""
+    try:
+        from django.db import connection
+        
+        with connection.cursor() as cursor:
+            # Check current length
+            cursor.execute("""
+                SELECT column_name, data_type, character_maximum_length 
+                FROM information_schema.columns 
+                WHERE table_name = 'core_dog' AND column_name = 'photo'
+            """)
+            result = cursor.fetchone()
+            
+            if result:
+                column_name, data_type, max_length = result
+                result_data = {
+                    'before': {
+                        'column_name': column_name,
+                        'data_type': data_type,
+                        'max_length': max_length
+                    }
+                }
+                
+                if max_length and max_length < 500:
+                    # Fix the field length
+                    cursor.execute("""
+                        ALTER TABLE core_dog 
+                        ALTER COLUMN photo TYPE VARCHAR(500)
+                    """)
+                    
+                    # Check the result
+                    cursor.execute("""
+                        SELECT column_name, data_type, character_maximum_length 
+                        FROM information_schema.columns 
+                        WHERE table_name = 'core_dog' AND column_name = 'photo'
+                    """)
+                    new_result = cursor.fetchone()
+                    
+                    if new_result:
+                        new_column_name, new_data_type, new_max_length = new_result
+                        result_data['after'] = {
+                            'column_name': new_column_name,
+                            'data_type': new_data_type,
+                            'max_length': new_max_length
+                        }
+                        result_data['success'] = True
+                        result_data['message'] = f"Photo field length updated from {max_length} to {new_max_length}"
+                    else:
+                        result_data['success'] = False
+                        result_data['message'] = "Could not verify the change"
+                else:
+                    result_data['success'] = True
+                    result_data['message'] = f"Photo field already has sufficient length: {max_length}"
+            else:
+                result_data = {
+                    'success': False,
+                    'message': 'Photo column not found'
+                }
+        
+        return JsonResponse(result_data)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e),
+            'error_type': str(type(e))
+        })
