@@ -39,7 +39,7 @@ class Dog(models.Model):
         try:
             if self.photo and self.photo.name:
                 # Check if this is a Supabase URL (stored in photo field)
-                if 'supabase' in self.photo.name or self.photo.name.startswith('http'):
+                if self.photo.name.startswith('http'):
                     print(f"✅ Using Supabase photo URL for {self.name}: {self.photo.name}")
                     return self.photo.name
         except Exception as e:
