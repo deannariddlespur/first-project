@@ -52,7 +52,7 @@ print("🔧 Adding photo_url column to core_dog table...")
 
 try:
     # Add photo_url column
-    call_command('add_photo_url_column')
+    call_command('add_photo_url_direct')
     print("✅ photo_url column added successfully!")
 except Exception as e:
     print(f"❌ Error adding photo_url column: {e}")
