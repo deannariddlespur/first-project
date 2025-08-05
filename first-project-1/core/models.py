@@ -34,20 +34,30 @@ class Dog(models.Model):
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # For now, use placeholder URLs that work on Railway
+        # First, try to use photo_url (Supabase URL) if available
+        if hasattr(self, 'photo_url') and self.photo_url:
+            print(f"✅ Using Supabase URL for {self.name}: {self.photo_url}")
+            return self.photo_url
+        
+        # If we have a local photo, try to get its Supabase URL
         try:
             if self.photo:
-                # Generate a placeholder URL based on dog name
-                placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text={self.name}"
-                print(f"✅ Using placeholder URL for {self.name}: {placeholder_url}")
-                return placeholder_url
+                # Try to get Supabase URL for this photo
+                supabase_url = supabase_storage.get_file_url(str(self.photo))
+                if supabase_url:
+                    print(f"✅ Found Supabase URL for {self.name}: {supabase_url}")
+                    return supabase_url
+                else:
+                    # Fallback to local photo URL
+                    print(f"✅ Using local photo URL for {self.name}: {self.photo.url}")
+                    return self.photo.url
         except Exception as e:
             print(f"⚠️ Photo not available for {self.name}: {e}")
         
-        # Fallback to a generic placeholder
-        generic_url = "https://via.placeholder.com/300x300/667eea/ffffff?text=Dog"
-        print(f"✅ Using generic placeholder for {self.name}")
-        return generic_url
+        # Final fallback to a placeholder
+        placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text={self.name}"
+        print(f"✅ Using placeholder URL for {self.name}: {placeholder_url}")
+        return placeholder_url
     
     def save_photo_to_supabase(self, image_file):
         """Upload photo to Supabase with comprehensive error handling"""
