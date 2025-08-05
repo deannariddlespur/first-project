@@ -66,13 +66,14 @@ class Dog(models.Model):
             # Upload to Supabase
             public_url = supabase_storage.upload_file(image_file)
             
-            if public_url:
+            if public_url and public_url.startswith('http'):
                 print(f"✅ Photo uploaded successfully: {public_url}")
-                # Save the Supabase URL to the photo field for reference
-                self.photo.save(image_file.name, image_file, save=True)
+                # Store the Supabase URL in the photo field
+                self.photo.name = public_url
+                self.save()
                 return True
             else:
-                print(f"❌ Supabase upload failed for {self.name}")
+                print(f"❌ Supabase upload failed for {self.name}, falling back to local storage")
                 # Fallback to local storage
                 self.photo.save(image_file.name, image_file, save=True)
                 return False
