@@ -302,26 +302,8 @@ class DailyLog(models.Model):
         return f"Log for {self.booking.dog} on {self.date}"
     
     def get_photo_url(self):
-        """Get photo URL using Supabase exclusively"""
-        # Try to get Supabase URL from photo field
-        try:
-            if self.photo and self.photo.name:
-                # Check if this is a Supabase URL (stored in photo field)
-                if self.photo.name.startswith('http'):
-                    # Remove trailing ? if present (can cause browser issues)
-                    photo_url = self.photo.name
-                    if photo_url.endswith('?'):
-                        photo_url = photo_url[:-1]
-                    print(f"✅ Using Supabase photo URL for daily log: {photo_url}")
-                    return photo_url
-                else:
-                    # If it's not a URL, it might be a local path - skip it
-                    print(f"⚠️ Photo field contains local path for daily log: {self.photo.name}")
-                    return None
-        except Exception as e:
-            print(f"⚠️ Supabase photo not available for daily log: {e}")
-        
-        # Fallback to a placeholder (no local storage fallback)
+        """Get photo URL using Supabase exclusively - temporarily disabled due to database column issue"""
+        # Temporarily return placeholder until photo column is fixed
         placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text=Daily+Log"
         print(f"✅ Using placeholder URL for daily log: {placeholder_url}")
         return placeholder_url
