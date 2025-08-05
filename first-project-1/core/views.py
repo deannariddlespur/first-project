@@ -17,7 +17,7 @@ import csv
 from django.core.mail import send_mail
 from django.conf import settings
 import os
-# from .supabase_storage import supabase_storage
+from .supabase_storage import supabase_storage
 
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
@@ -2700,19 +2700,28 @@ def user_profile(request):
 def debug_supabase_config(request):
     """Debug Supabase configuration and image storage"""
     import os
-    # from .supabase_storage import supabase_storage
+    from .supabase_storage import supabase_storage
     
     debug_info = {
         'supabase_url': os.environ.get('SUPABASE_URL', 'Not set'),
         'supabase_key': os.environ.get('SUPABASE_ANON_KEY', 'Not set'),
-        'supabase_client_available': False,  # Temporarily disabled
-        'bucket_name': 'dog-photos',
+        'supabase_client_available': supabase_storage.client is not None,
+        'bucket_name': supabase_storage.bucket_name,
     }
     
-    # Test Supabase connection - temporarily disabled
-    debug_info['bucket_accessible'] = False
-    debug_info['bucket_error'] = 'Supabase import temporarily disabled'
-    debug_info['bucket_files'] = 0
+    # Test Supabase connection
+    if supabase_storage.client:
+        try:
+            # Try to list files in bucket
+            files = supabase_storage.client.storage.from_(supabase_storage.bucket_name).list()
+            debug_info['bucket_files'] = len(files) if files else 0
+            debug_info['bucket_accessible'] = True
+        except Exception as e:
+            debug_info['bucket_accessible'] = False
+            debug_info['bucket_error'] = str(e)
+    else:
+        debug_info['bucket_accessible'] = False
+        debug_info['bucket_error'] = 'No Supabase client'
     
     # Check existing dogs and their photos
     from .models import Dog
