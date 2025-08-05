@@ -98,4 +98,14 @@ except Exception as e:
     print(f"❌ Error fixing photo field length: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
+print("🔧 Adding missing photo column to DailyLog table...")
+
+try:
+    # Add missing photo column to DailyLog table
+    call_command('fix_dailylog_photo_column')
+    print("✅ DailyLog photo column fixed successfully!")
+except Exception as e:
+    print(f"❌ Error fixing DailyLog photo column: {e}")
+    print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
+
 print("🎯 Startup script completed!") 
