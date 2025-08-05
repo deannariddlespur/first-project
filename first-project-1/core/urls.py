@@ -67,5 +67,5 @@ urlpatterns = [
     path('test-debug-logs/', views.test_debug_logs, name='test_debug_logs'),
     path('test-photo-urls/', views.test_photo_urls, name='test_photo_urls'),
     path('test-supabase-upload/', views.test_supabase_upload, name='test_supabase_upload'),
-
+    path('test-photo-field-length/', views.test_photo_field_length, name='test_photo_field_length'),
 ] 

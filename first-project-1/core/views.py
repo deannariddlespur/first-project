@@ -2900,3 +2900,38 @@ def debug_supabase_config(request):
     debug_info['dogs'] = dog_info
     
     return render(request, 'core/debug_supabase.html', {'debug_info': debug_info})
+
+def test_photo_field_length(request):
+    """Test endpoint to check photo field length in database"""
+    try:
+        from django.db import connection
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT column_name, data_type, character_maximum_length 
+                FROM information_schema.columns 
+                WHERE table_name = 'core_dog' AND column_name = 'photo'
+            """)
+            result = cursor.fetchone()
+            
+            if result:
+                column_name, data_type, max_length = result
+                return JsonResponse({
+                    'status': 'success',
+                    'column_name': column_name,
+                    'data_type': data_type,
+                    'max_length': max_length,
+                    'can_store_supabase_url': max_length >= 500 if max_length else False
+                })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Photo column not found'
+                })
+                
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e),
+            'error_type': str(type(e))
+        })
