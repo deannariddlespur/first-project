@@ -766,6 +766,7 @@ def owner_dashboard(request):
 @user_passes_test(is_owner)
 def add_dog(request):
     """Add dog with improved error handling and Supabase storage"""
+    print(f"🎯 add_dog view called - method: {request.method}")
     try:
         # Check if user is authenticated
         if not request.user.is_authenticated:
