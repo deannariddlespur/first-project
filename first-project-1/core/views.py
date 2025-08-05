@@ -779,38 +779,42 @@ def add_dog(request):
             return redirect('register_owner')
         
         if request.method == 'POST':
-            print(f"🔄 POST request received for add_dog")
-            print(f"🔍 DEBUG: request.POST keys: {list(request.POST.keys())}")
-            print(f"🔍 DEBUG: request.FILES keys: {list(request.FILES.keys())}")
-            print(f"🔍 DEBUG: request.FILES content: {dict(request.FILES)}")
+            # Create debug info
+            debug_info = {
+                'post_keys': list(request.POST.keys()),
+                'files_keys': list(request.FILES.keys()),
+                'files_content': {k: str(v) for k, v in request.FILES.items()},
+                'user': str(request.user),
+                'owner': str(owner) if owner else 'None'
+            }
+            
             try:
                 form = DogForm(request.POST, request.FILES)
-                print(f"🔍 DEBUG: Form is valid: {form.is_valid()}")
+                debug_info['form_valid'] = form.is_valid()
+                
                 if form.is_valid():
-                    print(f"🔍 DEBUG: Form data: {form.cleaned_data}")
-                    print(f"🔍 DEBUG: Photo field in cleaned_data: {form.cleaned_data.get('photo')}")
+                    debug_info['form_data'] = {k: str(v) for k, v in form.cleaned_data.items()}
+                    debug_info['photo_field'] = str(form.cleaned_data.get('photo'))
+                    
                     dog = form.save(commit=False)
                     dog.owner = owner
                     dog.save()
                     
-                    # Upload photo to Supabase if provided
-                    print(f"🔍 DEBUG: request.FILES keys: {list(request.FILES.keys())}")
-                    print(f"🔍 DEBUG: request.FILES.get('photo'): {request.FILES.get('photo')}")
+                    debug_info['dog_saved'] = True
+                    debug_info['dog_name'] = dog.name
                     
                     if request.FILES.get('photo'):
-                        print(f"🔄 Starting photo upload for {dog.name}...")
+                        debug_info['photo_upload_attempt'] = True
                         success = dog.save_photo_to_supabase(request.FILES['photo'])
-                        if success:
-                            print(f"✅ Photo uploaded to Supabase for {dog.name}")
-                        else:
-                            print(f"⚠️ Photo upload failed for {dog.name}, using local storage")
+                        debug_info['photo_upload_success'] = success
                     else:
-                        print(f"ℹ️ No photo provided for {dog.name}")
+                        debug_info['photo_upload_attempt'] = False
                     
-                    return redirect('owner_dashboard')
+                    # Return debug info instead of redirect for now
+                    return JsonResponse(debug_info)
                 else:
-                    print(f"🔍 DEBUG: Form errors: {form.errors}")
-                    return render(request, 'core/add_dog.html', {'form': form})
+                    debug_info['form_errors'] = form.errors
+                    return JsonResponse(debug_info)
             except Exception as e:
                 return HttpResponse(f"Error saving dog: {str(e)}")
         else:
