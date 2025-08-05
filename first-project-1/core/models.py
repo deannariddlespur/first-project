@@ -40,8 +40,12 @@ class Dog(models.Model):
             if self.photo and self.photo.name:
                 # Check if this is a Supabase URL (stored in photo field)
                 if self.photo.name.startswith('http'):
-                    print(f"✅ Using Supabase photo URL for {self.name}: {self.photo.name}")
-                    return self.photo.name
+                    # Remove trailing ? if present (can cause browser issues)
+                    photo_url = self.photo.name
+                    if photo_url.endswith('?'):
+                        photo_url = photo_url[:-1]
+                    print(f"✅ Using Supabase photo URL for {self.name}: {photo_url}")
+                    return photo_url
         except Exception as e:
             print(f"⚠️ Supabase photo not available for {self.name}: {e}")
         
