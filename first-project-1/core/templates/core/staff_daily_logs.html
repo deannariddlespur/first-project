@@ -546,14 +546,15 @@
                                 <p><strong>Owner:</strong> {{ log.booking.dog.owner.user.get_full_name|default:log.booking.dog.owner.user.username }}</p>
                             </div>
                         
-                        {% if log.photo %}
+                        <!-- Photo section temporarily disabled due to database column issue -->
+                        <!-- {% if log.photo %}
                         <div class="log-section">
                             <h4>📸 Photo</h4>
                             <div class="log-photo">
                                     <img src="{{ log.get_photo_url }}" alt="Daily log photo">
                             </div>
                         </div>
-                        {% endif %}
+                        {% endif %} -->
                     </div>
                     
                     <div class="log-actions">
