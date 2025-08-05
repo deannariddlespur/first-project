@@ -2125,6 +2125,34 @@ def test_debug_logs(request):
         'message': 'Debug test completed - check logs for debug messages'
     })
 
+def test_photo_urls(request):
+    """Test photo URLs for all dogs"""
+    from .models import Dog
+    
+    dogs = Dog.objects.all()[:5]  # Get first 5 dogs
+    results = []
+    
+    for dog in dogs:
+        try:
+            photo_url = dog.get_photo_url()
+            results.append({
+                'dog_name': dog.name,
+                'photo_url': photo_url,
+                'has_photo_field': bool(dog.photo),
+                'photo_name': dog.photo.name if dog.photo else None,
+                'photo_path': str(dog.photo.path) if dog.photo and hasattr(dog.photo, 'path') else None
+            })
+        except Exception as e:
+            results.append({
+                'dog_name': dog.name,
+                'error': str(e)
+            })
+    
+    return JsonResponse({
+        'status': 'success',
+        'results': results
+    })
+
 def fix_dog_ownership(request):
     """Fix dog ownership issues"""
     try:
