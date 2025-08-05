@@ -11,24 +11,24 @@ class Command(BaseCommand):
             with connection.cursor() as cursor:
                 # Add photo_base64 column to core_dog table
                 try:
-                    cursor.execute("ALTER TABLE core_dog ADD COLUMN IF NOT EXISTS photo_base64 TEXT")
+                    cursor.execute("ALTER TABLE core_dog ADD COLUMN photo_base64 TEXT")
                     self.stdout.write(
                         self.style.SUCCESS('✅ Added photo_base64 column to core_dog table')
                     )
                 except Exception as e:
                     self.stdout.write(
-                        self.style.ERROR(f'❌ Error adding photo_base64 column: {e}')
+                        self.style.WARNING(f'⚠️ photo_base64 column might already exist: {e}')
                     )
                 
                 # Add photo column to core_dailylog table
                 try:
-                    cursor.execute("ALTER TABLE core_dailylog ADD COLUMN IF NOT EXISTS photo VARCHAR(100)")
+                    cursor.execute("ALTER TABLE core_dailylog ADD COLUMN photo TEXT")
                     self.stdout.write(
                         self.style.SUCCESS('✅ Added photo column to core_dailylog table')
                     )
                 except Exception as e:
                     self.stdout.write(
-                        self.style.ERROR(f'❌ Error adding photo column: {e}')
+                        self.style.WARNING(f'⚠️ photo column might already exist: {e}')
                     )
                 
                 # Test the exact query that's failing
