@@ -46,6 +46,10 @@ class Dog(models.Model):
                         photo_url = photo_url[:-1]
                     print(f"✅ Using Supabase photo URL for {self.name}: {photo_url}")
                     return photo_url
+                else:
+                    # If it's not a URL, it might be a local path - skip it
+                    print(f"⚠️ Photo field contains local path for {self.name}: {self.photo.name}")
+                    return None
         except Exception as e:
             print(f"⚠️ Supabase photo not available for {self.name}: {e}")
         
@@ -310,6 +314,10 @@ class DailyLog(models.Model):
                         photo_url = photo_url[:-1]
                     print(f"✅ Using Supabase photo URL for daily log: {photo_url}")
                     return photo_url
+                else:
+                    # If it's not a URL, it might be a local path - skip it
+                    print(f"⚠️ Photo field contains local path for daily log: {self.photo.name}")
+                    return None
         except Exception as e:
             print(f"⚠️ Supabase photo not available for daily log: {e}")
         
@@ -341,6 +349,10 @@ class StaffNote(models.Model):
                         photo_url = photo_url[:-1]
                     print(f"✅ Using Supabase photo URL for staff note: {photo_url}")
                     return photo_url
+                else:
+                    # If it's not a URL, it might be a local path - skip it
+                    print(f"⚠️ Picture field contains local path for staff note: {self.picture.name}")
+                    return None
         except Exception as e:
             print(f"⚠️ Supabase photo not available for staff note: {e}")
         
