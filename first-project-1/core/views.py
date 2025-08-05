@@ -3008,3 +3008,53 @@ def test_supabase_upload_debug(request):
             'message': str(e),
             'error_type': str(type(e))
         })
+
+def test_dog_upload_process(request):
+    """Test the complete dog upload process"""
+    try:
+        from core.models import Dog
+        from django.core.files.base import ContentFile
+        
+        # Create a test dog
+        test_owner = Owner.objects.first()
+        if not test_owner:
+            return JsonResponse({'error': 'No owner found'})
+        
+        # Create test file
+        test_content = b"test image content"
+        test_file = ContentFile(test_content, name="test_dog_upload.jpg")
+        
+        # Create dog
+        dog = Dog.objects.create(
+            name="Test Upload Dog",
+            breed="Test Breed",
+            age=3,
+            size="medium",
+            owner=test_owner
+        )
+        
+        # Test the save_photo_to_supabase method
+        success, debug_info = dog.save_photo_to_supabase(test_file)
+        
+        # Get the result
+        result = {
+            'dog_id': dog.id,
+            'dog_name': dog.name,
+            'upload_success': success,
+            'debug_info': debug_info,
+            'photo_name_after_upload': dog.photo.name if dog.photo else None,
+            'get_photo_url_result': dog.get_photo_url(),
+            'photo_starts_with_http': dog.photo.name.startswith('http') if dog.photo and dog.photo.name else False
+        }
+        
+        # Clean up test dog
+        dog.delete()
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e),
+            'error_type': str(type(e))
+        })
