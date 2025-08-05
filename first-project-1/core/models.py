@@ -28,13 +28,22 @@ class Dog(models.Model):
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True, max_length=500)
     # photo_url = models.URLField(blank=True, null=True)  # Removed permanently
+    supabase_url = models.URLField(blank=True, null=True, max_length=1000)  # Temporary field for Supabase URLs
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # Try to get Supabase URL first
+        # Try to get Supabase URL first (from dedicated field)
+        try:
+            if self.supabase_url:
+                print(f"✅ Using Supabase photo URL for {self.name}: {self.supabase_url}")
+                return self.supabase_url
+        except Exception as e:
+            print(f"⚠️ Supabase photo not available for {self.name}: {e}")
+        
+        # Try to get Supabase URL from photo field (legacy)
         try:
             if self.photo and self.photo.name:
                 # Check if this is a Supabase URL (stored in photo field)
@@ -81,9 +90,18 @@ class Dog(models.Model):
             if public_url and public_url.startswith('http'):
                 print(f"✅ Photo uploaded successfully: {public_url}")
                 # Store the Supabase URL in the photo field
-                self.photo.name = public_url
-                self.save()
-                return True, debug_info
+                try:
+                    # Store Supabase URL in the dedicated field
+                    self.supabase_url = public_url
+                    self.save()
+                    return True, debug_info
+                except Exception as save_error:
+                    print(f"❌ Error saving Supabase URL to database: {save_error}")
+                    debug_info['error'] = f"Database save error: {save_error}"
+                    debug_info['error_type'] = str(type(save_error))
+                    # Fallback to local storage
+                    self.photo.save(image_file.name, image_file, save=True)
+                    return False, debug_info
             else:
                 print(f"❌ Supabase upload failed for {self.name}, falling back to local storage")
                 print(f"🔍 Public URL was: {public_url}")
