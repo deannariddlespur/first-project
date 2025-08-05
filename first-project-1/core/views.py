@@ -2762,7 +2762,7 @@ def export_daily_logs(request):
             log.medication,
             log.exercise,
             log.notes,
-            log.get_photo_url() if log.photo else ''
+            log.get_photo_url()  # Temporarily removed photo check
         ])
     
     return response
