@@ -27,13 +27,34 @@ class Dog(models.Model):
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, default='medium')
     notes = models.TextField(blank=True)
     photo = models.ImageField(upload_to='dog_photos/', blank=True, null=True)
+    photo_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
         """Get photo URL with comprehensive fallback system"""
-        # For now, use placeholder URLs that work on Railway
+        # First, try to access photo_url field (Supabase URL)
+        try:
+            if hasattr(self, 'photo_url') and self.photo_url:
+                print(f"✅ Using Supabase URL for {self.name}: {self.photo_url}")
+                return self.photo_url
+        except Exception as e:
+            print(f"⚠️ photo_url field not available for {self.name}: {e}")
+        
+        # If no photo_url, try to get Supabase URL for local photo
+        try:
+            if self.photo and supabase_storage.client:
+                # Try to get Supabase URL for the local photo
+                file_path = str(self.photo)
+                supabase_url = supabase_storage.get_file_url(file_path)
+                if supabase_url and 'supabase' in supabase_url:
+                    print(f"✅ Using Supabase URL for local photo of {self.name}: {supabase_url}")
+                    return supabase_url
+        except Exception as e:
+            print(f"⚠️ Could not get Supabase URL for {self.name}: {e}")
+        
+        # Fallback to placeholder URL
         try:
             if self.photo:
                 # Generate a placeholder URL based on dog name
@@ -43,7 +64,7 @@ class Dog(models.Model):
         except Exception as e:
             print(f"⚠️ Photo not available for {self.name}: {e}")
         
-        # Fallback to a generic placeholder
+        # Final fallback to a generic placeholder
         generic_url = "https://via.placeholder.com/300x300/667eea/ffffff?text=Dog"
         print(f"✅ Using generic placeholder for {self.name}")
         return generic_url
