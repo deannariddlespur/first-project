@@ -88,12 +88,12 @@ except Exception as e:
     print(f"❌ Error adding supabase_url column: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
 
-print("🔧 Immediately fixing photo field length...")
+print("🔧 Fixing photo field length with PostgreSQL syntax...")
 
 try:
-    # Immediately fix photo field length
-    call_command('fix_photo_length_immediate')
-    print("✅ Photo field length fixed immediately!")
+    # Fix photo field length with PostgreSQL syntax
+    call_command('fix_photo_length_postgresql')
+    print("✅ Photo field length fixed with PostgreSQL syntax!")
 except Exception as e:
     print(f"❌ Error fixing photo field length: {e}")
     print(f"🔍 DEBUG: Exception details: {type(e).__name__}: {str(e)}")
