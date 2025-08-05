@@ -30,6 +30,11 @@ A comprehensive web application for managing dog boarding operations, built with
 - **Customer Management** - Owner and dog database
 - **Staff Notes** - Internal communication system
 
+### 🔧 **Debug & Troubleshooting**
+- **Production Debug Tools** - Built-in image troubleshooting
+- **Database Health Checks** - Monitor database status
+- **Environment Validation** - Verify configuration settings
+
 ## 🛠️ Technology Stack
 
 - **Backend**: Django 4.2+ (Python)
@@ -310,10 +315,17 @@ python manage.py runserver
 - Verify database is running
 - Check database credentials
 
+**"Images not displaying in production"**
+- Check the production debug page: `https://your-domain.railway.app/debug-production/`
+- Verify Railway volume plugin is mounted correctly
+- Check Supabase environment variables are set
+- Test image URLs directly in browser
+
 ### Getting Help
 
 - **Documentation**: Check `QUICK_START.md` for detailed setup
 - **Deployment**: See `DEPLOYMENT_GUIDE.md` for production setup
+- **Debug Tools**: Use `/debug-production/` for production image troubleshooting
 - **Issues**: Create an issue on GitHub
 - **Email**: Contact support at support@yourdomain.com
 

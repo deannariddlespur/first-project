@@ -343,7 +343,7 @@
                 {% if log.photo %}
                 <div class="current-photo">
                     <label>Current Photo:</label>
-                    <img src="{{ log.photo.url }}" alt="Current daily log photo">
+                                            <img src="{{ log.get_photo_url }}" alt="Current daily log photo">
                 </div>
                 {% endif %}
             </div>

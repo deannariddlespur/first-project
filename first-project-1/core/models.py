@@ -34,7 +34,7 @@ class Dog(models.Model):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
-        """Get photo URL with comprehensive fallback system"""
+        """Get photo URL using Supabase exclusively"""
         # Try to get Supabase URL from photo field
         try:
             if self.photo and self.photo.name:
@@ -49,16 +49,7 @@ class Dog(models.Model):
         except Exception as e:
             print(f"⚠️ Supabase photo not available for {self.name}: {e}")
         
-        # Try local photo as fallback
-        try:
-            if self.photo:
-                photo_url = self.photo.url
-                print(f"✅ Using local photo URL for {self.name}: {photo_url}")
-                return photo_url
-        except Exception as e:
-            print(f"⚠️ Local photo not available for {self.name}: {e}")
-        
-        # Fallback to a placeholder
+        # Fallback to a placeholder (no local storage fallback)
         placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text={self.name}"
         print(f"✅ Using placeholder URL for {self.name}: {placeholder_url}")
         return placeholder_url
@@ -96,15 +87,11 @@ class Dog(models.Model):
                     print(f"❌ Error saving Supabase URL to database: {save_error}")
                     debug_info['error'] = f"Database save error: {save_error}"
                     debug_info['error_type'] = str(type(save_error))
-                    # Fallback to local storage
-                    self.photo.save(image_file.name, image_file, save=True)
                     return False, debug_info
             else:
-                print(f"❌ Supabase upload failed for {self.name}, falling back to local storage")
+                print(f"❌ Supabase upload failed for {self.name}")
                 print(f"🔍 Public URL was: {public_url}")
                 debug_info['error'] = f"Supabase upload returned: {public_url}"
-                # Fallback to local storage
-                self.photo.save(image_file.name, image_file, save=True)
                 return False, debug_info
                 
         except Exception as e:
@@ -113,8 +100,6 @@ class Dog(models.Model):
             print(f"🔍 Error details: {str(e)}")
             debug_info['error'] = str(e)
             debug_info['error_type'] = str(type(e))
-            # Fallback to local storage
-            self.photo.save(image_file.name, image_file, save=True)
             return False, debug_info
 
 
@@ -311,6 +296,27 @@ class DailyLog(models.Model):
 
     def __str__(self):
         return f"Log for {self.booking.dog} on {self.date}"
+    
+    def get_photo_url(self):
+        """Get photo URL using Supabase exclusively"""
+        # Try to get Supabase URL from photo field
+        try:
+            if self.photo and self.photo.name:
+                # Check if this is a Supabase URL (stored in photo field)
+                if self.photo.name.startswith('http'):
+                    # Remove trailing ? if present (can cause browser issues)
+                    photo_url = self.photo.name
+                    if photo_url.endswith('?'):
+                        photo_url = photo_url[:-1]
+                    print(f"✅ Using Supabase photo URL for daily log: {photo_url}")
+                    return photo_url
+        except Exception as e:
+            print(f"⚠️ Supabase photo not available for daily log: {e}")
+        
+        # Fallback to a placeholder (no local storage fallback)
+        placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text=Daily+Log"
+        print(f"✅ Using placeholder URL for daily log: {placeholder_url}")
+        return placeholder_url
 
 class StaffNote(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='staff_notes')
@@ -321,6 +327,27 @@ class StaffNote(models.Model):
     
     def __str__(self):
         return f"Staff note for {self.booking.dog} by {self.staff_member}"
+    
+    def get_photo_url(self):
+        """Get photo URL using Supabase exclusively"""
+        # Try to get Supabase URL from photo field
+        try:
+            if self.picture and self.picture.name:
+                # Check if this is a Supabase URL (stored in picture field)
+                if self.picture.name.startswith('http'):
+                    # Remove trailing ? if present (can cause browser issues)
+                    photo_url = self.picture.name
+                    if photo_url.endswith('?'):
+                        photo_url = photo_url[:-1]
+                    print(f"✅ Using Supabase photo URL for staff note: {photo_url}")
+                    return photo_url
+        except Exception as e:
+            print(f"⚠️ Supabase photo not available for staff note: {e}")
+        
+        # Fallback to a placeholder (no local storage fallback)
+        placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text=Staff+Note"
+        print(f"✅ Using placeholder URL for staff note: {placeholder_url}")
+        return placeholder_url
 
 class FacilityAvailability(models.Model):
     TYPE_CHOICES = [
