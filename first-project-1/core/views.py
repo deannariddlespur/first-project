@@ -17,7 +17,7 @@ import csv
 from django.core.mail import send_mail
 from django.conf import settings
 import os
-# from .supabase_storage import supabase_storage  # Temporarily disabled
+from .supabase_storage import supabase_storage
 
 from .models import Owner, Dog, Kennel, Booking, DailyLog, Payment, StaffNote, FacilityAvailability
 
