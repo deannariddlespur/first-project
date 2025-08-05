@@ -48,22 +48,18 @@ class Dog(models.Model):
         return placeholder_url
     
     def save_photo_to_supabase(self, image_file):
-        """Upload photo to Supabase for persistent storage"""
+        """Save photo to local storage (simplified)"""
         try:
-            print(f"🔄 Uploading photo for {self.name} to Supabase...")
+            print(f"🔄 Saving photo for {self.name} to local storage...")
             
-            # Upload to Supabase
-            public_url = supabase_storage.upload_file(image_file)
+            # Save the file to the photo field
+            self.photo.save(image_file.name, image_file, save=True)
             
-            if public_url:
-                print(f"✅ Photo uploaded successfully: {public_url}")
-                return True
-            else:
-                print(f"❌ Supabase upload failed for {self.name}")
-                return False
+            print(f"✅ Photo saved to local storage for {self.name}")
+            return True
                 
         except Exception as e:
-            print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
+            print(f"❌ Error saving photo for {self.name}: {e}")
             return False
 
 
