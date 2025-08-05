@@ -787,11 +787,14 @@ def add_dog(request):
                     
                     # Upload photo to Supabase if provided
                     if request.FILES.get('photo'):
+                        print(f"🔄 Starting photo upload for {dog.name}...")
                         success = dog.save_photo_to_supabase(request.FILES['photo'])
                         if success:
                             print(f"✅ Photo uploaded to Supabase for {dog.name}")
                         else:
                             print(f"⚠️ Photo upload failed for {dog.name}, using local storage")
+                    else:
+                        print(f"ℹ️ No photo provided for {dog.name}")
                     
                     return redirect('owner_dashboard')
                 else:
