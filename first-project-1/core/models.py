@@ -60,6 +60,14 @@ class Dog(models.Model):
     
     def save_photo_to_supabase(self, image_file):
         """Upload photo to Supabase for persistent storage"""
+        debug_info = {
+            'image_file_name': image_file.name,
+            'image_file_size': image_file.size,
+            'supabase_upload_result': None,
+            'error': None,
+            'error_type': None
+        }
+        
         try:
             print(f"🔄 Uploading photo for {self.name} to Supabase...")
             print(f"🔍 Image file name: {image_file.name}")
@@ -67,6 +75,7 @@ class Dog(models.Model):
             
             # Upload to Supabase
             public_url = supabase_storage.upload_file(image_file)
+            debug_info['supabase_upload_result'] = public_url
             print(f"🔍 Supabase upload result: {public_url}")
             
             if public_url and public_url.startswith('http'):
@@ -74,21 +83,24 @@ class Dog(models.Model):
                 # Store the Supabase URL in the photo field
                 self.photo.name = public_url
                 self.save()
-                return True
+                return True, debug_info
             else:
                 print(f"❌ Supabase upload failed for {self.name}, falling back to local storage")
                 print(f"🔍 Public URL was: {public_url}")
+                debug_info['error'] = f"Supabase upload returned: {public_url}"
                 # Fallback to local storage
                 self.photo.save(image_file.name, image_file, save=True)
-                return False
+                return False, debug_info
                 
         except Exception as e:
             print(f"❌ Error in save_photo_to_supabase for {self.name}: {e}")
             print(f"🔍 Error type: {type(e)}")
             print(f"🔍 Error details: {str(e)}")
+            debug_info['error'] = str(e)
+            debug_info['error_type'] = str(type(e))
             # Fallback to local storage
             self.photo.save(image_file.name, image_file, save=True)
-            return False
+            return False, debug_info
 
 
 class Kennel(models.Model):

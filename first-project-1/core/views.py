@@ -806,9 +806,10 @@ def add_dog(request):
                     if request.FILES.get('photo'):
                         debug_info['photo_upload_attempt'] = True
                         debug_info['photo_file_name'] = request.FILES['photo'].name
-                        success = dog.save_photo_to_supabase(request.FILES['photo'])
+                        success, upload_debug = dog.save_photo_to_supabase(request.FILES['photo'])
                         debug_info['photo_upload_success'] = success
                         debug_info['photo_url_after_upload'] = dog.photo.name if dog.photo else None
+                        debug_info['upload_debug'] = upload_debug
                     else:
                         debug_info['photo_upload_attempt'] = False
                     
