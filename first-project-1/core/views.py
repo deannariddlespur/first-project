@@ -749,7 +749,7 @@ def owner_dashboard(request):
         
         # Get dogs with safe field access - only select fields that exist
         try:
-            dogs = Dog.objects.filter(owner=owner).only('id', 'name', 'breed', 'age', 'size', 'notes', 'owner_id', 'photo')
+            dogs = Dog.objects.filter(owner=owner).only('id', 'name', 'breed', 'age', 'size', 'notes', 'owner_id')
         except Exception as e:
             print(f"Error fetching dogs: {e}")
             dogs = []
