@@ -453,7 +453,7 @@
                 {% endif %}
                 {% if note.picture %}
                     <div class="note-picture">
-                        <img src="{{ note.picture.url }}" alt="Staff picture" class="staff-picture">
+                        <img src="{{ note.get_photo_url }}" alt="Staff picture" class="staff-picture">
                     </div>
                 {% endif %}
             </div>
