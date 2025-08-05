@@ -778,6 +778,9 @@ def add_dog(request):
             return redirect('register_owner')
         
         if request.method == 'POST':
+            print(f"🔄 POST request received for add_dog")
+            print(f"🔍 DEBUG: request.POST keys: {list(request.POST.keys())}")
+            print(f"🔍 DEBUG: request.FILES keys: {list(request.FILES.keys())}")
             try:
                 form = DogForm(request.POST, request.FILES)
                 if form.is_valid():
