@@ -90,20 +90,20 @@ python manage.py runserver
 
 For persistent image storage that survives Railway container restarts, set up Supabase Storage:
 
-### 1. Create Supabase Project
+### **Step 1: Create Supabase Project**
 1. Go to [supabase.com](https://supabase.com)
 2. Sign in with GitHub
 3. Create a new project named "dog-boarding-storage"
-4. Set a database password and choose a region
+4. Set a database password and choose a region close to your Railway deployment
 
-### 2. Create Storage Bucket
-1. In Supabase dashboard, go to **Storage**
+### **Step 2: Create Storage Bucket**
+1. In Supabase dashboard, go to **Storage** in the left sidebar
 2. Click **Create a new bucket**
 3. Name it `dog-photos`
-4. Set it as **Public**
+4. Set it as **Public** (so images can be accessed via URL)
 5. Click **Create bucket**
 
-### 3. Configure Bucket Policies
+### **Step 3: Configure Bucket Policies**
 Go to **Storage** → **Policies** and add:
 
 **For INSERT (upload):**
@@ -118,18 +118,28 @@ CREATE POLICY "Allow public downloads" ON storage.objects
 FOR SELECT USING (bucket_id = 'dog-photos');
 ```
 
-### 4. Get Credentials
+### **Step 4: Get Your Credentials**
 1. Go to **Settings** → **API**
-2. Copy your **Project URL** and **anon public** key
+2. Copy your **Project URL** (looks like: `https://your-project.supabase.co`)
+3. Copy your **anon public** key (starts with `eyJ...`)
 
-### 5. Add Environment Variables
-Add to your Railway project or `.env` file:
+### **Step 5: Add Environment Variables to Railway**
+1. Go to your Railway project dashboard
+2. Go to **Variables** tab
+3. Add these environment variables:
 ```
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-### Benefits of Supabase Storage
+### **Step 6: Test Your Setup**
+1. Deploy your app to Railway
+2. Try uploading a dog photo
+3. Check the console logs for:
+   - `✅ Photo uploaded to Supabase for [dog name]`
+   - Or `⚠️ Photo upload failed, using local storage`
+
+### **Benefits of Supabase Storage**
 - ✅ **Persistent images** that survive Railway restarts
 - ✅ **Fast global CDN** for image delivery
 - ✅ **Free tier** (2GB storage, 1GB bandwidth/month)
@@ -223,15 +233,53 @@ DATABASES = {
 
 ### Railway (Recommended)
 
-1. **Create Railway account** at [railway.app](https://railway.app)
-2. **Connect GitHub repository**
-3. **Add PostgreSQL database**
-4. **Set environment variables**:
+#### **Step 1: Create Railway Account**
+1. Go to [railway.app](https://railway.app)
+2. Sign up with GitHub
+3. Create a new project
+
+#### **Step 2: Connect Your Repository**
+1. Click **"Deploy from GitHub repo"**
+2. Select your dog boarding repository
+3. Railway will automatically detect it's a Django app
+
+#### **Step 3: Add PostgreSQL Database**
+1. In your Railway project, click **"New"**
+2. Select **"Database"** → **"PostgreSQL"**
+3. Railway will automatically link it to your app
+
+#### **Step 4: Set Environment Variables**
+Go to **Variables** tab and add:
+```
+SECRET_KEY=your-super-secret-production-key-here
+DEBUG=False
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+#### **Step 5: Deploy**
+1. Railway will automatically build and deploy your app
+2. Your app will be live at `your-app.railway.app`
+3. Check the **Deployments** tab for build status
+
+#### **Step 6: Setup Production Database**
+1. Go to **Deployments** → **View Logs**
+2. Run this command in the Railway console:
+   ```bash
+   python manage.py setup_production
    ```
-   SECRET_KEY=your-production-secret-key
-   DEBUG=False
-   ```
-5. **Deploy!** Your app will be live at `your-app.railway.app`
+3. This creates admin user and sample data
+
+#### **Step 7: Test Your App**
+- **Admin Panel**: `https://your-app.railway.app/admin/`
+- **Staff Dashboard**: `https://your-app.railway.app/staff/`
+- **Owner Login**: `https://your-app.railway.app/login/`
+
+**Default Credentials:**
+- **Admin**: `admin` / `admin123456`
+- **Sample Owner**: `jane.doe` / `password123`
+
+*For detailed Railway setup, see [RAILWAY_SETUP.md](RAILWAY_SETUP.md)*
 
 ### Render (Alternative)
 
@@ -325,9 +373,28 @@ python manage.py runserver
 
 - **Documentation**: Check `QUICK_START.md` for detailed setup
 - **Deployment**: See `DEPLOYMENT_GUIDE.md` for production setup
+- **Railway Setup**: See `RAILWAY_SETUP.md` for Railway-specific instructions
+- **Supabase Setup**: See `SUPABASE_SETUP.md` for image storage setup
 - **Debug Tools**: Use `/debug-production/` for production image troubleshooting
 - **Issues**: Create an issue on GitHub
 - **Email**: Contact support at support@yourdomain.com
+
+### Common Deployment Issues
+
+**"Images not displaying in production"**
+- Check the production debug page: `https://your-domain.railway.app/debug-production/`
+- Verify Supabase environment variables are set correctly
+- Test image URLs directly in browser
+
+**"Database connection failed"**
+- Check Railway environment variables
+- Verify PostgreSQL database is running
+- Check database credentials in Railway dashboard
+
+**"App won't deploy"**
+- Check Railway build logs for errors
+- Verify `requirements.txt` is up to date
+- Ensure `Procfile` is present in repository
 
 ## 🎯 Roadmap
 
@@ -357,7 +424,8 @@ python manage.py runserver
 - **Django** - The web framework for perfectionists
 - **Bootstrap** - Frontend framework for responsive design
 - **Font Awesome** - Icons for better UX
-- **Railway/Render** - Hosting platforms for easy deployment
+- **Railway** - Hosting platform for easy deployment
+- **Supabase** - Database and storage platform for persistent data
 
 ---
 
