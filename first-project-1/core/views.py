@@ -814,10 +814,20 @@ def add_dog(request):
                     if photo_file:
                         debug_info['photo_upload_attempt'] = True
                         debug_info['photo_file_name'] = photo_file.name
+                        
+                        # Try to upload to Supabase first
                         success, upload_debug = dog.save_photo_to_supabase(photo_file)
                         debug_info['photo_upload_success'] = success
-                        debug_info['photo_url_after_upload'] = dog.photo.name if dog.photo else None
                         debug_info['upload_debug'] = upload_debug
+                        
+                        if not success:
+                            # If Supabase upload failed, save locally
+                            print(f"⚠️ Supabase upload failed, saving locally for {dog.name}")
+                            dog.photo = photo_file
+                            dog.save()
+                            debug_info['local_save_fallback'] = True
+                        
+                        debug_info['photo_url_after_upload'] = dog.photo.name if dog.photo else None
                     else:
                         debug_info['photo_upload_attempt'] = False
                     

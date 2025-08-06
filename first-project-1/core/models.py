@@ -34,8 +34,7 @@ class Dog(models.Model):
         return f"{self.name} ({self.owner}) - {self.get_size_display()}"
     
     def get_photo_url(self):
-        """Get photo URL using Supabase exclusively"""
-        # Try to get Supabase URL from photo field
+        """Get photo URL - works with both local and Supabase storage"""
         try:
             if self.photo and self.photo.name:
                 # Check if this is a Supabase URL (stored in photo field)
@@ -47,13 +46,17 @@ class Dog(models.Model):
                     print(f"✅ Using Supabase photo URL for {self.name}: {photo_url}")
                     return photo_url
                 else:
-                    # If it's not a URL, it might be a local path - skip it
-                    print(f"⚠️ Photo field contains local path for {self.name}: {self.photo.name}")
-                    return None
+                    # It's a local file path - return the URL for local development
+                    if self.photo.url:
+                        print(f"✅ Using local photo URL for {self.name}: {self.photo.url}")
+                        return self.photo.url
+                    else:
+                        print(f"⚠️ Local photo not found for {self.name}: {self.photo.name}")
+                        return None
         except Exception as e:
-            print(f"⚠️ Supabase photo not available for {self.name}: {e}")
+            print(f"⚠️ Photo not available for {self.name}: {e}")
         
-        # Fallback to a placeholder (no local storage fallback)
+        # Fallback to a placeholder
         placeholder_url = f"https://via.placeholder.com/300x300/667eea/ffffff?text={self.name}"
         print(f"✅ Using placeholder URL for {self.name}: {placeholder_url}")
         return placeholder_url
