@@ -293,7 +293,8 @@ python manage.py runserver
 - **Django** - The web framework for perfectionists
 - **Bootstrap** - Frontend framework for responsive design
 - **Font Awesome** - Icons for better UX
-- **Railway/Render** - Hosting platforms for easy deployment
+- **Railway** - Hosting platform for easy deployment
+- **Supabase** - Database and storage platform for persistent data
 
 ---
 
