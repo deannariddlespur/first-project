@@ -375,7 +375,7 @@
         <form method="get" class="filter-controls">
             <div class="filter-group">
                 <label for="size-filter">Size Filter</label>
-                <select name="size" id="size-filter" class="filter-control" onchange="this.form.submit()">
+                <select name="size" id="size-filter" class="filter-control">
                     <option value="all" {% if size_filter == 'all' %}selected{% endif %}>All Sizes</option>
                     {% for value, label in size_choices %}
                         <option value="{{ value }}" {% if size_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -384,7 +384,7 @@
             </div>
             <div class="filter-group">
                 <label for="availability-filter">Availability</label>
-                <select name="availability" id="availability-filter" class="filter-control" onchange="this.form.submit()">
+                <select name="availability" id="availability-filter" class="filter-control">
                     <option value="all" {% if availability_filter == 'all' %}selected{% endif %}>All Kennels</option>
                     <option value="available" {% if availability_filter == 'available' %}selected{% endif %}>Available</option>
                     <option value="occupied" {% if availability_filter == 'occupied' %}selected{% endif %}>Occupied</option>
@@ -392,7 +392,7 @@
             </div>
             <div class="filter-group">
                 <label for="period-filter">Time Period</label>
-                <select name="period" id="period-filter" class="filter-control" onchange="this.form.submit()">
+                <select name="period" id="period-filter" class="filter-control">
                     <option value="all" {% if period_filter == 'all' %}selected{% endif %}>All Time</option>
                     <option value="week" {% if period_filter == 'week' %}selected{% endif %}>This Week</option>
                     <option value="month" {% if period_filter == 'month' %}selected{% endif %}>This Month</option>
@@ -404,6 +404,14 @@
                     <input type="text" name="date" id="date-filter" class="filter-control" value="{{ date_filter }}" placeholder="mm/dd/yyyy" readonly>
                     <button type="button" class="date-picker-btn" onclick="openDatePicker('date-filter')">📅</button>
                 </div>
+            </div>
+            <div class="filter-group">
+                <button type="submit" class="action-btn" style="margin-top: 20px;">
+                    🔍 Apply Filters
+                </button>
+                <a href="{% url 'staff_kennel_management' %}" class="action-btn" style="margin-top: 10px; display: inline-block; text-decoration: none; background: #6c757d;">
+                    🗑️ Clear Filters
+                </a>
             </div>
         </form>
     </div>
