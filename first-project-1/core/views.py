@@ -11,7 +11,7 @@ from django.utils.html import format_html
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import time
 import csv
 from django.core.mail import send_mail
@@ -1682,12 +1682,23 @@ def staff_kennel_management(request):
     size_filter = request.GET.get('size', 'all')
     availability_filter = request.GET.get('availability', 'all')
     period_filter = request.GET.get('period', 'all')  # New period filter
+    date_filter = request.GET.get('date', '')  # New date filter
     
     kennels = Kennel.objects.all()
     
     # Apply size filter
     if size_filter != 'all':
         kennels = kennels.filter(size=size_filter)
+    
+    # Parse date filter if provided
+    check_date = None
+    if date_filter:
+        try:
+            # Parse mm/dd/yyyy format
+            month, day, year = date_filter.split('/')
+            check_date = date(int(year), int(month), int(day))
+        except (ValueError, TypeError):
+            check_date = None
     
     # Calculate date range for period filter
     today = timezone.now().date()
@@ -1708,8 +1719,14 @@ def staff_kennel_management(request):
             status__in=['confirmed', 'pending']
         )
         
+        # If specific date is provided, check availability for that date
+        if check_date:
+            booking_query = booking_query.filter(
+                start_date__lte=check_date,
+                end_date__gte=check_date
+            )
         # Apply period filter if specified
-        if start_date and end_date:
+        elif start_date and end_date:
             booking_query = booking_query.filter(
                 start_date__lte=end_date,
                 end_date__gte=start_date
@@ -1742,6 +1759,7 @@ def staff_kennel_management(request):
         'size_filter': size_filter,
         'availability_filter': availability_filter,
         'period_filter': period_filter,
+        'date_filter': date_filter,
         'size_choices': Kennel.SIZE_CHOICES,
         'total_kennels': total_kennels,
         'available_kennels': available_kennels,
