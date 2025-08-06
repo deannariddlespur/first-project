@@ -1725,21 +1725,21 @@ def staff_kennel_management(request):
                 start_date__lte=check_date,
                 end_date__gte=check_date
             )
+            kennel.current_bookings = booking_query
+            kennel.period_bookings = booking_query.count()
         # Apply period filter if specified
         elif start_date and end_date:
             booking_query = booking_query.filter(
                 start_date__lte=end_date,
                 end_date__gte=start_date
             )
+            kennel.current_bookings = booking_query
+            kennel.period_bookings = booking_query.count()
         else:
-            # Default to current bookings
-            booking_query = booking_query.filter(
-                start_date__lte=today,
-                end_date__gte=today
-            )
-        
-        kennel.current_bookings = booking_query
-        kennel.period_bookings = booking_query.count()
+            # If no date filter is provided, don't show any bookings as "current"
+            # This prevents showing kennels as occupied when no specific date is selected
+            kennel.current_bookings = []
+            kennel.period_bookings = 0
     
     # Apply availability filter
     if availability_filter == 'available':

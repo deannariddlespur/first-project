@@ -400,8 +400,10 @@
             </div>
             <div class="filter-group">
                 <label for="date-filter">Specific Date</label>
-                <input type="text" name="date" id="date-filter" class="filter-control" value="{{ date_filter }}" placeholder="mm/dd/yyyy" readonly>
-                <button type="button" class="date-picker-btn" onclick="openDatePicker('date-filter')" style="margin-top: 5px; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">📅</button>
+                <div class="date-input-container">
+                    <input type="text" name="date" id="date-filter" class="filter-control" value="{{ date_filter }}" placeholder="mm/dd/yyyy" readonly>
+                    <button type="button" class="date-picker-btn" onclick="openDatePicker('date-filter')">📅</button>
+                </div>
             </div>
         </form>
     </div>
@@ -513,25 +515,6 @@
     </div>
 </div>
 
-<script>
-    function openDatePicker(inputId) {
-        const input = document.getElementById(inputId);
-        const today = new Date();
-        const maxDate = new Date(today.getFullYear() + 1, 11, 31); // End of next year
-        
-        // Create a simple date picker
-        const date = prompt('Enter date (mm/dd/yyyy):', input.value || '');
-        if (date) {
-            // Basic validation
-            const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/;
-            if (dateRegex.test(date)) {
-                input.value = date;
-                input.form.submit();
-            } else {
-                alert('Please enter a valid date in mm/dd/yyyy format');
-            }
-        }
-    }
-</script>
+{% include 'core/base_date_picker.html' %}
 
 {% endblock %} 
